@@ -5,10 +5,8 @@ const DYNAMIC_CACHE = 'calm-mind-dynamic-v1.2';
 
 // Assets para cache estático (críticos para funcionamento offline)
 const STATIC_ASSETS = [
-  '/',
   '/index.html',
-  'https://cdn.tailwindcss.com/3.3.0',
-  // Adicione outros assets críticos aqui
+  // Adicione outros assets críticos aqui, por exemplo '/offline.html', '/icon-192.png'
 ];
 
 // Assets para cache dinâmico (carregados conforme necessário)
@@ -88,12 +86,29 @@ self.addEventListener('fetch', event => {
 
 // Verificar se é um asset estático
 function isStaticAsset(request) {
-  return STATIC_ASSETS.some(asset => request.url.includes(asset)) ||
-         request.url.includes('tailwind') ||
-         request.url.includes('.css') ||
-         request.url.includes('.js') ||
-         request.url.includes('.woff') ||
-         request.url.includes('.woff2');
+  try {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+
+    // Match known static paths exactly
+    if (STATIC_ASSETS.includes(pathname)) return true;
+
+    // Heuristics based on file extensions or known hosts
+    if (request.url.includes('tailwind') ||
+        pathname.endsWith('.css') ||
+        pathname.endsWith('.js') ||
+        pathname.endsWith('.woff') ||
+        pathname.endsWith('.woff2') ||
+        pathname.endsWith('.png') ||
+        pathname.endsWith('.jpg') ||
+        pathname.endsWith('.svg')) {
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    return false;
+  }
 }
 
 // Verificar se é um asset dinâmico
@@ -105,8 +120,12 @@ function isDynamicAsset(request) {
 
 // Verificar se é uma requisição de navegação
 function isNavigationRequest(request) {
-  return request.mode === 'navigate' || 
-         (request.method === 'GET' && request.headers.get('accept').includes('text/html'));
+  try {
+    const accept = request.headers.get('accept') || '';
+    return request.mode === 'navigate' || (request.method === 'GET' && accept.includes('text/html'));
+  } catch (e) {
+    return false;
+  }
 }
 
 // Estratégia Cache First (para assets estáticos)
@@ -315,18 +334,18 @@ self.addEventListener('message', event => {
       break;
       
     case 'GET_VERSION':
-      event.ports[0].postMessage({ version: CACHE_NAME });
+      if (event.ports && event.ports[0]) event.ports[0].postMessage({ version: CACHE_NAME });
       break;
-      
+
     case 'CLEAR_CACHE':
       clearAllCaches().then(() => {
-        event.ports[0].postMessage({ success: true });
+        if (event.ports && event.ports[0]) event.ports[0].postMessage({ success: true });
       });
       break;
-      
+
     case 'CACHE_STATS':
       getCacheStats().then(stats => {
-        event.ports[0].postMessage(stats);
+        if (event.ports && event.ports[0]) event.ports[0].postMessage(stats);
       });
       break;
   }

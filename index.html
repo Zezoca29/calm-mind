@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#6366f1">
     
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNhbG0gTWluZCAtIENvbnRyb2xlIGRlIEFuc2llZGFkZSIsCiAgInNob3J0X25hbWUiOiAiQ2FsbSBNaW5kIiwKICAiZGVzY3JpcHRpb24iOiAiQXBwIHBhcmEgY29udHJvbGUgZSBhY29tcGFuaGFtZW50byBkZSBhbnNpZWRhZGUiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzEwMTgyNyIsCiAgInRoZW1lX2NvbG9yIjogIiM2MzY2ZjEiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSXhPVElpSUdobGFXZG9kRDBpTVRreUlpQjJhV1YzUW05NFBTSXdJREFnTVRreUlERTVNaUlnWm1sc2JEMGlJelkyTXpabU1TSStQR05wY21Oc1pTQmplRDBpT1RZaUlHTjVQU0k1TmlJZ2NqMGlOREFpSUdacGJHeGZQU0lqTVRBek9EZEdJajQ4TDJOUGRIY3hsUGo0OEwzTjJaejQ9IiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
+    <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Calm Mind">
@@ -933,7 +933,20 @@
                 }
 
                 deferredPrompt = null;
+                return;
             }
+
+            // Fallback / instruções quando o beforeinstallprompt não estiver disponível
+            showToast('Instalação não disponível neste contexto.');
+            // Fornecer instruções rápidas ao usuário — não é possível acionar A2HS programaticamente em iOS
+            const info = document.createElement('div');
+            info.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-gray-200 px-4 py-2 rounded shadow-lg z-50';
+            info.innerHTML = `
+                <div class="text-sm">Para testar a instalação: sirva o site via <strong>localhost</strong> (HTTPS) e abra no navegador. Em muitos navegadores, o prompt aparece automaticamente. No iOS, use "Adicionar à Tela de Início" no menu de compartilhamento.</div>
+                <div class="text-xs text-gray-400 mt-1">Fechar em 8s</div>
+            `;
+            document.body.appendChild(info);
+            setTimeout(() => info.remove(), 8000);
         };
 
         // Mostrar notificação de atualização disponível
@@ -1039,6 +1052,19 @@
 
                 // Registrar Service Worker e recursos PWA
                 registerServiceWorker();
+                
+                // Mostrar botão de instalação em ambiente de desenvolvimento (localhost)
+                try {
+                    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                        const installBtn = document.getElementById('installBtn');
+                        if (installBtn) {
+                            installBtn.classList.remove('hidden');
+                            installBtn.title = 'Teste: instalação (localhost) - em produção o prompt aparece automaticamente quando disponível';
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Erro ao tentar mostrar botão de instalação em dev:', err);
+                }
                 
             } catch (error) {
                 console.error('Error initializing app:', error);
