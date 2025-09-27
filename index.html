@@ -93,6 +93,12 @@
             <header class="bg-gray-800 p-4 shadow-lg">
                 <h1 class="text-2xl font-bold text-center text-indigo-400">🧘‍♀️ Calm Mind</h1>
                 <p class="text-center text-gray-400 text-sm mt-1">Seu espaço de bem-estar mental</p>
+                <!-- Install button for PWA -->
+                <div class="flex justify-center mt-3">
+                    <button id="installBtn" onclick="promptInstall()" class="hidden bg-white text-indigo-600 px-3 py-1 rounded text-sm shadow">
+                        ➕ Instalar App
+                    </button>
+                </div>
             </header>
 
             <!-- Navigation -->
@@ -866,20 +872,157 @@
             }).join('');
         };
 
-        // Service Worker Registration - Simplified approach
+        // Service Worker Registration and PWA Features
+        let swRegistration = null;
+        let deferredPrompt;
+
         const registerServiceWorker = async () => {
-            // Skip service worker registration in artifact environment
-            console.log('Service Worker skipped in artifact environment');
+            if ('serviceWorker' in navigator) {
+                try {
+                    swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                    console.log('✅ Service Worker registered successfully');
+
+                    // Listen for updates to the SW
+                    swRegistration.addEventListener('updatefound', () => {
+                        const newWorker = swRegistration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showUpdateNotification();
+                            }
+                        });
+                    });
+
+                    // Setup background sync if available
+                    if ('sync' in window.ServiceWorkerRegistration.prototype) {
+                        setupBackgroundSync();
+                    }
+
+                    // Setup push notifications if available
+                    if ('Notification' in window && 'PushManager' in window) {
+                        setupPushNotifications();
+                    }
+
+                } catch (error) {
+                    console.log('❌ Service Worker registration failed:', error);
+                }
+            }
         };
 
         // PWA Install prompt
-        let deferredPrompt;
-        
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+
+            // Mostrar botão de instalação
+            const installBtn = document.getElementById('installBtn');
+            installBtn.classList.remove('hidden');
             console.log('PWA install prompt available');
         });
+
+        // Função para instalar PWA
+        const promptInstall = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+
+                if (outcome === 'accepted') {
+                    showToast('App instalado com sucesso! 🎉');
+                    document.getElementById('installBtn').classList.add('hidden');
+                } else {
+                    showToast('Instalação cancelada');
+                }
+
+                deferredPrompt = null;
+            }
+        };
+
+        // Mostrar notificação de atualização disponível
+        const showUpdateNotification = () => {
+            const updateBanner = document.createElement('div');
+            updateBanner.className = 'fixed top-0 left-0 right-0 bg-indigo-600 text-white p-3 text-center z-50';
+            updateBanner.innerHTML = `
+                <p class="mb-2">Nova versão disponível!</p>
+                <button onclick="applyUpdate()" class="bg-white text-indigo-600 px-4 py-1 rounded text-sm mr-2">
+                    Atualizar
+                </button>
+                <button onclick="this.parentElement.remove()" class="text-white text-sm">
+                    Depois
+                </button>
+            `;
+            document.body.appendChild(updateBanner);
+        };
+
+        // Aplicar atualização
+        const applyUpdate = async () => {
+            if (swRegistration && swRegistration.waiting) {
+                swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+            }
+        };
+
+        // Configurar Background Sync
+        const setupBackgroundSync = () => {
+            // Registrar sync quando salvar dados offline
+            navigator.serviceWorker.ready.then(registration => {
+                // Os eventos de sync serão registrados quando necessário
+                console.log('🔄 Background Sync ready');
+            });
+        };
+
+        // Configurar Push Notifications
+        const setupPushNotifications = async () => {
+            if (Notification.permission === 'default') {
+                // Não solicitar permissão automaticamente - fazer apenas quando usuário interagir
+                console.log('🔔 Push notifications available');
+            }
+        };
+
+        // Solicitar permissão para notificações
+        const requestNotificationPermission = async () => {
+            if ('Notification' in window) {
+                const permission = await Notification.requestPermission();
+
+                if (permission === 'granted') {
+                    showToast('Notificações ativadas! 🔔');
+                    scheduleWellnessReminders();
+                } else {
+                    showToast('Notificações negadas');
+                }
+
+                return permission;
+            }
+        };
+
+        // Agendar lembretes de bem-estar
+        const scheduleWellnessReminders = () => {
+            // Lembrete diário para registrar humor
+            setInterval(() => {
+                if (Notification.permission === 'granted') {
+                    new Notification('Calm Mind - Lembrete', {
+                        body: 'Que tal registrar como você está se sentindo hoje? 😊',
+                        icon: '/icon-192.png',
+                        tag: 'daily-mood-reminder'
+                    });
+                }
+            }, 24 * 60 * 60 * 1000); // 24 horas
+        };
+
+        // Listener para mensagens do Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', event => {
+                console.log('💬 Message from SW:', event.data);
+
+                switch (event.data.type) {
+                    case 'SYNC_COMPLETE':
+                        showToast(`Dados sincronizados: ${event.data.data}`);
+                        break;
+
+                    case 'CACHE_UPDATED':
+                        console.log('📦 Cache updated');
+                        break;
+                }
+            });
+        }
 
         // App initialization
         const initApp = async () => {
@@ -893,6 +1036,9 @@
                 
                 // Show dashboard by default
                 showSection('dashboard');
+
+                // Registrar Service Worker e recursos PWA
+                registerServiceWorker();
                 
             } catch (error) {
                 console.error('Error initializing app:', error);
