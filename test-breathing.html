@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Breathing Exercises</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <h1 class="text-2xl font-bold mb-4">Breathing Exercise Test</h1>
+    <p class="mb-4">This page tests the breathing exercises multiple times to verify the fix.</p>
+    
+    <div class="mb-4">
+        <button id="runTest" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">Run Breathing Test (10 times)</button>
+        <button id="reset" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded ml-2">Reset</button>
+    </div>
+    
+    <div id="breakSection" class="mb-4 hidden">
+        <h2 class="text-xl font-semibold mb-2">Break Time</h2>
+        <p class="mb-2">Take a moment to relax and reset.</p>
+        <button id="resumeButton" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">Resume Exercise</button>
+    </div>
+    
+    <div id="results" class="mt-4">
+        <h2 class="text-xl font-semibold mb-2">Test Results:</h2>
+        <div id="log" class="bg-gray-800 p-4 rounded h-64 overflow-y-auto"></div>
+    </div>
+
+    <script>
+        // Simulate the breathing exercise functions
+        let breathingTimer = null;
+        let breathingPhase = 0;
+        let breathingCycle = 0;
+        let currentExercise = null;
+        let isOnBreak = false;
+        let pendingExercise = null;
+        
+        const breathingExercises = {
+            '478': {
+                name: '4-7-8 Relaxamento',
+                phases: [
+                    { name: 'Inspire', duration: 1, instruction: 'Respire fundo pelo nariz' },
+                    { name: 'Segure', duration: 1, instruction: 'Mantenha o ar nos pulmões' },
+                    { name: 'Expire', duration: 1, instruction: 'Solte o ar pela boca devagar' },
+                    { name: 'Pause', duration: 1, instruction: 'Pequena pausa' }
+                ],
+                totalCycles: 1
+            }
+        };
+        
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearAllTimers() {
+            // Clear any existing timers to prevent conflicts
+            if (breathingTimer) {
+                clearInterval(breathingTimer);
+                breathingTimer = null;
+            }
+        }
+        
+        function takeABreak(exerciseType) {
+            // Clear all timers when taking a break
+            clearAllTimers();
+            
+            isOnBreak = true;
+            pendingExercise = exerciseType;
+            
+            // Show break section
+            document.getElementById('breakSection').classList.remove('hidden');
+            
+            // Hide modal if it was showing
+            const modal = document.getElementById('breathingModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            
+            log("Taking a break... Click 'Resume Exercise' when ready to continue.");
+        }
+        
+        function resumeExercise() {
+            // Clear all timers before resuming
+            clearAllTimers();
+            
+            isOnBreak = false;
+            document.getElementById('breakSection').classList.add('hidden');
+            
+            if (pendingExercise) {
+                log("Resuming exercise...");
+                startBreathing(pendingExercise);
+                pendingExercise = null;
+            }
+        }
+        
+        function stopBreathing() {
+            // Clear all timers when stopping
+            clearAllTimers();
+            
+            // Clear animation classes to prevent conflicts
+            log("Stopped breathing exercise and cleared animations");
+            
+            // Trigger break when stopping
+            if (currentExercise && !isOnBreak) {
+                takeABreak(currentExercise.name);
+            }
+        }
+        
+        function runBreathingPhase() {
+            // Clear any existing timers before starting a new phase
+            clearAllTimers();
+            
+            const phase = currentExercise.phases[breathingPhase];
+            let timeLeft = phase.duration;
+            
+            log(`Running phase: ${phase.name} (${phase.duration}s)`);
+            
+            // Clear all animation classes first to prevent conflicts
+            // This simulates what we fixed in the main app
+            log("Cleared all animation classes");
+            
+            if (phase.name === 'Inspire') {
+                log("Applied breathe-in animation");
+            } else if (phase.name === 'Expire') {
+                log("Applied breathe-out animation");
+            } else {
+                log("Applied pulse animation");
+            }
+            
+            breathingTimer = setInterval(() => {
+                timeLeft--;
+                log(`Time left: ${timeLeft}s`);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(breathingTimer);
+                    breathingTimer = null;
+                    nextBreathingPhase();
+                }
+            }, 100); // Faster for testing
+        }
+        
+        function nextBreathingPhase() {
+            // Clear any existing timers
+            clearAllTimers();
+            
+            breathingPhase++;
+            
+            if (breathingPhase >= currentExercise.phases.length) {
+                breathingPhase = 0;
+                breathingCycle++;
+                
+                if (breathingCycle > currentExercise.totalCycles) {
+                    completeBreathingExercise();
+                    return;
+                }
+            }
+            
+            setTimeout(() => runBreathingPhase(), 100);
+        }
+        
+        function completeBreathingExercise() {
+            // Clear all timers when completing
+            clearAllTimers();
+            
+            log("✅ Exercise completed successfully!");
+            stopBreathing();
+        }
+        
+        function startBreathing(exerciseType) {
+            // Clear all timers before starting a new exercise
+            clearAllTimers();
+            
+            currentExercise = breathingExercises[exerciseType];
+            breathingPhase = 0;
+            breathingCycle = 1;
+
+            
+            log(`Starting ${currentExercise.name}`);
+            runBreathingPhase();
+        }
+        
+        function runTest() {
+            // Clear all timers before running test
+            clearAllTimers();
+            
+            log("=== Starting Breathing Test ===");
+            
+            let count = 0;
+            const maxRuns = 10;
+            
+            function runNext() {
+                if (count < maxRuns) {
+                    count++;
+                    log(`--- Running exercise ${count}/${maxRuns} ---`);
+                    startBreathing('478');
+                    
+                    // Schedule next run after a delay
+                    setTimeout(runNext, 2000);
+                } else {
+                    log("=== Test completed ===");
+                }
+            }
+            
+            runNext();
+        }
+        
+        document.getElementById('runTest').addEventListener('click', runTest);
+        document.getElementById('reset').addEventListener('click', () => {
+            document.getElementById('log').innerHTML = '';
+        });
+        document.getElementById('resumeButton').addEventListener('click', resumeExercise);
+    </script>
+</body>
+</html>

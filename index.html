@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calm Mind - Controle de Ansiedade</title>
     <meta name="description" content="App para controle e acompanhamento de ansiedade">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#7c9cbf">
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
@@ -15,6 +15,24 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'calm-blue': '#7c9cbf',
+                        'calm-blue-dark': '#5a7a9e',
+                        'calm-green': '#a8c5a8',
+                        'calm-lavender': '#b8a9d4',
+                        'calm-sand': '#e8dcc4',
+                        'calm-mint': '#b8d8d8',
+                        'calm-bg': '#2a3d4a',
+                        'calm-card': '#3a5260'
+                    }
+                }
+            }
+        }
+    </script>
     
     <style>
         @keyframes breathe {
@@ -76,13 +94,13 @@
     </style>
 </head>
 
-<body class="bg-gray-900 text-white font-sans">
+<body class="bg-calm-bg text-white font-sans">
     <div id="app" class="min-h-screen">
         <!-- Loading Screen -->
-        <div id="loading" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
+        <div id="loading" class="fixed inset-0 bg-calm-bg flex items-center justify-center z-50">
             <div class="text-center">
-                <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <h2 class="text-xl font-semibold text-indigo-400">Calm Mind</h2>
+                <div class="w-16 h-16 border-4 border-calm-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <h2 class="text-xl font-semibold text-calm-blue">Calm Mind</h2>
                 <p class="text-gray-400">Carregando...</p>
             </div>
         </div>
@@ -90,34 +108,33 @@
         <!-- Main App -->
         <div id="main-app" class="hidden">
             <!-- Header -->
-            <header class="bg-gray-800 p-4 shadow-lg">
-                <h1 class="text-2xl font-bold text-center text-indigo-400">🧘‍♀️ Calm Mind</h1>
+            <header class="bg-calm-card p-4 shadow-lg">
+                <h1 class="text-2xl font-bold text-center text-calm-blue">🌸 Calm Mind</h1>
                 <p class="text-center text-gray-400 text-sm mt-1">Seu espaço de bem-estar mental</p>
-                <!-- Install button for PWA -->
                 <div class="flex justify-center mt-3">
-                    <button id="installBtn" onclick="promptInstall()" class="hidden bg-white text-indigo-600 px-3 py-1 rounded text-sm shadow">
-                        ➕ Instalar App
+                    <button id="installBtn" onclick="promptInstall()" class="hidden bg-calm-sand text-calm-blue-dark px-3 py-1 rounded text-sm shadow">
+                        ✨ Instalar App
                     </button>
                 </div>
             </header>
 
             <!-- Navigation -->
-            <nav class="bg-gray-800 border-t border-gray-700">
+            <nav class="bg-calm-card border-t border-gray-700">
                 <div class="flex justify-around py-2">
                     <button onclick="showSection('dashboard')" class="nav-btn flex flex-col items-center p-2 rounded-lg transition-colors" data-section="dashboard">
-                        <span class="text-xl mb-1">📊</span>
+                        <span class="text-xl mb-1">📈</span>
                         <span class="text-xs">Dashboard</span>
                     </button>
                     <button onclick="showSection('mood')" class="nav-btn flex flex-col items-center p-2 rounded-lg transition-colors" data-section="mood">
-                        <span class="text-xl mb-1">😊</span>
+                        <span class="text-xl mb-1">💭</span>
                         <span class="text-xs">Humor</span>
                     </button>
                     <button onclick="showSection('breathing')" class="nav-btn flex flex-col items-center p-2 rounded-lg transition-colors" data-section="breathing">
-                        <span class="text-xl mb-1">🫁</span>
+                        <span class="text-xl mb-1">💨</span>
                         <span class="text-xs">Respiração</span>
                     </button>
                     <button onclick="showSection('diary')" class="nav-btn flex flex-col items-center p-2 rounded-lg transition-colors" data-section="diary">
-                        <span class="text-xl mb-1">📔</span>
+                        <span class="text-xl mb-1">✍️</span>
                         <span class="text-xs">Diário</span>
                     </button>
                 </div>
@@ -128,23 +145,23 @@
                 <!-- Dashboard Section -->
                 <section id="dashboard-section" class="section">
                     <div class="mb-6">
-                        <h2 class="text-xl font-semibold mb-4">📈 Seu Progresso</h2>
+                        <h2 class="text-xl font-semibold mb-4 text-calm-blue">📈 Seu Progresso</h2>
                         
                         <!-- Quick Stats -->
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-gray-800 p-4 rounded-lg">
+                            <div class="bg-calm-card p-4 rounded-lg border border-calm-blue/20">
                                 <h3 class="text-sm text-gray-400">Registros este mês</h3>
-                                <p class="text-2xl font-bold text-indigo-400" id="monthlyRecords">0</p>
+                                <p class="text-2xl font-bold text-calm-blue" id="monthlyRecords">0</p>
                             </div>
-                            <div class="bg-gray-800 p-4 rounded-lg">
+                            <div class="bg-calm-card p-4 rounded-lg border border-calm-green/20">
                                 <h3 class="text-sm text-gray-400">Exercícios feitos</h3>
-                                <p class="text-2xl font-bold text-green-400" id="exercisesCount">0</p>
+                                <p class="text-2xl font-bold text-calm-green" id="exercisesCount">0</p>
                             </div>
                         </div>
 
                         <!-- Recent Mood Chart -->
-                        <div class="bg-gray-800 p-4 rounded-lg">
-                            <h3 class="text-lg font-medium mb-3">Humor dos últimos 7 dias</h3>
+                        <div class="bg-calm-card p-4 rounded-lg border border-calm-lavender/20">
+                            <h3 class="text-lg font-medium mb-3 text-calm-lavender">Humor dos últimos 7 dias</h3>
                             <div id="moodChart" class="h-32 flex items-end justify-around">
                                 <!-- Chart will be populated by JavaScript -->
                             </div>
@@ -152,8 +169,8 @@
                     </div>
 
                     <!-- Recent Entries -->
-                    <div class="bg-gray-800 p-4 rounded-lg">
-                        <h3 class="text-lg font-medium mb-3">Últimos registros</h3>
+                    <div class="bg-calm-card p-4 rounded-lg border border-calm-mint/20">
+                        <h3 class="text-lg font-medium mb-3 text-calm-mint">Últimos registros</h3>
                         <div id="recentEntries" class="space-y-3">
                             <!-- Recent entries will be populated by JavaScript -->
                         </div>
@@ -162,9 +179,9 @@
 
                 <!-- Mood Section -->
                 <section id="mood-section" class="section hidden">
-                    <h2 class="text-xl font-semibold mb-4">😊 Como você está se sentindo?</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-calm-blue">💭 Como você está se sentindo?</h2>
                     
-                    <div class="bg-gray-800 p-6 rounded-lg mb-4">
+                    <div class="bg-calm-card p-6 rounded-lg mb-4 border border-calm-blue/20">
                         <div class="text-center mb-6">
                             <p class="text-gray-300 mb-4">Selecione seu humor atual:</p>
                             <div class="flex justify-around mb-6">
@@ -178,7 +195,7 @@
 
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Nível de ansiedade (1-10):</label>
-                            <input type="range" id="anxietyLevel" min="1" max="10" value="5" class="w-full">
+                            <input type="range" id="anxietyLevel" min="1" max="10" value="5" class="w-full accent-calm-lavender">
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
                                 <span>Baixa</span>
                                 <span>Moderada</span>
@@ -188,10 +205,10 @@
 
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">O que você está sentindo?</label>
-                            <textarea id="moodNotes" placeholder="Descreva suas emoções, pensamentos ou o que aconteceu hoje..." class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-indigo-500 focus:outline-none resize-none" rows="3"></textarea>
+                            <textarea id="moodNotes" placeholder="Descreva suas emoções, pensamentos ou o que aconteceu hoje..." class="w-full p-3 bg-calm-bg rounded-lg border border-calm-blue/30 focus:border-calm-blue focus:outline-none resize-none" rows="3"></textarea>
                         </div>
 
-                        <button onclick="saveMoodEntry()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                        <button onclick="saveMoodEntry()" class="w-full bg-calm-blue hover:bg-calm-blue-dark text-white font-medium py-3 px-4 rounded-lg transition-colors">
                             💾 Salvar Registro
                         </button>
                     </div>
@@ -199,32 +216,32 @@
 
                 <!-- Breathing Section -->
                 <section id="breathing-section" class="section hidden">
-                    <h2 class="text-xl font-semibold mb-4">🫁 Exercícios de Respiração</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-calm-blue">💨 Exercícios de Respiração</h2>
                     
                     <div class="space-y-4">
                         <!-- Breathing Exercise 1 -->
-                        <div class="bg-gray-800 p-6 rounded-lg">
-                            <h3 class="text-lg font-medium mb-2">4-7-8 (Relaxamento)</h3>
+                        <div class="bg-calm-card p-6 rounded-lg border border-calm-mint/20">
+                            <h3 class="text-lg font-medium mb-2 text-calm-mint">4-7-8 (Relaxamento)</h3>
                             <p class="text-gray-400 mb-4">Inspire por 4, segure por 7, expire por 8 segundos</p>
-                            <button onclick="startBreathing('478')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <button onclick="startBreathing('478')" class="bg-calm-mint hover:bg-calm-mint/80 text-calm-bg px-4 py-2 rounded-lg transition-colors">
                                 ▶️ Iniciar
                             </button>
                         </div>
 
                         <!-- Breathing Exercise 2 -->
-                        <div class="bg-gray-800 p-6 rounded-lg">
-                            <h3 class="text-lg font-medium mb-2">Box Breathing (Foco)</h3>
+                        <div class="bg-calm-card p-6 rounded-lg border border-calm-green/20">
+                            <h3 class="text-lg font-medium mb-2 text-calm-green">Box Breathing (Foco)</h3>
                             <p class="text-gray-400 mb-4">4 tempos para cada fase: inspire, segure, expire, segure</p>
-                            <button onclick="startBreathing('box')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <button onclick="startBreathing('box')" class="bg-calm-green hover:bg-calm-green/80 text-calm-bg px-4 py-2 rounded-lg transition-colors">
                                 ▶️ Iniciar
                             </button>
                         </div>
 
                         <!-- Breathing Exercise 3 -->
-                        <div class="bg-gray-800 p-6 rounded-lg">
-                            <h3 class="text-lg font-medium mb-2">Respiração Simples</h3>
+                        <div class="bg-calm-card p-6 rounded-lg border border-calm-lavender/20">
+                            <h3 class="text-lg font-medium mb-2 text-calm-lavender">Respiração Simples</h3>
                             <p class="text-gray-400 mb-4">Inspire por 4, expire por 6 segundos</p>
-                            <button onclick="startBreathing('simple')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <button onclick="startBreathing('simple')" class="bg-calm-lavender hover:bg-calm-lavender/80 text-calm-bg px-4 py-2 rounded-lg transition-colors">
                                 ▶️ Iniciar
                             </button>
                         </div>
@@ -233,25 +250,22 @@
 
                 <!-- Breathing Exercise Modal -->
                 <div id="breathingModal" class="fixed inset-0 bg-black bg-opacity-80 hidden flex items-center justify-center z-50">
-                    <div class="bg-gray-800 p-8 rounded-lg max-w-sm w-full mx-4 text-center">
-                        <h3 id="exerciseTitle" class="text-xl font-semibold mb-4"></h3>
+                    <div class="bg-calm-card p-8 rounded-lg max-w-sm w-full mx-4 text-center border-2 border-calm-blue/30">
+                        <h3 id="exerciseTitle" class="text-xl font-semibold mb-4 text-calm-blue"></h3>
                         
                         <!-- Breathing Animation -->
                         <div class="relative mb-6">
-                            <div id="breathingCircle" class="w-32 h-32 mx-auto bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            <div id="breathingCircle" class="w-32 h-32 mx-auto bg-gradient-to-br from-calm-mint to-calm-lavender rounded-full flex items-center justify-center text-calm-bg font-bold text-lg shadow-lg">
                                 <span id="breathingText">Prepare-se</span>
                             </div>
                         </div>
 
-                        <div id="instructionText" class="text-lg mb-4 h-6">Preparando...</div>
-                        <div id="timerText" class="text-3xl font-bold mb-6 text-indigo-400">3</div>
+                        <div id="instructionText" class="text-lg mb-4 h-6 text-gray-300">Preparando...</div>
+                        <div id="timerText" class="text-3xl font-bold mb-6 text-calm-blue">3</div>
                         
                         <div class="flex gap-4">
-                            <button onclick="stopBreathing()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors">
+                            <button onclick="stopBreathing()" class="flex-1 bg-calm-lavender hover:bg-calm-lavender/80 text-calm-bg py-2 px-4 rounded-lg transition-colors">
                                 ⏹️ Parar
-                            </button>
-                            <button id="pauseBtn" onclick="togglePause()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg transition-colors">
-                                ⏸️ Pausar
                             </button>
                         </div>
                     </div>
@@ -259,35 +273,35 @@
 
                 <!-- Diary Section -->
                 <section id="diary-section" class="section hidden">
-                    <h2 class="text-xl font-semibold mb-4">📔 Diário Emocional</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-calm-blue">✍️ Diário Emocional</h2>
                     
                     <!-- New Entry Form -->
-                    <div class="bg-gray-800 p-6 rounded-lg mb-6">
-                        <h3 class="text-lg font-medium mb-4">Nova entrada</h3>
+                    <div class="bg-calm-card p-6 rounded-lg mb-6 border border-calm-sand/20">
+                        <h3 class="text-lg font-medium mb-4 text-calm-sand">Nova entrada</h3>
                         
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Título (opcional)</label>
-                            <input type="text" id="diaryTitle" placeholder="Ex: Dia difícil no trabalho" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-indigo-500 focus:outline-none">
+                            <input type="text" id="diaryTitle" placeholder="Ex: Dia tranquilo em casa" class="w-full p-3 bg-calm-bg rounded-lg border border-calm-blue/30 focus:border-calm-blue focus:outline-none">
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Como foi seu dia?</label>
-                            <textarea id="diaryEntry" placeholder="Escreva sobre seus pensamentos, sentimentos, o que aconteceu hoje..." class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-indigo-500 focus:outline-none resize-none" rows="5"></textarea>
+                            <textarea id="diaryEntry" placeholder="Escreva sobre seus pensamentos, sentimentos, o que aconteceu hoje..." class="w-full p-3 bg-calm-bg rounded-lg border border-calm-blue/30 focus:border-calm-blue focus:outline-none resize-none" rows="5"></textarea>
                         </div>
 
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Tags (separe por vírgula)</label>
-                            <input type="text" id="diaryTags" placeholder="trabalho, família, ansiedade, gratidão" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-indigo-500 focus:outline-none">
+                            <input type="text" id="diaryTags" placeholder="trabalho, família, gratidão, paz" class="w-full p-3 bg-calm-bg rounded-lg border border-calm-blue/30 focus:border-calm-blue focus:outline-none">
                         </div>
 
-                        <button onclick="saveDiaryEntry()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                        <button onclick="saveDiaryEntry()" class="w-full bg-calm-blue hover:bg-calm-blue-dark text-white font-medium py-3 px-4 rounded-lg transition-colors">
                             💾 Salvar Entrada
                         </button>
                     </div>
 
                     <!-- Diary Entries -->
                     <div>
-                        <h3 class="text-lg font-medium mb-4">Suas entradas</h3>
+                        <h3 class="text-lg font-medium mb-4 text-calm-lavender">Suas entradas</h3>
                         <div id="diaryEntries" class="space-y-4">
                             <!-- Diary entries will be populated by JavaScript -->
                         </div>
@@ -297,7 +311,7 @@
         </div>
 
         <!-- Success Toast -->
-        <div id="toast" class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform z-50">
+        <div id="toast" class="fixed top-4 right-4 bg-calm-green text-calm-bg px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform z-50">
             <span id="toastMessage"></span>
         </div>
     </div>
@@ -321,19 +335,16 @@
                 request.onupgradeneeded = (event) => {
                     db = event.target.result;
                     
-                    // Mood entries store
                     if (!db.objectStoreNames.contains('moodEntries')) {
                         const moodStore = db.createObjectStore('moodEntries', { keyPath: 'id', autoIncrement: true });
                         moodStore.createIndex('date', 'date', { unique: false });
                     }
                     
-                    // Diary entries store
                     if (!db.objectStoreNames.contains('diaryEntries')) {
                         const diaryStore = db.createObjectStore('diaryEntries', { keyPath: 'id', autoIncrement: true });
                         diaryStore.createIndex('date', 'date', { unique: false });
                     }
                     
-                    // Breathing sessions store
                     if (!db.objectStoreNames.contains('breathingSessions')) {
                         const breathingStore = db.createObjectStore('breathingSessions', { keyPath: 'id', autoIncrement: true });
                         breathingStore.createIndex('date', 'date', { unique: false });
@@ -342,7 +353,6 @@
             });
         };
 
-        // Data management functions
         const saveToStore = async (storeName, data) => {
             const transaction = db.transaction([storeName], 'readwrite');
             const store = transaction.objectStore(storeName);
@@ -359,18 +369,17 @@
             });
         };
 
-        // Navigation
         const showSection = (sectionName) => {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('hidden');
             });
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-600');
+                btn.classList.remove('bg-calm-blue');
                 btn.classList.add('text-gray-400');
             });
             
             document.getElementById(`${sectionName}-section`).classList.remove('hidden');
-            document.querySelector(`[data-section="${sectionName}"]`).classList.add('bg-indigo-600');
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('bg-calm-blue');
             document.querySelector(`[data-section="${sectionName}"]`).classList.remove('text-gray-400');
             
             if (sectionName === 'dashboard') {
@@ -380,7 +389,6 @@
             }
         };
 
-        // Toast notification
         const showToast = (message) => {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
@@ -391,7 +399,6 @@
             }, 3000);
         };
 
-        // Mood tracking
         const saveMoodEntry = async () => {
             const selectedMood = document.querySelector('.mood-btn.selected');
             if (!selectedMood) {
@@ -415,8 +422,7 @@
                 await saveToStore('moodEntries', moodEntry);
                 showToast('Humor registrado com sucesso!');
                 
-                // Reset form
-                document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected', 'bg-indigo-600'));
+                document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected', 'bg-calm-lavender'));
                 document.getElementById('anxietyLevel').value = 5;
                 document.getElementById('moodNotes').value = '';
                 
@@ -427,21 +433,18 @@
             }
         };
 
-        // Mood button selection
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('mood-btn')) {
                 document.querySelectorAll('.mood-btn').forEach(btn => {
-                    btn.classList.remove('selected', 'bg-indigo-600');
+                    btn.classList.remove('selected', 'bg-calm-lavender');
                 });
-                e.target.classList.add('selected', 'bg-indigo-600');
+                e.target.classList.add('selected', 'bg-calm-lavender');
             }
         });
 
-        // Breathing exercises
-        let breathingTimer;
+        let breathingTimer = null;
         let breathingPhase = 0;
         let breathingCycle = 0;
-        let breathingPaused = false;
         let currentExercise = null;
 
         const breathingExercises = {
@@ -475,20 +478,33 @@
             }
         };
 
+        // Function to clear all timers to prevent conflicts
+        function clearAllTimers() {
+            if (breathingTimer) {
+                clearInterval(breathingTimer);
+                breathingTimer = null;
+            }
+        }
+
         const startBreathing = (exerciseType) => {
+            // Clear any existing timers before starting
+            clearAllTimers();
+            
             currentExercise = breathingExercises[exerciseType];
             breathingPhase = 0;
             breathingCycle = 1;
-            breathingPaused = false;
+
             
             document.getElementById('exerciseTitle').textContent = currentExercise.name;
             document.getElementById('breathingModal').classList.remove('hidden');
             
-            // Start with countdown
             startBreathingCountdown();
         };
 
         const startBreathingCountdown = () => {
+            // Clear any existing timers
+            clearAllTimers();
+            
             let countdown = 3;
             const timerElement = document.getElementById('timerText');
             const instructionElement = document.getElementById('instructionText');
@@ -510,7 +526,8 @@
         };
 
         const runBreathingPhase = () => {
-            if (breathingPaused) return;
+            // Clear any existing timers before starting a new phase
+            clearAllTimers();
             
             const phase = currentExercise.phases[breathingPhase];
             let timeLeft = phase.duration;
@@ -519,9 +536,9 @@
             document.getElementById('timerText').textContent = timeLeft;
             document.getElementById('breathingText').textContent = phase.name;
             
-            // Animation based on phase
             const circle = document.getElementById('breathingCircle');
-            circle.className = 'w-32 h-32 mx-auto bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg transition-transform duration-1000';
+            // Clear all animation classes first to prevent conflicts
+            circle.className = 'w-32 h-32 mx-auto bg-gradient-to-br from-calm-mint to-calm-lavender rounded-full flex items-center justify-center text-calm-bg font-bold text-lg transition-transform duration-1000 shadow-lg';
             
             if (phase.name === 'Inspire') {
                 circle.classList.add('animate-breathe-in');
@@ -532,19 +549,21 @@
             }
             
             breathingTimer = setInterval(() => {
-                if (breathingPaused) return;
-                
                 timeLeft--;
                 document.getElementById('timerText').textContent = timeLeft;
                 
                 if (timeLeft <= 0) {
                     clearInterval(breathingTimer);
+                    breathingTimer = null;
                     nextBreathingPhase();
                 }
             }, 1000);
         };
 
         const nextBreathingPhase = () => {
+            // Clear any existing timers
+            clearAllTimers();
+            
             breathingPhase++;
             
             if (breathingPhase >= currentExercise.phases.length) {
@@ -561,7 +580,9 @@
         };
 
         const completeBreathingExercise = async () => {
-            // Save breathing session
+            // Clear all timers when completing
+            clearAllTimers();
+            
             const session = {
                 date: new Date().toISOString(),
                 exercise: currentExercise.name,
@@ -588,21 +609,15 @@
         };
 
         const stopBreathing = () => {
-            clearInterval(breathingTimer);
-            document.getElementById('breathingModal').classList.add('hidden');
-        };
-
-        const togglePause = () => {
-            breathingPaused = !breathingPaused;
-            const btn = document.getElementById('pauseBtn');
-            btn.textContent = breathingPaused ? '▶️ Continuar' : '⏸️ Pausar';
+            // Clear all timers when stopping
+            clearAllTimers();
             
-            if (!breathingPaused) {
-                runBreathingPhase();
-            }
+            document.getElementById('breathingModal').classList.add('hidden');
+            // Clear animation classes to prevent conflicts
+            const circle = document.getElementById('breathingCircle');
+            circle.classList.remove('animate-breathe-in', 'animate-breathe-out', 'animate-pulse-gentle');
         };
 
-        // Diary functionality
         const saveDiaryEntry = async () => {
             const title = document.getElementById('diaryTitle').value;
             const content = document.getElementById('diaryEntry').value;
@@ -625,7 +640,6 @@
                 await saveToStore('diaryEntries', diaryEntry);
                 showToast('Entrada do diário salva!');
                 
-                // Reset form
                 document.getElementById('diaryTitle').value = '';
                 document.getElementById('diaryEntry').value = '';
                 document.getElementById('diaryTags').value = '';
@@ -648,7 +662,6 @@
                     return;
                 }
                 
-                // Sort entries by date (newest first)
                 entries.sort((a, b) => new Date(b.date) - new Date(a.date));
                 
                 container.innerHTML = entries.map(entry => {
@@ -665,18 +678,18 @@
                         : entry.content;
                     
                     const tagsHtml = entry.tags.length > 0 
-                        ? entry.tags.map(tag => `<span class="bg-indigo-600 text-xs px-2 py-1 rounded-full">${tag}</span>`).join(' ')
+                        ? entry.tags.map(tag => `<span class="bg-calm-lavender/30 text-calm-lavender text-xs px-2 py-1 rounded-full">${tag}</span>`).join(' ')
                         : '';
                     
                     return `
-                        <div class="bg-gray-800 p-4 rounded-lg">
+                        <div class="bg-calm-bg p-4 rounded-lg border border-calm-sand/20">
                             <div class="flex justify-between items-start mb-2">
                                 <h4 class="font-medium text-white">${entry.title}</h4>
                                 <span class="text-xs text-gray-400">${date}</span>
                             </div>
                             <p class="text-gray-300 text-sm mb-3">${preview}</p>
                             ${tagsHtml ? `<div class="flex flex-wrap gap-2 mb-2">${tagsHtml}</div>` : ''}
-                            <button onclick="viewDiaryEntry(${entry.id})" class="text-indigo-400 text-sm hover:text-indigo-300 transition-colors">
+                            <button onclick="viewDiaryEntry(${entry.id})" class="text-calm-blue text-sm hover:text-calm-mint transition-colors">
                                 📖 Ler completo
                             </button>
                         </div>
@@ -703,16 +716,15 @@
                     });
                     
                     const tagsHtml = entry.tags.length > 0 
-                        ? entry.tags.map(tag => `<span class="bg-indigo-600 text-xs px-2 py-1 rounded-full">${tag}</span>`).join(' ')
+                        ? entry.tags.map(tag => `<span class="bg-calm-lavender/30 text-calm-lavender text-xs px-2 py-1 rounded-full">${tag}</span>`).join(' ')
                         : '';
                     
-                    // Create modal for full entry view
                     const modal = document.createElement('div');
                     modal.className = 'fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4';
                     modal.innerHTML = `
-                        <div class="bg-gray-800 p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                        <div class="bg-calm-card p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-calm-blue/30">
                             <div class="flex justify-between items-start mb-4">
-                                <h3 class="text-xl font-semibold">${entry.title}</h3>
+                                <h3 class="text-xl font-semibold text-calm-blue">${entry.title}</h3>
                                 <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
                             </div>
                             <p class="text-sm text-gray-400 mb-4">${date}</p>
@@ -728,7 +740,6 @@
             }
         };
 
-        // Dashboard functionality
         const updateDashboard = async () => {
             try {
                 const [moodEntries, diaryEntries, breathingSessions] = await Promise.all([
@@ -737,7 +748,6 @@
                     getAllFromStore('breathingSessions')
                 ]);
                 
-                // Calculate monthly records
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
                 const monthlyMoodEntries = moodEntries.filter(entry => {
@@ -748,10 +758,7 @@
                 document.getElementById('monthlyRecords').textContent = monthlyMoodEntries.length;
                 document.getElementById('exercisesCount').textContent = breathingSessions.length;
                 
-                // Create mood chart for last 7 days
                 updateMoodChart(moodEntries);
-                
-                // Show recent entries
                 updateRecentEntries(moodEntries, diaryEntries);
                 
             } catch (error) {
@@ -763,7 +770,6 @@
             const chartContainer = document.getElementById('moodChart');
             const last7Days = [];
             
-            // Get last 7 days
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
@@ -803,10 +809,10 @@
         };
 
         const getColorForMood = (mood) => {
-            if (mood <= 2) return 'bg-red-500';
-            if (mood <= 3) return 'bg-yellow-500';
-            if (mood <= 4) return 'bg-blue-500';
-            return 'bg-green-500';
+            if (mood <= 2) return 'bg-red-300';
+            if (mood <= 3) return 'bg-calm-sand';
+            if (mood <= 4) return 'bg-calm-mint';
+            return 'bg-calm-green';
         };
 
         const getMoodEmoji = (mood) => {
@@ -823,7 +829,6 @@
         const updateRecentEntries = (moodEntries, diaryEntries) => {
             const container = document.getElementById('recentEntries');
             
-            // Combine and sort all entries
             const allEntries = [
                 ...moodEntries.map(entry => ({ ...entry, type: 'mood' })),
                 ...diaryEntries.map(entry => ({ ...entry, type: 'diary' }))
@@ -844,7 +849,7 @@
                 
                 if (entry.type === 'mood') {
                     return `
-                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <div class="flex items-center justify-between p-3 bg-calm-bg rounded-lg border border-calm-blue/20">
                             <div class="flex items-center gap-3">
                                 <span class="text-2xl">${getMoodEmoji(entry.mood)}</span>
                                 <div>
@@ -857,9 +862,9 @@
                     `;
                 } else {
                     return `
-                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                        <div class="flex items-center justify-between p-3 bg-calm-bg rounded-lg border border-calm-sand/20">
                             <div class="flex items-center gap-3">
-                                <span class="text-2xl">📔</span>
+                                <span class="text-2xl">✍️</span>
                                 <div>
                                     <p class="font-medium">${entry.title}</p>
                                     <p class="text-xs text-gray-400">${entry.content.substring(0, 50)}...</p>
@@ -872,7 +877,6 @@
             }).join('');
         };
 
-        // Service Worker Registration and PWA Features
         let swRegistration = null;
         let deferredPrompt;
 
@@ -882,7 +886,6 @@
                     swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
                     console.log('✅ Service Worker registered successfully');
 
-                    // Listen for updates to the SW
                     swRegistration.addEventListener('updatefound', () => {
                         const newWorker = swRegistration.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -892,12 +895,10 @@
                         });
                     });
 
-                    // Setup background sync if available
                     if ('sync' in window.ServiceWorkerRegistration.prototype) {
                         setupBackgroundSync();
                     }
 
-                    // Setup push notifications if available
                     if ('Notification' in window && 'PushManager' in window) {
                         setupPushNotifications();
                     }
@@ -908,18 +909,15 @@
             }
         };
 
-        // PWA Install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
 
-            // Mostrar botão de instalação
             const installBtn = document.getElementById('installBtn');
             installBtn.classList.remove('hidden');
             console.log('PWA install prompt available');
         });
 
-        // Função para instalar PWA
         const promptInstall = async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -936,11 +934,9 @@
                 return;
             }
 
-            // Fallback / instruções quando o beforeinstallprompt não estiver disponível
             showToast('Instalação não disponível neste contexto.');
-            // Fornecer instruções rápidas ao usuário — não é possível acionar A2HS programaticamente em iOS
             const info = document.createElement('div');
-            info.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-gray-200 px-4 py-2 rounded shadow-lg z-50';
+            info.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-calm-card text-gray-200 px-4 py-2 rounded shadow-lg z-50 border border-calm-blue/30';
             info.innerHTML = `
                 <div class="text-sm">Para testar a instalação: sirva o site via <strong>localhost</strong> (HTTPS) e abra no navegador. Em muitos navegadores, o prompt aparece automaticamente. No iOS, use "Adicionar à Tela de Início" no menu de compartilhamento.</div>
                 <div class="text-xs text-gray-400 mt-1">Fechar em 8s</div>
@@ -949,13 +945,12 @@
             setTimeout(() => info.remove(), 8000);
         };
 
-        // Mostrar notificação de atualização disponível
         const showUpdateNotification = () => {
             const updateBanner = document.createElement('div');
-            updateBanner.className = 'fixed top-0 left-0 right-0 bg-indigo-600 text-white p-3 text-center z-50';
+            updateBanner.className = 'fixed top-0 left-0 right-0 bg-calm-blue text-white p-3 text-center z-50';
             updateBanner.innerHTML = `
                 <p class="mb-2">Nova versão disponível!</p>
-                <button onclick="applyUpdate()" class="bg-white text-indigo-600 px-4 py-1 rounded text-sm mr-2">
+                <button onclick="applyUpdate()" class="bg-white text-calm-blue px-4 py-1 rounded text-sm mr-2">
                     Atualizar
                 </button>
                 <button onclick="this.parentElement.remove()" class="text-white text-sm">
@@ -965,7 +960,6 @@
             document.body.appendChild(updateBanner);
         };
 
-        // Aplicar atualização
         const applyUpdate = async () => {
             if (swRegistration && swRegistration.waiting) {
                 swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -973,24 +967,18 @@
             }
         };
 
-        // Configurar Background Sync
         const setupBackgroundSync = () => {
-            // Registrar sync quando salvar dados offline
             navigator.serviceWorker.ready.then(registration => {
-                // Os eventos de sync serão registrados quando necessário
                 console.log('🔄 Background Sync ready');
             });
         };
 
-        // Configurar Push Notifications
         const setupPushNotifications = async () => {
             if (Notification.permission === 'default') {
-                // Não solicitar permissão automaticamente - fazer apenas quando usuário interagir
                 console.log('🔔 Push notifications available');
             }
         };
 
-        // Solicitar permissão para notificações
         const requestNotificationPermission = async () => {
             if ('Notification' in window) {
                 const permission = await Notification.requestPermission();
@@ -1006,9 +994,7 @@
             }
         };
 
-        // Agendar lembretes de bem-estar
         const scheduleWellnessReminders = () => {
-            // Lembrete diário para registrar humor
             setInterval(() => {
                 if (Notification.permission === 'granted') {
                     new Notification('Calm Mind - Lembrete', {
@@ -1017,10 +1003,9 @@
                         tag: 'daily-mood-reminder'
                     });
                 }
-            }, 24 * 60 * 60 * 1000); // 24 horas
+            }, 24 * 60 * 60 * 1000);
         };
 
-        // Listener para mensagens do Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', event => {
                 console.log('💬 Message from SW:', event.data);
@@ -1037,23 +1022,18 @@
             });
         }
 
-        // App initialization
         const initApp = async () => {
             try {
                 await initDB();
                 console.log('Database initialized');
                 
-                // Hide loading screen
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 
-                // Show dashboard by default
                 showSection('dashboard');
 
-                // Registrar Service Worker e recursos PWA
                 registerServiceWorker();
                 
-                // Mostrar botão de instalação em ambiente de desenvolvimento (localhost)
                 try {
                     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
                         const installBtn = document.getElementById('installBtn');
@@ -1068,14 +1048,12 @@
                 
             } catch (error) {
                 console.error('Error initializing app:', error);
-                // Show main app even if there's an error
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 showSection('dashboard');
             }
         };
 
-        // Start the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
