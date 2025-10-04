@@ -295,7 +295,13 @@
 
                 <!-- Breathing Section -->
                 <section id="breathing-section" class="section hidden">
-                    <h2 class="text-xl font-semibold mb-4 text-calm-blue">💨 Exercícios de Respiração</h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-calm-blue">💨 Exercícios de Respiração</h2>
+                        <button onclick="toggleAudioGuide()" id="audioToggle" class="flex items-center gap-2 bg-calm-card px-3 py-2 rounded-lg border border-calm-blue/30 transition-colors hover:bg-calm-blue/20" title="Ativar/desativar áudio guiado">
+                            <span id="audioIcon">🔊</span>
+                            <span class="text-xs">Áudio</span>
+                        </button>
+                    </div>
                     
                     <div class="space-y-4">
                         <!-- Breathing Exercise 1 -->
@@ -734,6 +740,79 @@
         let breathingPhase = 0;
         let breathingCycle = 0;
         let currentExercise = null;
+        let audioContext = null;
+        let audioEnabled = false;
+        let synth = window.speechSynthesis;
+        let speakingInstructions = false;
+
+        // Inicializa o contexto de áudio
+        const initAudioContext = () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        };
+
+        // Toggle do guia de áudio
+        const toggleAudioGuide = () => {
+            audioEnabled = !audioEnabled;
+            const audioIcon = document.getElementById('audioIcon');
+            const audioToggle = document.getElementById('audioToggle');
+            
+            if (audioEnabled) {
+                audioIcon.textContent = '🔊';
+                audioToggle.classList.add('bg-calm-blue/20');
+                initAudioContext();
+                showToast('Áudio guiado ativado');
+            } else {
+                audioIcon.textContent = '🔈';
+                audioToggle.classList.remove('bg-calm-blue/20');
+                if (synth.speaking) {
+                    synth.cancel();
+                }
+                showToast('Áudio guiado desativado');
+            }
+        };
+
+        // Função para reproduzir tons de metrônomo
+        const playTone = (frequency, duration) => {
+            if (!audioEnabled || !audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+
+            gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        };
+
+        // Função para falar instruções
+        const speakInstruction = (text) => {
+            if (!audioEnabled || speakingInstructions) return;
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.volume = 0.8;
+            utterance.rate = 1;
+            utterance.pitch = 1;
+
+            utterance.onstart = () => {
+                speakingInstructions = true;
+            };
+
+            utterance.onend = () => {
+                speakingInstructions = false;
+            };
+
+            synth.speak(utterance);
+        };
 
         const breathingExercises = {
             '478': {
@@ -797,12 +876,23 @@
             instructionElement.textContent = 'Prepare-se...';
             timerElement.textContent = countdown;
             
+            if (audioEnabled) {
+                speakInstruction('Prepare-se para começar o exercício de respiração');
+            }
+            
             const countdownTimer = setInterval(() => {
                 countdown--;
                 if (countdown > 0) {
                     timerElement.textContent = countdown;
+                    if (audioEnabled) {
+                        playTone(440, 0.1); // Nota Lá (A4) para contagem regressiva
+                    }
                 } else if (countdown === 0) {
                     timerElement.textContent = 'Vamos começar!';
+                    if (audioEnabled) {
+                        playTone(880, 0.2); // Nota Lá uma oitava acima para início
+                        speakInstruction('Vamos começar!');
+                    }
                 } else {
                     clearInterval(countdownTimer);
                     runBreathingPhase();
@@ -823,19 +913,52 @@
             const circle = document.getElementById('breathingCircle');
             circle.className = 'w-32 h-32 mx-auto bg-gradient-to-br from-calm-mint to-calm-lavender rounded-full flex items-center justify-center text-calm-bg font-bold text-lg transition-transform duration-1000 shadow-lg';
             
-            if (phase.name === 'Inspire') {
-                circle.classList.add('animate-breathe-in');
-            } else if (phase.name === 'Expire') {
-                circle.classList.add('animate-breathe-out');
+            // Reproduz a instrução da fase atual
+            if (audioEnabled) {
+                speakInstruction(phase.instruction);
+                
+                // Tons diferentes para cada fase
+                switch(phase.name) {
+                    case 'Inspire':
+                        playTone(523.25, 0.2); // Dó (C5) para inspiração
+                        circle.classList.add('animate-breathe-in');
+                        break;
+                    case 'Expire':
+                        playTone(261.63, 0.2); // Dó (C4) para expiração
+                        circle.classList.add('animate-breathe-out');
+                        break;
+                    case 'Segure':
+                        playTone(392.00, 0.2); // Sol (G4) para segurar
+                        circle.classList.add('animate-pulse-gentle');
+                        break;
+                    case 'Pause':
+                        playTone(329.63, 0.2); // Mi (E4) para pausa
+                        circle.classList.add('animate-pulse-gentle');
+                        break;
+                }
             } else {
-                circle.classList.add('animate-pulse-gentle');
+                if (phase.name === 'Inspire') {
+                    circle.classList.add('animate-breathe-in');
+                } else if (phase.name === 'Expire') {
+                    circle.classList.add('animate-breathe-out');
+                } else {
+                    circle.classList.add('animate-pulse-gentle');
+                }
             }
             
             breathingTimer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timerText').textContent = timeLeft;
                 
+                // Toque suave a cada segundo para marcar o tempo
+                if (audioEnabled && timeLeft > 0) {
+                    playTone(196.00, 0.1); // Sol (G3) suave para marcar o tempo
+                }
+                
                 if (timeLeft <= 0) {
+                    if (audioEnabled) {
+                        playTone(440, 0.2); // Lá (A4) para marcar o fim da fase
+                    }
                     clearInterval(breathingTimer);
                     breathingTimer = null;
                     nextBreathingPhase();
@@ -881,6 +1004,16 @@
             document.getElementById('instructionText').textContent = 'Exercício concluído! 🎉';
             document.getElementById('timerText').textContent = '✓';
             document.getElementById('breathingText').textContent = 'Parabéns!';
+            
+            if (audioEnabled) {
+                // Toca uma sequência de notas alegre para indicar conclusão
+                setTimeout(() => playTone(523.25, 0.15), 0);    // Dó (C5)
+                setTimeout(() => playTone(659.25, 0.15), 200);  // Mi (E5)
+                setTimeout(() => playTone(783.99, 0.15), 400);  // Sol (G5)
+                setTimeout(() => playTone(1046.50, 0.3), 600);  // Dó (C6)
+                
+                speakInstruction('Parabéns! Você completou o exercício de respiração!');
+            }
             
             setTimeout(() => {
                 document.getElementById('breathingModal').classList.add('hidden');
