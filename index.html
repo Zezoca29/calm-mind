@@ -67,6 +67,22 @@
             100% { transform: scale(1); }
         }
         
+        /* Animação para frases motivacionais */
+        @keyframes fadeInOut {
+            0% { 
+                opacity: 0; 
+                transform: translateY(10px);
+            }
+            10%, 90% { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateY(-10px);
+            }
+        }
+        
         .animate-breathe {
             animation: breathe 8s infinite;
         }
@@ -83,6 +99,10 @@
             animation: pulse-gentle 2s infinite;
         }
         
+        .animate-fade-in-out {
+            animation: fadeInOut 9s ease-in-out;
+        }
+        
         .hide-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -90,6 +110,16 @@
         
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
+        }
+
+        /* Efeito de favorito */
+        .favorite-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .favorite-icon.active {
+            color: #fbbf24;
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -144,6 +174,55 @@
             <main class="p-4 pb-20">
                 <!-- Dashboard Section -->
                 <section id="dashboard-section" class="section">
+                    <!-- COMPONENTE DE FRASES MOTIVACIONAIS -->
+                    <div class="mb-6 bg-gradient-to-br from-calm-card to-calm-bg p-6 rounded-2xl border border-calm-lavender/20 shadow-lg relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-calm-lavender/10 rounded-full blur-3xl"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-calm-mint/10 rounded-full blur-2xl"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-medium text-calm-lavender">💫 Mensagem do dia</h3>
+                                <button 
+                                    onclick="toggleFavoritePhrase()" 
+                                    class="favorite-icon text-xl transition-all hover:scale-110"
+                                    id="favoriteBtn"
+                                    title="Salvar como favorita">
+                                    ⭐
+                                </button>
+                            </div>
+                            
+                            <div class="min-h-[80px] flex items-center justify-center">
+                                <p id="motivationalPhrase" class="text-lg text-center text-gray-200 leading-relaxed animate-fade-in-out">
+                                    Carregando mensagem inspiradora...
+                                </p>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
+                                <span id="phraseTimer">Próxima em 9s</span>
+                                <button 
+                                    onclick="nextPhrase()" 
+                                    class="text-calm-mint hover:text-calm-green transition-colors">
+                                    Próxima →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NOVA SEÇÃO: Frases Favoritas -->
+                    <div id="favoritesSection" class="mb-6 hidden">
+                        <div class="bg-calm-card p-4 rounded-lg border border-calm-sand/20">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-lg font-medium text-calm-sand">⭐ Suas frases favoritas</h3>
+                                <button onclick="toggleFavoritesView()" class="text-xs text-gray-400 hover:text-white">
+                                    Ocultar
+                                </button>
+                            </div>
+                            <div id="favoritesList" class="space-y-2">
+                                <!-- Favoritas serão carregadas aqui -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-6">
                         <h2 class="text-xl font-semibold mb-4 text-calm-blue">📈 Seu Progresso</h2>
                         
@@ -317,6 +396,215 @@
     </div>
 
     <script>
+        // ==========================================
+        // SISTEMA DE FRASES MOTIVACIONAIS
+        // ==========================================
+        
+        const motivationalPhrases = {
+            morning: [
+                { emoji: '🌿', text: 'Respire fundo. Você não precisa resolver tudo agora.' },
+                { emoji: '☀️', text: 'Hoje é um bom dia para tentar com calma.' },
+                { emoji: '🌻', text: 'Você está fazendo o melhor que pode — e isso é o suficiente.' },
+                { emoji: '🌞', text: 'A calma cresce quando você a cultiva todos os dias.' },
+                { emoji: '☕', text: 'A pausa também faz parte do caminho.' },
+                { emoji: '🌅', text: 'Mesmo os pequenos avanços merecem reconhecimento.' }
+            ],
+            afternoon: [
+                { emoji: '🌊', text: 'A maré da vida sobe e desce, mas sempre volta a se acalmar.' },
+                { emoji: '🌤️', text: 'Tudo bem não estar bem o tempo todo.' },
+                { emoji: '🌼', text: 'Um passo de cada vez também é progresso.' },
+                { emoji: '🍃', text: 'Nada precisa ser perfeito, apenas verdadeiro.' },
+                { emoji: '💧', text: 'Permita-se sentir. Emoções também passam.' },
+                { emoji: '🌺', text: 'Você já superou dias difíceis antes. Vai conseguir de novo.' }
+            ],
+            evening: [
+                { emoji: '🌙', text: 'Descanse. Amanhã você recomeça com mais leveza.' },
+                { emoji: '🌾', text: 'Não apresse o seu tempo. A cura também tem o próprio ritmo.' },
+                { emoji: '🌸', text: 'Você é mais forte do que pensa e mais amado do que imagina.' },
+                { emoji: '🕊️', text: 'A ansiedade não define quem você é.' },
+                { emoji: '🌙', text: 'Feche os olhos e lembre-se: o agora é seguro.' },
+                { emoji: '🌻', text: 'Você não está sozinho. Está aprendendo a se cuidar.' },
+                { emoji: '💫', text: 'Sua mente precisa de descanso tanto quanto seu corpo.' },
+                { emoji: '🌷', text: 'Há beleza até mesmo nos dias em que você apenas tenta.' }
+            ]
+        };
+
+        // Estado do componente de frases
+        let currentPhraseIndex = 0;
+        let currentPeriod = 'morning';
+        let phraseRotationInterval = null;
+        let phraseTimerInterval = null;
+        let timeLeft = 9;
+        let currentPhrase = null;
+        let favoritePhrases = [];
+
+        // Determina o período do dia
+        function getTimeOfDay() {
+            const hour = new Date().getHours();
+            if (hour >= 5 && hour < 12) return 'morning';
+            if (hour >= 12 && hour < 18) return 'afternoon';
+            return 'evening';
+        }
+
+        // Carrega frases favoritas do localStorage
+        function loadFavoritePhrases() {
+            const stored = localStorage.getItem('calmMindFavorites');
+            favoritePhrases = stored ? JSON.parse(stored) : [];
+            updateFavoritesDisplay();
+        }
+
+        // Salva frases favoritas no localStorage
+        function saveFavoritePhrases() {
+            localStorage.setItem('calmMindFavorites', JSON.stringify(favoritePhrases));
+        }
+
+        // Verifica se a frase atual está nos favoritos
+        function isCurrentPhraseFavorite() {
+            if (!currentPhrase) return false;
+            return favoritePhrases.some(fav => fav.text === currentPhrase.text);
+        }
+
+        // Toggle favorito da frase atual
+        function toggleFavoritePhrase() {
+            if (!currentPhrase) return;
+
+            const isFavorite = isCurrentPhraseFavorite();
+            const favoriteBtn = document.getElementById('favoriteBtn');
+
+            if (isFavorite) {
+                // Remove dos favoritos
+                favoritePhrases = favoritePhrases.filter(fav => fav.text !== currentPhrase.text);
+                favoriteBtn.classList.remove('active');
+                showToast('Frase removida dos favoritos');
+            } else {
+                // Adiciona aos favoritos
+                favoritePhrases.push({...currentPhrase, savedAt: new Date().toISOString()});
+                favoriteBtn.classList.add('active');
+                showToast('Frase salva nos favoritos! ⭐');
+            }
+
+            saveFavoritePhrases();
+            updateFavoritesDisplay();
+        }
+
+        // Atualiza a exibição de favoritos
+        function updateFavoritesDisplay() {
+            const favoritesSection = document.getElementById('favoritesSection');
+            const favoritesList = document.getElementById('favoritesList');
+
+            if (favoritePhrases.length === 0) {
+                favoritesSection.classList.add('hidden');
+                return;
+            }
+
+            favoritesSection.classList.remove('hidden');
+            favoritesList.innerHTML = favoritePhrases.map((phrase, index) => `
+                <div class="bg-calm-bg p-3 rounded-lg flex items-start gap-3 border border-calm-sand/10">
+                    <span class="text-xl">${phrase.emoji}</span>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-300">${phrase.text}</p>
+                    </div>
+                    <button 
+                        onclick="removeFavorite(${index})" 
+                        class="text-gray-400 hover:text-red-400 transition-colors text-sm"
+                        title="Remover">
+                        ×
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Remove um favorito
+        function removeFavorite(index) {
+            favoritePhrases.splice(index, 1);
+            saveFavoritePhrases();
+            updateFavoritesDisplay();
+            updateFavoriteButtonState();
+            showToast('Frase removida dos favoritos');
+        }
+
+        // Toggle visualização de favoritos
+        function toggleFavoritesView() {
+            const favoritesSection = document.getElementById('favoritesSection');
+            favoritesSection.classList.toggle('hidden');
+        }
+
+        // Atualiza o estado do botão de favorito
+        function updateFavoriteButtonState() {
+            const favoriteBtn = document.getElementById('favoriteBtn');
+            if (isCurrentPhraseFavorite()) {
+                favoriteBtn.classList.add('active');
+            } else {
+                favoriteBtn.classList.remove('active');
+            }
+        }
+
+        // Exibe uma frase motivacional
+        function displayMotivationalPhrase() {
+            currentPeriod = getTimeOfDay();
+            const phrases = motivationalPhrases[currentPeriod];
+            currentPhrase = phrases[currentPhraseIndex];
+
+            const phraseElement = document.getElementById('motivationalPhrase');
+            
+            // Remove animação para resetar
+            phraseElement.classList.remove('animate-fade-in-out');
+            
+            // Aguarda um frame para aplicar a nova animação
+            setTimeout(() => {
+                phraseElement.innerHTML = `${currentPhrase.emoji} ${currentPhrase.text}`;
+                phraseElement.classList.add('animate-fade-in-out');
+                updateFavoriteButtonState();
+            }, 50);
+
+            // Avança para próxima frase
+            currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+        }
+
+        // Avança para próxima frase manualmente
+        function nextPhrase() {
+            clearInterval(phraseRotationInterval);
+            clearInterval(phraseTimerInterval);
+            timeLeft = 9;
+            displayMotivationalPhrase();
+            startPhraseRotation();
+        }
+
+        // Timer visual da próxima frase
+        function updatePhraseTimer() {
+            const timerElement = document.getElementById('phraseTimer');
+            timerElement.textContent = `Próxima em ${timeLeft}s`;
+            timeLeft--;
+            
+            if (timeLeft < 0) {
+                timeLeft = 9;
+            }
+        }
+
+        // Inicia a rotação automática de frases
+        function startPhraseRotation() {
+            // Limpa intervalos existentes
+            if (phraseRotationInterval) clearInterval(phraseRotationInterval);
+            if (phraseTimerInterval) clearInterval(phraseTimerInterval);
+
+            // Exibe a primeira frase
+            displayMotivationalPhrase();
+
+            // Timer visual
+            timeLeft = 9;
+            phraseTimerInterval = setInterval(updatePhraseTimer, 1000);
+
+            // Rotação de frases a cada 9 segundos
+            phraseRotationInterval = setInterval(() => {
+                displayMotivationalPhrase();
+                timeLeft = 9;
+            }, 9000);
+        }
+
+        // ==========================================
+        // FIM DO SISTEMA DE FRASES MOTIVACIONAIS
+        // ==========================================
+
         // IndexedDB setup
         let db;
         const DB_NAME = 'CalmMindDB';
@@ -478,7 +766,6 @@
             }
         };
 
-        // Function to clear all timers to prevent conflicts
         function clearAllTimers() {
             if (breathingTimer) {
                 clearInterval(breathingTimer);
@@ -487,7 +774,6 @@
         }
 
         const startBreathing = (exerciseType) => {
-            // Clear any existing timers before starting
             clearAllTimers();
             
             currentExercise = breathingExercises[exerciseType];
@@ -502,7 +788,6 @@
         };
 
         const startBreathingCountdown = () => {
-            // Clear any existing timers
             clearAllTimers();
             
             let countdown = 3;
@@ -526,7 +811,6 @@
         };
 
         const runBreathingPhase = () => {
-            // Clear any existing timers before starting a new phase
             clearAllTimers();
             
             const phase = currentExercise.phases[breathingPhase];
@@ -537,7 +821,6 @@
             document.getElementById('breathingText').textContent = phase.name;
             
             const circle = document.getElementById('breathingCircle');
-            // Clear all animation classes first to prevent conflicts
             circle.className = 'w-32 h-32 mx-auto bg-gradient-to-br from-calm-mint to-calm-lavender rounded-full flex items-center justify-center text-calm-bg font-bold text-lg transition-transform duration-1000 shadow-lg';
             
             if (phase.name === 'Inspire') {
@@ -561,7 +844,6 @@
         };
 
         const nextBreathingPhase = () => {
-            // Clear any existing timers
             clearAllTimers();
             
             breathingPhase++;
@@ -580,7 +862,6 @@
         };
 
         const completeBreathingExercise = async () => {
-            // Clear all timers when completing
             clearAllTimers();
             
             const session = {
@@ -609,11 +890,9 @@
         };
 
         const stopBreathing = () => {
-            // Clear all timers when stopping
             clearAllTimers();
             
             document.getElementById('breathingModal').classList.add('hidden');
-            // Clear animation classes to prevent conflicts
             const circle = document.getElementById('breathingCircle');
             circle.classList.remove('animate-breathe-in', 'animate-breathe-out', 'animate-pulse-gentle');
         };
@@ -1026,6 +1305,12 @@
             try {
                 await initDB();
                 console.log('Database initialized');
+                
+                // Carrega frases favoritas
+                loadFavoritePhrases();
+                
+                // Inicia rotação de frases motivacionais
+                startPhraseRotation();
                 
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
