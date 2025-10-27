@@ -121,6 +121,38 @@
             color: #fbbf24;
             transform: scale(1.2);
         }
+
+        /* Sleep Quality Button Effects */
+        .sleep-quality-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sleep-quality-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(124, 156, 191, 0.6) 0%, transparent 70%);
+            opacity: 0;
+            transform: scale(2);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .sleep-quality-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sleep-quality-btn:active::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .sleep-quality-btn.selected {
+            transform: scale(1.1);
+            background: rgba(124, 156, 191, 0.2);
+            box-shadow: 0 0 15px rgba(124, 156, 191, 0.3);
+        }
     </style>
 </head>
 
@@ -163,6 +195,10 @@
                         <span class="text-xl mb-1">💨</span>
                         <span class="text-xs">Respiração</span>
                     </button>
+                    <button onclick="showSection('sleep')" class="nav-btn flex flex-col items-center p-2 rounded-lg transition-colors" data-section="sleep">
+                        <span class="text-xl mb-1">🌙</span>
+                        <span class="text-xs">Sono</span>
+                    </button>
                     <button onclick="showSection('diary')" class="nav-btn flex flex-col items-center p-2 rounded-lg transition-colors" data-section="diary">
                         <span class="text-xl mb-1">✍️</span>
                         <span class="text-xs">Diário</span>
@@ -174,6 +210,25 @@
             <main class="p-4 pb-20">
                 <!-- Dashboard Section -->
                 <section id="dashboard-section" class="section">
+                    <!-- Sleep Stats Card -->
+                    <div class="mb-6 bg-calm-card p-6 rounded-2xl shadow-lg flex items-center gap-6">
+                        <div class="bg-calm-bg p-4 rounded-xl flex-1 text-center">
+                            <span class="text-2xl block mb-1">🌙</span>
+                            <span id="avgSleepHours" class="text-xl font-bold block">0h</span>
+                            <span class="text-sm text-gray-400">Média de Sono</span>
+                        </div>
+                        <div class="bg-calm-bg p-4 rounded-xl flex-1 text-center">
+                            <span class="text-2xl block mb-1">😴</span>
+                            <span id="sleepQuality" class="text-xl font-bold block">-</span>
+                            <span class="text-sm text-gray-400">Qualidade</span>
+                        </div>
+                        <div class="bg-calm-bg p-4 rounded-xl flex-1 text-center">
+                            <span class="text-2xl block mb-1">📊</span>
+                            <span id="sleepStreak" class="text-xl font-bold block">0</span>
+                            <span class="text-sm text-gray-400">Registros</span>
+                        </div>
+                    </div>
+
                     <!-- COMPONENTE DE FRASES MOTIVACIONAIS -->
                     <div class="mb-6 bg-gradient-to-br from-calm-card to-calm-bg p-6 rounded-2xl border border-calm-lavender/20 shadow-lg relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-calm-lavender/10 rounded-full blur-3xl"></div>
@@ -355,6 +410,102 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Sleep Section -->
+                <section id="sleep-section" class="section hidden">
+                    <!-- Registro de Sono -->
+                    <div class="mb-6 bg-calm-card p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 flex items-center gap-3">
+                            <span class="text-2xl">🌙</span> Registro do Sono
+                        </h2>
+                        <form id="sleepForm" class="space-y-4">
+                            <div class="form-group">
+                                <label class="block text-gray-400 text-sm font-medium mb-2">Hora que dormiu</label>
+                                <input type="datetime-local" id="sleepTime" required 
+                                    class="w-full bg-calm-bg p-3 rounded-lg border border-calm-blue/20 focus:border-calm-blue/50 transition-colors">
+                            </div>
+                            <div class="form-group">
+                                <label class="block text-gray-400 text-sm font-medium mb-2">Hora que acordou</label>
+                                <input type="datetime-local" id="wakeTime" required
+                                    class="w-full bg-calm-bg p-3 rounded-lg border border-calm-blue/20 focus:border-calm-blue/50 transition-colors">
+                            </div>
+                            <div class="form-group">
+                                <label class="block text-gray-400 text-sm font-medium mb-2">Qualidade do sono</label>
+                                <div class="grid grid-cols-5 gap-3">
+                                    <button type="button" class="quality-btn bg-calm-bg p-4 rounded-xl text-2xl hover:bg-calm-blue/10 transition-all" data-quality="1">😫</button>
+                                    <button type="button" class="quality-btn bg-calm-bg p-4 rounded-xl text-2xl hover:bg-calm-blue/10 transition-all" data-quality="2">😕</button>
+                                    <button type="button" class="quality-btn bg-calm-bg p-4 rounded-xl text-2xl hover:bg-calm-blue/10 transition-all" data-quality="3">😐</button>
+                                    <button type="button" class="quality-btn bg-calm-bg p-4 rounded-xl text-2xl hover:bg-calm-blue/10 transition-all" data-quality="4">😊</button>
+                                    <button type="button" class="quality-btn bg-calm-bg p-4 rounded-xl text-2xl hover:bg-calm-blue/10 transition-all" data-quality="5">😴</button>
+                                </div>
+                                <input type="hidden" id="sleepQuality" required>
+                            </div>
+                            <button type="submit" class="w-full bg-calm-blue text-white py-4 rounded-xl font-medium hover:bg-calm-blue/90 transition-colors">
+                                Salvar Registro
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Insights -->
+                    <div class="mb-6 bg-calm-card p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 flex items-center gap-3">
+                            <span class="text-2xl">📊</span> Insights Semanais
+                        </h2>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-calm-bg p-4 rounded-xl text-center">
+                                <div class="text-sm text-gray-400 mb-2">Média de Horas</div>
+                                <div class="text-2xl font-bold text-calm-blue" id="avgSleepHoursInsights">-</div>
+                            </div>
+                            <div class="bg-calm-bg p-4 rounded-xl text-center">
+                                <div class="text-sm text-gray-400 mb-2">Regularidade</div>
+                                <div class="text-2xl font-bold text-calm-blue" id="sleepRegularity">-</div>
+                            </div>
+                            <div class="bg-calm-bg p-4 rounded-xl text-center">
+                                <div class="text-sm text-gray-400 mb-2">Qualidade</div>
+                                <div class="text-2xl font-bold text-calm-blue" id="avgSleepQuality">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notificações -->
+                    <div class="mb-6 bg-calm-card p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 flex items-center gap-3">
+                            <span class="text-2xl">🔔</span> Lembretes
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between bg-calm-bg p-4 rounded-xl">
+                                <div>
+                                    <div class="font-medium">Hora de Dormir</div>
+                                    <div class="text-sm text-gray-400">22:00 todos os dias</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="sleepReminder" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-calm-blue"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between bg-calm-bg p-4 rounded-xl">
+                                <div>
+                                    <div class="font-medium">Como foi seu sono?</div>
+                                    <div class="text-sm text-gray-400">8:00 todos os dias</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="morningReminder" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-calm-blue"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico -->
+                    <div class="bg-calm-card p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-xl font-semibold mb-4 flex items-center gap-3">
+                            <span class="text-2xl">📅</span> Histórico
+                        </h2>
+                        <div id="sleepHistory" class="space-y-3">
+                            <!-- Sleep history entries will be inserted here -->
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Diary Section -->
                 <section id="diary-section" class="section hidden">
@@ -614,53 +765,102 @@
         // IndexedDB setup
         let db;
         const DB_NAME = 'CalmMindDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
 
         const initDB = async () => {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 
-                request.onerror = () => reject(request.error);
+                request.onerror = () => {
+                    console.error('Failed to open database:', request.error);
+                    reject(request.error);
+                };
                 request.onsuccess = () => {
                     db = request.result;
+                    console.log('Database opened successfully');
                     resolve(db);
                 };
                 
                 request.onupgradeneeded = (event) => {
+                    console.log('Database upgrade needed');
                     db = event.target.result;
                     
                     if (!db.objectStoreNames.contains('moodEntries')) {
                         const moodStore = db.createObjectStore('moodEntries', { keyPath: 'id', autoIncrement: true });
                         moodStore.createIndex('date', 'date', { unique: false });
+                        console.log('Created moodEntries store');
                     }
                     
                     if (!db.objectStoreNames.contains('diaryEntries')) {
                         const diaryStore = db.createObjectStore('diaryEntries', { keyPath: 'id', autoIncrement: true });
                         diaryStore.createIndex('date', 'date', { unique: false });
+                        console.log('Created diaryEntries store');
                     }
                     
                     if (!db.objectStoreNames.contains('breathingSessions')) {
                         const breathingStore = db.createObjectStore('breathingSessions', { keyPath: 'id', autoIncrement: true });
                         breathingStore.createIndex('date', 'date', { unique: false });
+                        console.log('Created breathingSessions store');
+                    }
+                    
+                    if (!db.objectStoreNames.contains('sleepEntries')) {
+                        const sleepStore = db.createObjectStore('sleepEntries', { keyPath: 'id', autoIncrement: true });
+                        sleepStore.createIndex('date', 'date', { unique: false });
+                        sleepStore.createIndex('quality', 'quality', { unique: false });
+                        console.log('Created sleepEntries store');
                     }
                 };
             });
         };
 
         const saveToStore = async (storeName, data) => {
-            const transaction = db.transaction([storeName], 'readwrite');
-            const store = transaction.objectStore(storeName);
-            return store.add(data);
+            try {
+                if (!db) {
+                    console.error('Database not initialized');
+                    throw new Error('Database not initialized');
+                }
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                return new Promise((resolve, reject) => {
+                    const request = store.add(data);
+                    request.onsuccess = () => {
+                        console.log('Record saved successfully:', data);
+                        resolve(request.result);
+                    };
+                    request.onerror = () => {
+                        console.error('Error saving record:', request.error);
+                        reject(request.error);
+                    };
+                });
+            } catch (error) {
+                console.error('Error in saveToStore:', error);
+                throw error;
+            }
         };
 
         const getAllFromStore = async (storeName) => {
-            const transaction = db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            return new Promise((resolve, reject) => {
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
+            try {
+                if (!db) {
+                    console.error('Database not initialized');
+                    return [];
+                }
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                return new Promise((resolve, reject) => {
+                    const request = store.getAll();
+                    request.onsuccess = () => {
+                        console.log(`Retrieved ${request.result.length} records from ${storeName}`);
+                        resolve(request.result);
+                    };
+                    request.onerror = () => {
+                        console.error('Error retrieving records:', request.error);
+                        reject(request.error);
+                    };
+                });
+            } catch (error) {
+                console.error('Error in getAllFromStore:', error);
+                return [];
+            }
         };
 
         const showSection = (sectionName) => {
@@ -680,6 +880,9 @@
                 updateDashboard();
             } else if (sectionName === 'diary') {
                 loadDiaryEntries();
+            } else if (sectionName === 'sleep') {
+                loadSleepHistory();
+                updateSleepInsights();
             }
         };
 
@@ -1154,14 +1357,17 @@
 
         const updateDashboard = async () => {
             try {
-                const [moodEntries, diaryEntries, breathingSessions] = await Promise.all([
+                const [moodEntries, diaryEntries, breathingSessions, sleepEntries] = await Promise.all([
                     getAllFromStore('moodEntries'),
                     getAllFromStore('diaryEntries'),
-                    getAllFromStore('breathingSessions')
+                    getAllFromStore('breathingSessions'),
+                    getAllFromStore('sleepEntries')
                 ]);
                 
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
+                
+                // Update mood stats
                 const monthlyMoodEntries = moodEntries.filter(entry => {
                     const entryDate = new Date(entry.date);
                     return entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear;
@@ -1172,6 +1378,33 @@
                 
                 updateMoodChart(moodEntries);
                 updateRecentEntries(moodEntries, diaryEntries);
+                
+                // Update sleep statistics
+                if (sleepEntries.length === 0) {
+                    ['avgSleepHours', 'sleepQuality', 'sleepStreak'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.textContent = '-';
+                    });
+                    return;
+                }
+                
+                // Average duration
+                const avgDuration = sleepEntries.reduce((sum, entry) => 
+                    sum + parseFloat(entry.duration), 0) / sleepEntries.length;
+                document.getElementById('avgSleepHours').textContent = avgDuration.toFixed(1) + 'h';
+                
+                // Quality emoji
+                const avgQuality = sleepEntries.reduce((sum, entry) => sum + entry.quality, 0) / sleepEntries.length;
+                const qualityEmojis = ['😫', '😕', '😐', '😊', '😴'];
+                document.getElementById('sleepQuality').textContent = qualityEmojis[Math.round(avgQuality) - 1];
+
+                // Count sleep records in the current month
+                const monthlyRecords = sleepEntries.filter(entry => {
+                    const entryDate = new Date(entry.date);
+                    return entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear;
+                }).length;
+                
+                document.getElementById('sleepStreak').textContent = monthlyRecords;
                 
             } catch (error) {
                 console.error('Error updating dashboard:', error);
@@ -1434,6 +1667,390 @@
             });
         }
 
+        // Sleep tracking state
+        let currentSleepQuality = 0;
+
+        function updateSleepDuration() {
+            const sleepTime = document.getElementById('sleepTime').value;
+            const wakeTime = document.getElementById('wakeTime').value;
+            
+            if (!sleepTime || !wakeTime) return;
+            
+            const sleepDate = new Date(sleepTime);
+            const wakeDate = new Date(wakeTime);
+            
+            // If wake time is before sleep time, assume it's the next day
+            let duration;
+            if (wakeDate < sleepDate) {
+                const wakeDateNextDay = new Date(wakeDate);
+                wakeDateNextDay.setDate(wakeDateNextDay.getDate() + 1);
+                duration = (wakeDateNextDay - sleepDate) / (1000 * 60 * 60);
+            } else {
+                duration = (wakeDate - sleepDate) / (1000 * 60 * 60);
+            }
+            
+            return duration;
+        }
+
+        function setSleepQuality(quality) {
+            currentSleepQuality = quality;
+            document.querySelectorAll('.sleep-quality-btn').forEach(btn => {
+                btn.classList.remove('bg-calm-blue/20', 'selected');
+            });
+            const selectedBtn = document.querySelector(`button[onclick="setSleepQuality(${quality})"]`);
+            selectedBtn.classList.add('bg-calm-blue/20', 'selected');
+            
+            // Add haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        async function saveSleepEntry() {
+            const sleepTime = document.getElementById('sleepTime').value;
+            const wakeTime = document.getElementById('wakeTime').value;
+            const notes = document.getElementById('sleepNotes').value;
+            
+            if (!sleepTime || !wakeTime) {
+                showToast('Por favor, preencha os horários de dormir e acordar');
+                return;
+            }
+            
+            if (currentSleepQuality === 0) {
+                showToast('Por favor, selecione a qualidade do sono');
+                return;
+            }
+            
+            const duration = updateSleepDuration();
+            
+            const sleepEntry = {
+                date: new Date().toISOString(),
+                sleepTime,
+                wakeTime,
+                duration,
+                quality: currentSleepQuality,
+                notes,
+                timestamp: Date.now()
+            };
+            
+            try {
+                await saveToStore('sleepEntries', sleepEntry);
+                showToast('Registro de sono salvo com sucesso!');
+                
+                document.getElementById('sleepTime').value = '';
+                document.getElementById('wakeTime').value = '';
+                document.getElementById('sleepNotes').value = '';
+                currentSleepQuality = 0;
+                document.querySelectorAll('.sleep-quality-btn').forEach(btn => {
+                    btn.classList.remove('bg-calm-blue/20');
+                });
+                
+                loadSleepHistory();
+                updateDashboard();
+            } catch (error) {
+                showToast('Erro ao salvar registro de sono');
+                console.error('Error saving sleep entry:', error);
+            }
+        }
+
+        async function loadSleepHistory() {
+            try {
+                const entries = await getAllFromStore('sleepEntries');
+                const container = document.getElementById('sleepHistory');
+                
+                if (entries.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400 text-center py-4">Nenhum registro de sono ainda.</p>';
+                    return;
+                }
+                
+                entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                container.innerHTML = entries.slice(0, 7).map(entry => {
+                    const date = new Date(entry.date).toLocaleDateString('pt-BR', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    const qualityEmojis = ['😫', '😕', '😐', '😊', '😴'];
+                    
+                    return `
+                        <div class="bg-calm-bg p-4 rounded-xl flex items-center gap-4">
+                            <div class="text-2xl">${qualityEmojis[entry.quality - 1]}</div>
+                            <div class="flex-1">
+                                <div class="font-semibold">${date}</div>
+                                <div class="text-sm text-gray-400">
+                                    ${entry.sleepTime} - ${entry.wakeTime} (${entry.duration.toFixed(1)}h)
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading sleep history:', error);
+            }
+        }
+
+        // Get sleep records for the last N days
+        async function getSleepRecords(days = 7) {
+            try {
+                if (!db) {
+                    await initDB();
+                }
+                const entries = await getAllFromStore('sleepEntries');
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                return entries.filter(r => new Date(r.date) >= cutoffDate);
+            } catch (error) {
+                console.error('Error getting sleep records:', error);
+                return [];
+            }
+        }
+
+        // Update sleep insights
+        async function updateSleepInsights() {
+            try {
+                console.log('Updating sleep insights...');
+                const records = await getSleepRecords(7);
+                console.log('Retrieved records:', records);
+                
+                if (records.length === 0) {
+                    console.log('No records found, setting default values');
+                    document.getElementById('avgSleepHours').textContent = '-';
+                    document.getElementById('avgSleepHoursInsights').textContent = '-';
+                    document.getElementById('sleepRegularity').textContent = '-';
+                    document.getElementById('avgSleepQuality').textContent = '-';
+                    return;
+                }
+
+                // Average hours
+                console.log('Sleep records for average calculation:', records);
+                const durations = records.map(r => parseFloat(r.duration));
+                console.log('Durations:', durations);
+                const totalDuration = durations.reduce((sum, duration) => sum + duration, 0);
+                console.log('Total duration:', totalDuration);
+                const avgHours = totalDuration / records.length;
+                console.log('Average hours:', avgHours);
+                document.getElementById('avgSleepHours').textContent = avgHours.toFixed(1) + 'h';
+                document.getElementById('avgSleepHoursInsights').textContent = avgHours.toFixed(1) + 'h';
+
+                // Average quality
+                const avgQuality = records.reduce((sum, r) => sum + r.quality, 0) / records.length;
+                console.log('Average quality:', avgQuality);
+                const qualityEmojis = ['😫', '😕', '😐', '😊', '😴'];
+                document.getElementById('avgSleepQuality').textContent = qualityEmojis[Math.round(avgQuality) - 1];
+
+                // Regularity score
+                const sleepTimes = records.map(r => {
+                    const time = new Date(r.sleepTime);
+                    return time.getHours() + time.getMinutes() / 60;
+                });
+                
+                const avgSleepTime = sleepTimes.reduce((sum, t) => sum + t, 0) / sleepTimes.length;
+                const variance = sleepTimes.reduce((sum, t) => sum + Math.pow(t - avgSleepTime, 2), 0) / sleepTimes.length;
+                const stdDev = Math.sqrt(variance);
+                
+                const regularityScore = Math.max(0, Math.min(100, 100 - (stdDev * 20)));
+                console.log('Regularity score:', regularityScore);
+                document.getElementById('sleepRegularity').textContent = regularityScore.toFixed(0) + '%';
+                
+                console.log('Sleep insights updated successfully');
+            } catch (error) {
+                console.error('Error updating sleep insights:', error);
+                // Show error state
+                document.getElementById('avgSleepHours').textContent = 'Erro';
+                document.getElementById('avgSleepHoursInsights').textContent = 'Erro';
+                document.getElementById('sleepRegularity').textContent = 'Erro';
+                document.getElementById('avgSleepQuality').textContent = 'Erro';
+            }
+        }
+
+        // Load and display sleep history
+        async function loadSleepHistory() {
+            try {
+                console.log('Loading sleep history...');
+                const entries = await getAllFromStore('sleepEntries');
+                console.log('Retrieved sleep entries:', entries);
+                const container = document.getElementById('sleepHistory');
+                
+                if (entries.length === 0) {
+                    console.log('No sleep entries found');
+                    container.innerHTML = `
+                        <div class="text-center py-8">
+                            <div class="text-4xl mb-3">🌙</div>
+                            <p class="text-gray-400">Nenhum registro de sono ainda.<br>Comece registrando sua primeira noite!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                container.innerHTML = entries.slice(0, 7).map(entry => {
+                    const date = new Date(entry.date).toLocaleDateString('pt-BR', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    const sleepTime = new Date(entry.sleepTime).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+                    const wakeTime = new Date(entry.wakeTime).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+                    const qualityEmojis = ['😫', '😕', '😐', '😊', '😴'];
+                    
+                    return `
+                        <div class="bg-calm-bg p-4 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="text-2xl">${qualityEmojis[entry.quality - 1]}</div>
+                                <div>
+                                    <div class="font-medium">${date}</div>
+                                    <div class="text-sm text-gray-400">${sleepTime} → ${wakeTime}</div>
+                                </div>
+                            </div>
+                            <div class="text-lg font-medium text-calm-blue">
+                                ${parseFloat(entry.duration).toFixed(1)}h
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                console.log('Sleep history loaded successfully');
+            } catch (error) {
+                console.error('Error loading sleep history:', error);
+            }
+        }
+
+        // Schedule sleep reminders
+        function scheduleSleepReminders() {
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                navigator.serviceWorker.ready.then(registration => {
+                    const sleepEnabled = document.getElementById('sleepReminder').checked;
+                    const morningEnabled = document.getElementById('morningReminder').checked;
+                    
+                    localStorage.setItem('sleepReminderEnabled', sleepEnabled);
+                    localStorage.setItem('morningReminderEnabled', morningEnabled);
+                    
+                    if (sleepEnabled || morningEnabled) {
+                        showToast('Lembretes configurados! 🔔');
+                    }
+                });
+            }
+        }
+
+        // Initialize sleep tracking functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Quality button click handlers
+            document.querySelectorAll('.quality-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.quality-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-calm-blue/20', 'scale-110', 'shadow-lg');
+                    });
+                    this.classList.add('active', 'bg-calm-blue/20', 'scale-110', 'shadow-lg');
+                    document.getElementById('sleepQuality').value = this.dataset.quality;
+                    
+                    // Add haptic feedback if available
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                });
+            });
+
+            // Sleep form submission
+            document.getElementById('sleepForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const sleepTime = new Date(document.getElementById('sleepTime').value);
+                const wakeTime = new Date(document.getElementById('wakeTime').value);
+                const quality = document.getElementById('sleepQuality').value;
+
+                if (!quality) {
+                    showToast('Por favor, selecione a qualidade do sono');
+                    return;
+                }
+
+                // Calculate duration properly handling overnight sleep
+                let duration;
+                if (wakeTime < sleepTime) {
+                    // If wake time is before sleep time, assume it's the next day
+                    const wakeTimeNextDay = new Date(wakeTime);
+                    wakeTimeNextDay.setDate(wakeTimeNextDay.getDate() + 1);
+                    duration = (wakeTimeNextDay - sleepTime) / (1000 * 60 * 60); // hours
+                } else {
+                    duration = (wakeTime - sleepTime) / (1000 * 60 * 60); // hours
+                }
+
+                try {
+                    const sleepEntry = {
+                        date: new Date().toISOString(),
+                        sleepTime: sleepTime.toISOString(),
+                        wakeTime: wakeTime.toISOString(),
+                        duration: duration.toFixed(2),
+                        quality: parseInt(quality),
+                        timestamp: Date.now()
+                    };
+
+                    try {
+                        await saveToStore('sleepEntries', sleepEntry);
+                        showToast('Registro de sono salvo com sucesso! 🎉');
+                        
+                        // Reset form
+                        document.querySelectorAll('.quality-btn').forEach(btn => {
+                            btn.classList.remove('active', 'bg-calm-blue/20', 'scale-110', 'shadow-lg');
+                        });
+                        document.getElementById('sleepQuality').value = '';
+                        
+                        // Update UI
+                        console.log('Updating UI after saving sleep entry');
+                        await loadSleepHistory();
+                        await updateSleepInsights();
+                        await updateDashboard();
+                        console.log('UI updated successfully');
+                    } catch (error) {
+                        showToast('Erro ao salvar registro');
+                        console.error('Error saving sleep entry:', error);
+                    }
+                } catch (error) {
+                    showToast('Erro ao salvar registro');
+                    console.error('Error creating sleep entry:', error);
+                }
+            });
+
+            // Load saved reminder preferences
+            document.getElementById('sleepReminder').checked = 
+                localStorage.getItem('sleepReminderEnabled') === 'true';
+            document.getElementById('morningReminder').checked = 
+                localStorage.getItem('morningReminderEnabled') === 'true';
+
+            // Reminder toggle handlers
+            document.getElementById('sleepReminder').addEventListener('change', function() {
+                localStorage.setItem('sleepReminderEnabled', this.checked);
+                if (this.checked) scheduleSleepReminders();
+            });
+
+            document.getElementById('morningReminder').addEventListener('change', function() {
+                localStorage.setItem('morningReminderEnabled', this.checked);
+                if (this.checked) scheduleSleepReminders();
+            });
+
+            // Set default datetime values for sleep form
+            const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            yesterday.setHours(22, 0);
+            now.setHours(7, 0);
+            
+            if (document.getElementById('sleepTime')) {
+                document.getElementById('sleepTime').value = yesterday.toISOString().slice(0, 16);
+            }
+            if (document.getElementById('wakeTime')) {
+                document.getElementById('wakeTime').value = now.toISOString().slice(0, 16);
+            }
+
+            // Initial UI update if we're in the sleep section
+            if (!document.getElementById('sleep-section').classList.contains('hidden')) {
+                loadSleepHistory();
+                updateSleepInsights();
+            }
+        });
+
         const initApp = async () => {
             try {
                 await initDB();
@@ -1444,6 +2061,10 @@
                 
                 // Inicia rotação de frases motivacionais
                 startPhraseRotation();
+                
+                // Initialize sleep tracking
+                await loadSleepHistory();
+                await updateSleepInsights();
                 
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');

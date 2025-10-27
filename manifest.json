@@ -75,6 +75,18 @@
           "sizes": "96x96"
         }
       ]
+    },
+    {
+      "name": "Ciclo de Sono",
+      "short_name": "Sono",
+      "description": "Registre e acompanhe seu ciclo de sono",
+      "url": "/sleep.html",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiI+PHRleHQgeD0iNDgiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjQ4Ij7wn4yZPC90ZXh0Pjwvc3ZnPg==",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "related_applications": [],
