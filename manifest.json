@@ -87,6 +87,12 @@
           "sizes": "96x96"
         }
       ]
+    },
+    {
+      "name": "🆘 Modo SOS",
+      "short_name": "SOS",
+      "url": "/?sos=true",
+      "icons": [{ "src": "/icons/sos-shortcut.png", "sizes": "192x192" }]
     }
   ],
   "related_applications": [],

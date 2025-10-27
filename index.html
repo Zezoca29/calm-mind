@@ -103,6 +103,15 @@
             animation: fadeInOut 9s ease-in-out;
         }
         
+        /* Scale classes for SOS breathing */
+        .scale-100 {
+            transform: scale(1);
+        }
+        
+        .scale-150 {
+            transform: scale(1.5);
+        }
+        
         .hide-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -157,7 +166,38 @@
 </head>
 
 <body class="bg-calm-bg text-white font-sans">
-    <div id="app" class="min-h-screen">
+    <!-- Modal SOS -->
+<div id="sosModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl space-y-6">
+    <h2 class="text-2xl font-bold text-red-600 text-center">Modo SOS</h2>
+
+    <!-- Respiração Guiada -->
+    <div id="breathingSection" class="space-y-4 text-center">
+      <p class="text-gray-700">Respire com o círculo:</p>
+      <div id="breathingCircle" class="mx-auto w-24 h-24 rounded-full bg-red-200 my-6 flex items-center justify-center"></div>
+      <p id="breathingInstruction" class="text-lg font-semibold text-gray-800">Inspire...</p>
+    </div>
+
+    <!-- Contatos -->
+    <div class="border-t pt-4">
+      <h3 class="text-lg font-bold text-gray-800 mb-2">Contatos de Emergência</h3>
+      <ul class="space-y-2 text-center">
+        <li><a href="tel:188" class="block bg-red-500 text-white py-2 rounded-lg">📞 CVV - 188</a></li>
+        <li><a href="tel:192" class="block bg-orange-500 text-white py-2 rounded-lg">🚑 SAMU - 192</a></li>
+      </ul>
+      <div id="customContacts" class="mt-4"></div>
+      <button onclick="addContact()" class="mt-2 w-full bg-gray-200 py-2 rounded-lg">➕ Adicionar Contato</button>
+    </div>
+
+    <!-- Técnica de Ancoragem -->
+    <div class="border-t pt-4 text-center">
+      <button onclick="startGrounding()" class="bg-blue-500 text-white py-2 px-4 rounded-lg">🧘 Técnica 5-4-3-2-1</button>
+    </div>
+
+    <button onclick="closeSOS()" class="w-full mt-4 py-2 bg-gray-300 rounded-lg">Fechar</button>
+  </div>
+</div>
+
         <!-- Loading Screen -->
         <div id="loading" class="fixed inset-0 bg-calm-bg flex items-center justify-center z-50">
             <div class="text-center">
@@ -171,7 +211,13 @@
         <div id="main-app" class="hidden">
             <!-- Header -->
             <header class="bg-calm-card p-4 shadow-lg">
-                <h1 class="text-2xl font-bold text-center text-calm-blue">🌸 Calm Mind</h1>
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-center text-calm-blue">🌸 Calm Mind</h1>
+                    <!-- SOS Button -->
+                    <button onclick="activateSOS()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg animate-pulse shadow-lg z-50" title="Modo de emergência">
+                        SOS
+                    </button>
+                </div>
                 <p class="text-center text-gray-400 text-sm mt-1">Seu espaço de bem-estar mental</p>
                 <div class="flex justify-center mt-3">
                     <button id="installBtn" onclick="promptInstall()" class="hidden bg-calm-sand text-calm-blue-dark px-3 py-1 rounded text-sm shadow">
@@ -762,6 +808,337 @@
         // FIM DO SISTEMA DE FRASES MOTIVACIONAIS
         // ==========================================
 
+        // ==========================================
+        // SISTEMA DE RELÓGIO MESTRE PARA EXERCÍCIOS DE RESPIRAÇÃO
+        // ==========================================
+        
+        // Relógio mestre para coordenar todos os exercícios de respiração
+        class MasterClock {
+            constructor() {
+                this.animationFrameId = null;
+                this.subscribers = new Set();
+                this.isRunning = false;
+                this.startTime = null;
+            }
+            
+            // Adicionar um subscriber (exercício de respiração)
+            subscribe(callback) {
+                this.subscribers.add(callback);
+            }
+            
+            // Remover um subscriber
+            unsubscribe(callback) {
+                this.subscribers.delete(callback);
+            }
+            
+            // Iniciar o relógio mestre
+            start() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.startTime = performance.now();
+                this.tick();
+            }
+            
+            // Parar o relógio mestre
+            stop() {
+                if (this.animationFrameId) {
+                    cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = null;
+                }
+                this.isRunning = false;
+                this.startTime = null;
+            }
+            
+            // Loop principal usando requestAnimationFrame
+            tick = (timestamp) => {
+                if (!this.startTime) {
+                    this.startTime = timestamp;
+                }
+                
+                const elapsed = timestamp - this.startTime;
+                
+                // Notificar todos os subscribers
+                this.subscribers.forEach(callback => {
+                    try {
+                        callback(elapsed, timestamp);
+                    } catch (error) {
+                        console.error('Error in master clock subscriber:', error);
+                    }
+                });
+                
+                // Continuar o loop
+                this.animationFrameId = requestAnimationFrame(this.tick);
+            }
+        }
+        
+        // Instância global do relógio mestre
+        const masterClock = new MasterClock();
+        
+        // ==========================================
+        // FIM DO SISTEMA DE RELÓGIO MESTRE
+        // ==========================================
+
+        // ==========================================
+        // SISTEMA SOS PARA CRISES DE ANSIEDADE
+        // ==========================================
+
+        // Variáveis para o controle do loop de animação
+        let sosAnimationFrameId = null;
+        let sosStartTime = null;
+        let sosPreviousPhase = null;
+
+        // Fases da respiração SOS
+        const sosBreathingPhases = [
+          { name: 'Inspire', duration: 4000, text: 'Inspire (4s)...' },
+          { name: 'Segure', duration: 7000, text: 'Segure (7s)...' },
+          { name: 'Expire', duration: 8000, text: 'Expire (8s)...' }
+        ];
+
+        function activateSOS() {
+          document.getElementById('sosModal').classList.remove('hidden');
+          if (navigator.vibrate) navigator.vibrate(200);
+          startSOSBreathing();
+        }
+
+        function closeSOS() {
+          document.getElementById('sosModal').classList.add('hidden');
+          stopSOSBreathing();
+        }
+
+        // Iniciar respiração SOS com um único loop de tempo
+        function startSOSBreathing() {
+          // Cancelar qualquer animação em andamento
+          if (sosAnimationFrameId) {
+            cancelAnimationFrame(sosAnimationFrameId);
+          }
+          
+          // Resetar variáveis
+          sosStartTime = null;
+          sosPreviousPhase = null;
+          
+          // Iniciar o loop de animação
+          sosAnimationFrameId = requestAnimationFrame(sosBreathingLoop);
+        }
+
+        // Parar respiração SOS e limpar todos os recursos
+        function stopSOSBreathing() {
+          if (sosAnimationFrameId) {
+            cancelAnimationFrame(sosAnimationFrameId);
+            sosAnimationFrameId = null;
+          }
+          sosStartTime = null;
+          sosPreviousPhase = null;
+        }
+
+        // Loop principal de respiração SOS usando requestAnimationFrame
+        function sosBreathingLoop(timestamp) {
+          if (!sosStartTime) {
+            sosStartTime = timestamp;
+          }
+          
+          const elapsed = timestamp - sosStartTime;
+          const totalCycleDuration = sosBreathingPhases.reduce((sum, phase) => sum + phase.duration, 0);
+          const timeInCycle = elapsed % totalCycleDuration;
+          
+          // Determinar a fase atual com base no tempo
+          let accumulated = 0;
+          let currentPhase = null;
+          let timeRemainingInPhase = 0;
+          
+          for (let i = 0; i < sosBreathingPhases.length; i++) {
+            accumulated += sosBreathingPhases[i].duration;
+            if (timeInCycle < accumulated) {
+              currentPhase = sosBreathingPhases[i];
+              timeRemainingInPhase = accumulated - timeInCycle;
+              break;
+            }
+          }
+          
+          // Atualizar UI com base na fase atual
+          updateSOSUI(currentPhase, timeRemainingInPhase);
+          
+          // Continuar o loop
+          sosAnimationFrameId = requestAnimationFrame(sosBreathingLoop);
+        }
+
+        // Atualizar interface do usuário com base na fase atual
+        function updateSOSUI(phase, timeRemaining) {
+          const instruction = document.getElementById('breathingInstruction');
+          const circle = document.getElementById('breathingCircle');
+          
+          if (!instruction || !circle) return;
+          
+          // Atualizar texto de instrução
+          instruction.textContent = phase.text;
+          
+          // Calcular progresso da fase (0 a 1)
+          const phaseDuration = phase.duration;
+          const progress = 1 - (timeRemaining / phaseDuration);
+          
+          // Atualizar timer no círculo
+          const secondsLeft = Math.ceil(timeRemaining / 1000);
+          if (!circle.querySelector('#sosTimer')) {
+            circle.innerHTML = '<div id="sosTimer" class="text-calm-bg font-bold text-2xl flex items-center justify-center w-full h-full"></div>';
+          }
+          document.getElementById('sosTimer').textContent = secondsLeft;
+          
+          // Aplicar transformações visuais com base na fase
+          circle.style.transition = 'transform 0.1s ease-out';
+          
+          switch(phase.name) {
+            case 'Inspire':
+              // Escalar para cima durante inspiração
+              const inspireScale = 1 + (progress * 0.5); // Escala de 1 a 1.5
+              circle.style.transform = `scale(${inspireScale})`;
+              circle.className = 'mx-auto w-24 h-24 rounded-full bg-red-200 my-6 flex items-center justify-center';
+              break;
+              
+            case 'Segure':
+              // Manter tamanho constante e pulsar suavemente
+              circle.style.transform = 'scale(1.5)';
+              circle.className = 'mx-auto w-24 h-24 rounded-full bg-red-200 animate-pulse my-6 flex items-center justify-center';
+              break;
+              
+            case 'Expire':
+              // Escalar para baixo durante expiração
+              const expireScale = 1.5 - (progress * 0.5); // Escala de 1.5 a 1
+              circle.style.transform = `scale(${expireScale})`;
+              circle.className = 'mx-auto w-24 h-24 rounded-full bg-red-200 my-6 flex items-center justify-center';
+              break;
+          }
+          
+          // Sincronizar áudio se necessário (chamado apenas quando a fase muda)
+          if (sosPreviousPhase !== phase.name) {
+            sosSpeakInstruction(phase.name);
+            sosPreviousPhase = phase.name;
+          }
+        }
+
+        // Função para falar instruções de forma síncrona
+        function sosSpeakInstruction(text) {
+          // Esta função pode ser expandida para incluir áudio se necessário
+          // Por enquanto, estamos apenas sincronizando a UI
+          console.log('SOS Phase:', text);
+        }
+
+// Técnica de Ancoragem 5-4-3-2-1
+function startGrounding() {
+  // Close the SOS modal first
+  closeSOS();
+  
+  // Create a new modal for the grounding technique
+  const groundingModal = document.createElement('div');
+  groundingModal.id = 'groundingModal';
+  groundingModal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+  
+  // Steps for the 5-4-3-2-1 technique
+  const groundingSteps = [
+    { title: 'Técnica 5-4-3-2-1', instruction: 'Nome 5 coisas que você pode ver', count: 5 },
+    { title: 'Técnica 4-3-2-1', instruction: 'Nome 4 coisas que você pode tocar', count: 4 },
+    { title: 'Técnica 3-2-1', instruction: 'Nome 3 coisas que você pode ouvir', count: 3 },
+    { title: 'Técnica 2-1', instruction: 'Nome 2 coisas que você pode cheirar', count: 2 },
+    { title: 'Técnica Final', instruction: 'Nome 1 coisa que você pode saborear', count: 1 }
+  ];
+  
+  let currentStep = 0;
+  
+  function updateGroundingStep() {
+    const step = groundingSteps[currentStep];
+    let dotsHtml = '';
+    for (let i = 0; i < 5; i++) {
+      if (i < step.count) {
+        dotsHtml += `<span class="w-3 h-3 bg-blue-500 rounded-full inline-block mr-1"></span>`;
+      } else {
+        dotsHtml += `<span class="w-3 h-3 bg-gray-300 rounded-full inline-block mr-1"></span>`;
+      }
+    }
+    
+    groundingModal.innerHTML = `
+      <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+        <h2 class="text-2xl font-bold text-blue-600 text-center mb-4">${step.title}</h2>
+        <p class="text-gray-700 text-center mb-6">${step.instruction}</p>
+        <div class="flex justify-center space-x-2 mb-6">
+          ${dotsHtml}
+        </div>
+        <div class="flex justify-between">
+          <button onclick="closeGrounding()" class="py-2 px-4 bg-gray-300 rounded-lg">Fechar</button>
+          <button onclick="nextGroundingStep()" class="py-2 px-4 bg-blue-500 text-white rounded-lg">
+            ${currentStep < groundingSteps.length - 1 ? 'Próximo' : 'Concluir'}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  window.nextGroundingStep = function() {
+    if (currentStep < groundingSteps.length - 1) {
+      currentStep++;
+      updateGroundingStep();
+    } else {
+      // This is the last step, show completion message
+      groundingModal.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl text-center">
+          <h2 class="text-2xl font-bold text-blue-600 mb-4">Técnica Concluída!</h2>
+          <p class="text-gray-700 mb-6">Parabéns! Você completou a técnica de ancoragem 5-4-3-2-1.</p>
+          <button onclick="closeGrounding()" class="py-2 px-4 bg-blue-500 text-white rounded-lg">Fechar</button>
+        </div>
+      `;
+    }
+  };
+  
+  window.closeGrounding = function() {
+    document.body.removeChild(groundingModal);
+  };
+  
+  document.body.appendChild(groundingModal);
+  updateGroundingStep();
+}
+
+function closeGrounding() {
+  const groundingModal = document.getElementById('groundingModal');
+  if (groundingModal) {
+    groundingModal.remove();
+  }
+  // Remove the global functions
+  delete window.nextGroundingStep;
+  delete window.closeGrounding;
+}
+
+// Clean up duplicate/incorrect code
+// The following functions were duplicated or incorrect, so we're removing them
+// function openSOS() { ... }
+// function closeSOS() { ... } (duplicate)
+
+// Contatos personalizados
+function addContact() {
+  const name = prompt('Nome do contato:');
+  const phone = prompt('Número (com DDD):');
+  if (!name || !phone) return;
+
+  const contacts = JSON.parse(localStorage.getItem('sosContacts') || '[]');
+  contacts.push({ name, phone });
+  localStorage.setItem('sosContacts', JSON.stringify(contacts));
+  renderContacts();
+}
+
+function renderContacts() {
+  const div = document.getElementById('customContacts');
+  const contacts = JSON.parse(localStorage.getItem('sosContacts') || '[]');
+  div.innerHTML = contacts.map(c =>
+    `<a href="tel:${c.phone}" class="block bg-green-500 text-white py-2 rounded-lg mt-2">${c.name}</a>`
+  ).join('');
+}
+
+// Render contacts when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+  renderContacts();
+});
+
+        // ==========================================
+        // FIM DO SISTEMA SOS
+        // ==========================================
+
         // IndexedDB setup
         let db;
         const DB_NAME = 'CalmMindDB';
@@ -939,14 +1316,19 @@
             }
         });
 
-        let breathingTimer = null;
-        let breathingPhase = 0;
-        let breathingCycle = 0;
         let currentExercise = null;
         let audioContext = null;
         let audioEnabled = false;
         let synth = window.speechSynthesis;
         let speakingInstructions = false;
+        
+        // Variáveis para o controle do exercício de respiração
+        let mainStartTime = null;
+        let mainPreviousPhase = null;
+        let mainCurrentPhase = null;
+        let mainCurrentCycle = 0;
+        let mainExerciseStartTime = null;
+        let isBreathingExerciseActive = false;
 
         // Inicializa o contexto de áudio
         const initAudioContext = () => {
@@ -1049,9 +1431,10 @@
         };
 
         function clearAllTimers() {
-            if (breathingTimer) {
-                clearInterval(breathingTimer);
-                breathingTimer = null;
+            // Remover o subscriber do relógio mestre se estiver ativo
+            if (isBreathingExerciseActive) {
+                masterClock.unsubscribe(breathingClockCallback);
+                isBreathingExerciseActive = false;
             }
         }
 
@@ -1059,9 +1442,13 @@
             clearAllTimers();
             
             currentExercise = breathingExercises[exerciseType];
-            breathingPhase = 0;
-            breathingCycle = 1;
 
+            // Resetar variáveis de animação
+            mainStartTime = null;
+            mainPreviousPhase = null;
+            mainCurrentPhase = null;
+            mainCurrentCycle = 1;
+            mainExerciseStartTime = null;
             
             document.getElementById('exerciseTitle').textContent = currentExercise.name;
             document.getElementById('breathingModal').classList.remove('hidden');
@@ -1106,85 +1493,166 @@
         const runBreathingPhase = () => {
             clearAllTimers();
             
-            const phase = currentExercise.phases[breathingPhase];
-            let timeLeft = phase.duration;
+            // Registrar o callback no relógio mestre
+            masterClock.subscribe(breathingClockCallback);
+            isBreathingExerciseActive = true;
+            masterClock.start();
+        };
+        
+        // Callback para o relógio mestre
+        const breathingClockCallback = (elapsed) => {
+            if (!mainExerciseStartTime) {
+                mainExerciseStartTime = performance.now();
+            }
             
+            if (!mainStartTime) {
+                mainStartTime = performance.now();
+            }
+            
+            const timestamp = performance.now();
+            const elapsedTime = timestamp - mainStartTime;
+            const totalCycleDuration = currentExercise.phases.reduce((sum, phase) => sum + (phase.duration * 1000), 0);
+            const timeInCycle = elapsedTime % totalCycleDuration;
+            
+            // Determinar a fase atual com base no tempo
+            let accumulated = 0;
+            let currentPhase = null;
+            let timeRemainingInPhase = 0;
+            
+            for (let i = 0; i < currentExercise.phases.length; i++) {
+                accumulated += currentExercise.phases[i].duration * 1000;
+                if (timeInCycle < accumulated) {
+                    currentPhase = currentExercise.phases[i];
+                    timeRemainingInPhase = accumulated - timeInCycle;
+                    break;
+                }
+            }
+            
+            // Atualizar UI com base na fase atual
+            if (currentPhase) {
+                updateMainBreathingUI(currentPhase, timeRemainingInPhase);
+            }
+        };
+
+        // Loop principal de respiração usando requestAnimationFrame
+        function mainBreathingLoop(timestamp) {
+            if (!mainExerciseStartTime) {
+                mainExerciseStartTime = timestamp;
+            }
+            
+            if (!mainStartTime) {
+                mainStartTime = timestamp;
+            }
+            
+            const elapsed = timestamp - mainStartTime;
+            const totalCycleDuration = currentExercise.phases.reduce((sum, phase) => sum + (phase.duration * 1000), 0);
+            const timeInCycle = elapsed % totalCycleDuration;
+            
+            // Determinar a fase atual com base no tempo
+            let accumulated = 0;
+            let currentPhase = null;
+            let timeRemainingInPhase = 0;
+            
+            for (let i = 0; i < currentExercise.phases.length; i++) {
+                accumulated += currentExercise.phases[i].duration * 1000;
+                if (timeInCycle < accumulated) {
+                    currentPhase = currentExercise.phases[i];
+                    timeRemainingInPhase = accumulated - timeInCycle;
+                    break;
+                }
+            }
+            
+            // Atualizar UI com base na fase atual
+            if (currentPhase) {
+                updateMainBreathingUI(currentPhase, timeRemainingInPhase);
+            }
+            
+            // Continuar o loop
+            mainAnimationFrameId = requestAnimationFrame(mainBreathingLoop);
+        }
+
+        // Atualizar interface do usuário com base na fase atual
+        function updateMainBreathingUI(phase, timeRemaining) {
+            // Atualizar texto de instrução
             document.getElementById('instructionText').textContent = phase.instruction;
-            document.getElementById('timerText').textContent = timeLeft;
             document.getElementById('breathingText').textContent = phase.name;
+            
+            // Calcular progresso da fase (0 a 1)
+            const phaseDuration = phase.duration * 1000;
+            const progress = 1 - (timeRemaining / phaseDuration);
+            
+            // Atualizar timer
+            const secondsLeft = Math.ceil(timeRemaining / 1000);
+            document.getElementById('timerText').textContent = secondsLeft;
             
             const circle = document.getElementById('breathingCircle');
             circle.className = 'w-32 h-32 mx-auto bg-gradient-to-br from-calm-mint to-calm-lavender rounded-full flex items-center justify-center text-calm-bg font-bold text-lg transition-transform duration-1000 shadow-lg';
             
-            // Reproduz a instrução da fase atual
-            if (audioEnabled) {
-                speakInstruction(phase.instruction);
-                
-                // Tons diferentes para cada fase
-                switch(phase.name) {
-                    case 'Inspire':
-                        playTone(523.25, 0.2); // Dó (C5) para inspiração
-                        circle.classList.add('animate-breathe-in');
-                        break;
-                    case 'Expire':
-                        playTone(261.63, 0.2); // Dó (C4) para expiração
-                        circle.classList.add('animate-breathe-out');
-                        break;
-                    case 'Segure':
-                        playTone(392.00, 0.2); // Sol (G4) para segurar
-                        circle.classList.add('animate-pulse-gentle');
-                        break;
-                    case 'Pause':
-                        playTone(329.63, 0.2); // Mi (E4) para pausa
-                        circle.classList.add('animate-pulse-gentle');
-                        break;
-                }
-            } else {
-                if (phase.name === 'Inspire') {
-                    circle.classList.add('animate-breathe-in');
-                } else if (phase.name === 'Expire') {
-                    circle.classList.add('animate-breathe-out');
-                } else {
+            // Aplicar transformações visuais com base na fase
+            circle.style.transition = 'transform 0.1s ease-out';
+            
+            switch(phase.name) {
+                case 'Inspire':
+                    // Escalar para cima durante inspiração
+                    const inspireScale = 1 + (progress * 0.3); // Escala de 1 a 1.3
+                    circle.style.transform = `scale(${inspireScale})`;
+                    circle.classList.remove('animate-breathe-in', 'animate-breathe-out', 'animate-pulse-gentle');
+                    break;
+                    
+                case 'Expire':
+                    // Escalar para baixo durante expiração
+                    const expireScale = 1.3 - (progress * 0.3); // Escala de 1.3 a 1
+                    circle.style.transform = `scale(${expireScale})`;
+                    circle.classList.remove('animate-breathe-in', 'animate-breathe-out', 'animate-pulse-gentle');
+                    break;
+                    
+                case 'Segure':
+                case 'Pause':
+                    // Manter tamanho constante e pulsar suavemente
+                    circle.style.transform = 'scale(1.15)';
+                    circle.classList.remove('animate-breathe-in', 'animate-breathe-out', 'animate-pulse-gentle');
                     circle.classList.add('animate-pulse-gentle');
-                }
+                    break;
             }
             
-            breathingTimer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timerText').textContent = timeLeft;
-                
-                // Toque suave a cada segundo para marcar o tempo
-                if (audioEnabled && timeLeft > 0) {
-                    playTone(196.00, 0.1); // Sol (G3) suave para marcar o tempo
-                }
-                
-                if (timeLeft <= 0) {
-                    if (audioEnabled) {
-                        playTone(440, 0.2); // Lá (A4) para marcar o fim da fase
+            // Sincronizar áudio se necessário (chamado apenas quando a fase muda)
+            if (mainPreviousPhase !== phase.name) {
+                if (audioEnabled) {
+                    speakInstruction(phase.instruction);
+                    
+                    // Tons diferentes para cada fase
+                    switch(phase.name) {
+                        case 'Inspire':
+                            playTone(523.25, 0.2); // Dó (C5) para inspiração
+                            break;
+                        case 'Expire':
+                            playTone(261.63, 0.2); // Dó (C4) para expiração
+                            break;
+                        case 'Segure':
+                            playTone(392.00, 0.2); // Sol (G4) para segurar
+                            break;
+                        case 'Pause':
+                            playTone(329.63, 0.2); // Mi (E4) para pausa
+                            break;
                     }
-                    clearInterval(breathingTimer);
-                    breathingTimer = null;
-                    nextBreathingPhase();
                 }
-            }, 1000);
-        };
+                mainPreviousPhase = phase.name;
+            }
+        }
 
         const nextBreathingPhase = () => {
-            clearAllTimers();
+            // Esta função não é mais necessária com o novo sistema de tempo único
+            // O loop principal já cuida da transição entre fases
             
-            breathingPhase++;
+            // Verificar se completamos todos os ciclos
+            const elapsed = Date.now() - mainExerciseStartTime;
+            const cycleDuration = currentExercise.phases.reduce((sum, phase) => sum + phase.duration, 0) * 1000;
+            const currentCycle = Math.floor(elapsed / cycleDuration) + 1;
             
-            if (breathingPhase >= currentExercise.phases.length) {
-                breathingPhase = 0;
-                breathingCycle++;
-                
-                if (breathingCycle > currentExercise.totalCycles) {
-                    completeBreathingExercise();
-                    return;
-                }
+            if (currentCycle > currentExercise.totalCycles) {
+                completeBreathingExercise();
+                return;
             }
-            
-            setTimeout(() => runBreathingPhase(), 500);
         };
 
         const completeBreathingExercise = async () => {
@@ -1231,6 +1699,7 @@
             document.getElementById('breathingModal').classList.add('hidden');
             const circle = document.getElementById('breathingCircle');
             circle.classList.remove('animate-breathe-in', 'animate-breathe-out', 'animate-pulse-gentle');
+            circle.style.transform = 'scale(1)';
         };
 
         const saveDiaryEntry = async () => {
