@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calm Mind - Seu espaço seguro para saúde mental</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Calm Mind Color Palette */
+        :root {
+            --calm-blue: #7c9cbf;
+            --calm-blue-dark: #5a7a9e;
+            --calm-green: #a8c5a8;
+            --calm-lavender: #b8a9d4;
+            --calm-sand: #e8dcc4;
+            --calm-mint: #b8d8d8;
+            --calm-bg: #2a3d4a;
+            --calm-card: #3a5260;
+        }
+        
+        .bg-calm-blue { background-color: var(--calm-blue); }
+        .bg-calm-blue-dark { background-color: var(--calm-blue-dark); }
+        .bg-calm-green { background-color: var(--calm-green); }
+        .bg-calm-lavender { background-color: var(--calm-lavender); }
+        .bg-calm-sand { background-color: var(--calm-sand); }
+        .bg-calm-mint { background-color: var(--calm-mint); }
+        .bg-calm-bg { background-color: var(--calm-bg); }
+        .bg-calm-card { background-color: var(--calm-card); }
+        
+        .text-calm-blue { color: var(--calm-blue); }
+        .text-calm-blue-dark { color: var(--calm-blue-dark); }
+        .text-calm-green { color: var(--calm-green); }
+        .text-calm-lavender { color: var(--calm-lavender); }
+        .text-calm-sand { color: var(--calm-sand); }
+        .text-calm-mint { color: var(--calm-mint); }
+        .text-calm-bg { color: var(--calm-bg); }
+        
+        .border-calm-blue { border-color: var(--calm-blue); }
+        .border-calm-green { border-color: var(--calm-green); }
+        .border-calm-lavender { border-color: var(--calm-lavender); }
+        .border-calm-sand { border-color: var(--calm-sand); }
+        .border-calm-mint { border-color: var(--calm-mint); }
+        
+        .hover\:bg-calm-blue-dark:hover { background-color: var(--calm-blue-dark); }
+        .hover\:bg-calm-green:hover { background-color: var(--calm-green); }
+        .hover\:text-calm-mint:hover { color: var(--calm-mint); }
+        .hover\:text-calm-green:hover { color: var(--calm-green); }
+        .hover\:bg-calm-blue:hover { background-color: var(--calm-blue); }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 1s ease-out forwards;
+        }
+        
+        .animate-pulse-soft {
+            animation: pulse-soft 3s ease-in-out infinite;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #2a3d4a 0%, #1a2a35 100%);
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(124, 156, 191, 0.2);
+        }
+        
+        .testimonial-card {
+            backdrop-filter: blur(10px);
+            background: rgba(58, 82, 96, 0.6);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #b8d8d8, #7c9cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="gradient-bg text-white">
+    <!-- Header/Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-calm-card/80 backdrop-blur-md border-b border-calm-blue/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="text-3xl">🧘‍♀️</span>
+                    <span class="text-2xl font-bold text-calm-blue">Calm Mind</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-300 hover:text-calm-mint transition-colors">Recursos</a>
+                    <a href="#community" class="text-gray-300 hover:text-calm-mint transition-colors">Comunidade</a>
+                    <a href="#testimonials" class="text-gray-300 hover:text-calm-mint transition-colors">Depoimentos</a>
+                    <a href="#pricing" class="text-gray-300 hover:text-calm-mint transition-colors">Planos</a>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="showLogin()" class="text-calm-blue hover:text-calm-mint transition-colors font-medium">
+                        Entrar
+                    </button>
+                    <button onclick="showSignup()" class="bg-calm-blue hover:bg-calm-blue-dark text-white px-6 py-2 rounded-full transition-all shadow-lg hover:shadow-calm-blue/50">
+                        Começar Grátis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8 animate-fadeInUp">
+                    <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+                        Seu espaço seguro para 
+                        <span class="text-calm-mint">saúde mental</span>
+                    </h1>
+                    <p class="text-xl text-gray-300">
+                        Controle sua ansiedade, melhore seu sono e encontre paz interior com ferramentas comprovadas e uma comunidade acolhedora ao seu lado.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="showSignup()" class="bg-calm-green hover:bg-calm-green/80 text-calm-bg px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-2xl hover:shadow-calm-green/50 transform hover:scale-105">
+                            🌸 Começar Jornada Grátis
+                        </button>
+                        <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})" class="border-2 border-calm-blue text-calm-blue hover:bg-calm-blue hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all">
+                            ▶️ Ver Como Funciona
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-8 pt-4">
+                        <div class="flex -space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-calm-lavender flex items-center justify-center border-2 border-calm-bg">👤</div>
+                            <div class="w-10 h-10 rounded-full bg-calm-mint flex items-center justify-center border-2 border-calm-bg">👤</div>
+                            <div class="w-10 h-10 rounded-full bg-calm-sand flex items-center justify-center border-2 border-calm-bg">👤</div>
+                            <div class="w-10 h-10 rounded-full bg-calm-green flex items-center justify-center border-2 border-calm-bg">👤</div>
+                        </div>
+                        <div class="text-sm">
+                            <div class="flex items-center gap-1 text-yellow-400">
+                                ⭐⭐⭐⭐⭐
+                            </div>
+                            <p class="text-gray-400">+12.000 pessoas transformando suas vidas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative animate-float">
+                    <div class="absolute inset-0 bg-calm-blue/20 rounded-full blur-3xl"></div>
+                    <div class="relative bg-calm-card rounded-3xl p-8 shadow-2xl border border-calm-blue/30">
+                        <div class="text-center space-y-6">
+                            <div class="text-6xl animate-pulse-soft">🌙</div>
+                            <h3 class="text-2xl font-semibold">Monitore seu bem-estar</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="bg-calm-bg/50 p-4 rounded-xl">
+                                    <div class="text-3xl mb-2">💭</div>
+                                    <div class="text-sm text-gray-400">Humor</div>
+                                </div>
+                                <div class="bg-calm-bg/50 p-4 rounded-xl">
+                                    <div class="text-3xl mb-2">😴</div>
+                                    <div class="text-sm text-gray-400">Sono</div>
+                                </div>
+                                <div class="bg-calm-bg/50 p-4 rounded-xl">
+                                    <div class="text-3xl mb-2">🧘</div>
+                                    <div class="text-sm text-gray-400">Calma</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-calm-card/30 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="stat-number">12k+</div>
+                    <p class="text-gray-400 mt-2">Usuários ativos</p>
+                </div>
+                <div>
+                    <div class="stat-number">350+</div>
+                    <p class="text-gray-400 mt-2">Psicólogos parceiros</p>
+                </div>
+                <div>
+                    <div class="stat-number">89%</div>
+                    <p class="text-gray-400 mt-2">Melhora relatada</p>
+                </div>
+                <div>
+                    <div class="stat-number">24/7</div>
+                    <p class="text-gray-400 mt-2">Suporte disponível</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Ferramentas que <span class="text-calm-lavender">realmente funcionam</span>
+                </h2>
+                <p class="text-xl text-gray-400">Baseadas em ciência, aprovadas por especialistas, testadas por milhares</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-blue/20">
+                    <div class="text-5xl mb-4">💨</div>
+                    <h3 class="text-2xl font-semibold mb-3">Exercícios de Respiração</h3>
+                    <p class="text-gray-400 mb-4">Técnicas guiadas como 4-7-8 e Box Breathing para acalmar a mente em momentos de crise. Com áudio guiado e animações relaxantes.</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center gap-2">✓ Modo SOS para crises</li>
+                        <li class="flex items-center gap-2">✓ Guia de voz opcional</li>
+                        <li class="flex items-center gap-2">✓ Funciona offline</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-green/20">
+                    <div class="text-5xl mb-4">🌙</div>
+                    <h3 class="text-2xl font-semibold mb-3">Rastreamento de Sono</h3>
+                    <p class="text-gray-400 mb-4">Monitore seus ciclos de sono, qualidade e padrões. Receba insights personalizados e lembretes inteligentes.</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center gap-2">✓ Análise de regularidade</li>
+                        <li class="flex items-center gap-2">✓ Lembretes de sono</li>
+                        <li class="flex items-center gap-2">✓ Relatórios semanais</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-lavender/20">
+                    <div class="text-5xl mb-4">✍️</div>
+                    <h3 class="text-2xl font-semibold mb-3">Diário Emocional</h3>
+                    <p class="text-gray-400 mb-4">Registre seus pensamentos e emoções de forma privada e segura. Identifique padrões e gatilhos.</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center gap-2">✓ 100% privado</li>
+                        <li class="flex items-center gap-2">✓ Análise de humor</li>
+                        <li class="flex items-center gap-2">✓ Tags personalizadas</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-mint/20">
+                    <div class="text-5xl mb-4">🆘</div>
+                    <h3 class="text-2xl font-semibold mb-3">Modo SOS</h3>
+                    <p class="text-gray-400 mb-4">Em momentos críticos, acesse técnicas de ancoragem, respiração guiada e contatos de emergência instantaneamente.</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center gap-2">✓ Técnica 5-4-3-2-1</li>
+                        <li class="flex items-center gap-2">✓ Contatos rápidos</li>
+                        <li class="flex items-center gap-2">✓ CVV integrado</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-sand/20">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-2xl font-semibold mb-3">Dashboard Inteligente</h3>
+                    <p class="text-gray-400 mb-4">Visualize seu progresso com gráficos intuitivos e insights personalizados baseados nos seus dados.</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center gap-2">✓ Métricas visuais</li>
+                        <li class="flex items-center gap-2">✓ Tendências mensais</li>
+                        <li class="flex items-center gap-2">✓ Conquistas desbloqueáveis</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-blue/20">
+                    <div class="text-5xl mb-4">💬</div>
+                    <h3 class="text-2xl font-semibold mb-3">PWA Offline</h3>
+                    <p class="text-gray-400 mb-4">Funciona completamente offline. Instale como app no celular e acesse sempre que precisar, com ou sem internet.</p>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center gap-2">✓ Instalável</li>
+                        <li class="flex items-center gap-2">✓ Sem anúncios</li>
+                        <li class="flex items-center gap-2">✓ Dados locais seguros</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="py-20 px-4 bg-calm-card/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Você não está <span class="text-calm-green">sozinho(a)</span>
+                </h2>
+                <p class="text-xl text-gray-400">Uma comunidade de mais de 12 mil pessoas e 350+ psicólogos prontos para acolher</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-calm-green/20 p-3 rounded-full">
+                            <span class="text-2xl">🤝</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2">Comunidade Acolhedora</h3>
+                            <p class="text-gray-400">Conecte-se com pessoas que entendem o que você está passando. Compartilhe experiências, conquistas e desafios em um ambiente seguro e livre de julgamentos.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="bg-calm-lavender/20 p-3 rounded-full">
+                            <span class="text-2xl">👨‍⚕️</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2">Psicólogos Parceiros</h3>
+                            <p class="text-gray-400">Acesso a uma rede de 350+ profissionais especializados em ansiedade, depressão e saúde mental. Agende consultas com valores acessíveis.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="bg-calm-mint/20 p-3 rounded-full">
+                            <span class="text-2xl">🎯</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2">Grupos de Apoio</h3>
+                            <p class="text-gray-400">Participe de grupos temáticos: ansiedade no trabalho, insônia, relacionamentos, autoestima e muito mais. Sessões semanais moderadas por profissionais.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="bg-calm-blue/20 p-3 rounded-full">
+                            <span class="text-2xl">🔒</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-2">Privacidade Total</h3>
+                            <p class="text-gray-400">Seus dados são 100% privados e criptografados. Você decide o que e quando compartilhar. Anonimato garantido na comunidade.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute inset-0 bg-calm-lavender/10 rounded-3xl blur-3xl"></div>
+                    <div class="relative bg-calm-card rounded-3xl p-8 border border-calm-lavender/30">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 bg-calm-bg/50 p-4 rounded-xl">
+                                <div class="w-12 h-12 bg-calm-green rounded-full flex items-center justify-center">👤</div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Maria Silva</p>
+                                    <p class="text-sm text-gray-400">Compartilhou uma vitória</p>
+                                </div>
+                                <span class="text-xs text-gray-500">2h</span>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-calm-bg/50 p-4 rounded-xl">
+                                <div class="w-12 h-12 bg-calm-lavender rounded-full flex items-center justify-center">👨‍⚕️</div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Dr. João Santos</p>
+                                    <p class="text-sm text-gray-400">Respondeu sua dúvida</p>
+                                </div>
+                                <span class="text-xs text-gray-500">4h</span>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-calm-bg/50 p-4 rounded-xl">
+                                <div class="w-12 h-12 bg-calm-mint rounded-full flex items-center justify-center">👤</div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Grupo: Ansiedade Social</p>
+                                    <p class="text-sm text-gray-400">Nova sessão amanhã às 19h</p>
+                                </div>
+                                <span class="text-xs text-gray-500">6h</span>
+                            </div>
+
+                            <div class="text-center pt-4">
+                                <button onclick="showSignup()" class="text-calm-mint hover:text-calm-green transition-colors font-medium">
+                                    Ver mais da comunidade →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Histórias que <span class="text-calm-sand">inspiram</span>
+                </h2>
+                <p class="text-xl text-gray-400">Veja como o Calm Mind tem transformado vidas</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="testimonial-card rounded-2xl p-6 border border-calm-blue/20">
+                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                    <p class="text-gray-300 mb-4">"Sofria com crises de ansiedade há anos. O Calm Mind me ensinou técnicas que realmente funcionam. O modo SOS já me salvou várias vezes."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-calm-lavender rounded-full flex items-center justify-center">A</div>
+                        <div>
+                            <p class="font-medium">Ana Paula</p>
+                            <p class="text-sm text-gray-400">São Paulo, SP</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card rounded-2xl p-6 border border-calm-green/20">
+                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                    <p class="text-gray-300 mb-4">"Melhorei minha qualidade de sono em 80%. O rastreamento me ajudou a identificar padrões que eu nem sabia que existiam. Indispensável!"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-calm-mint rounded-full flex items-center justify-center">R</div>
+                        <div>
+                            <p class="font-medium">Ricardo Almeida</p>
+                            <p class="text-sm text-gray-400">Rio de Janeiro, RJ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card rounded-2xl p-6 border border-calm-sand/20">
+                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                    <p class="text-gray-300 mb-4">"A comunidade é incrível! Encontrei pessoas que me entenderam como ninguém. Não me sinto mais sozinha nessa jornada."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-calm-green rounded-full flex items-center justify-center">C</div>
+                        <div>
+                            <p class="font-medium">Carla Mendes</p>
+                            <p class="text-sm text-gray-400">Belo Horizonte, MG</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 px-4 bg-calm-card/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Planos para sua <span class="text-calm-blue">jornada</span>
+                </h2>
+                <p class="text-xl text-gray-400">Comece grátis, evolua quando quiser</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-calm-card rounded-2xl p-8 border border-calm-blue/20">
+                    <h3 class="text-2xl font-bold mb-2">Essencial</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">Grátis</span>
+                        <span class="text-gray-400">/sempre</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2 text-gray-300">✓ Exercícios de respiração</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Rastreamento de humor</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Diário emocional</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Modo SOS</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Funciona offline</li>
+                    </ul>
+                    <button onclick="showSignup()" class="w-full bg-calm-bg hover:bg-calm-bg/70 text-white py-3 rounded-lg transition-all">
+                        Começar Grátis
+                    </button>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="bg-gradient-to-br from-calm-blue to-calm-lavender rounded-2xl p-8 transform scale-105 shadow-2xl relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-calm-green text-calm-bg px-4 py-1 rounded-full text-sm font-semibold">
+                        Mais Popular
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Premium</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">R$ 29,90</span>
+                        <span class="text-gray-200">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2 text-white">✓ Tudo do Essencial</li>
+                        <li class="flex items-center gap-2 text-white">✓ Análises avançadas</li>
+                        <li class="flex items-center gap-2 text-white">✓ Rastreamento de sono</li>
+                        <li class="flex items-center gap-2 text-white">✓ Relatórios personalizados</li>
+                        <li class="flex items-center gap-2 text-white">✓ Acesso aos grupos</li>
+                        <li class="flex items-center gap-2 text-white">✓ 2 consultas/mês com desconto</li>
+                    </ul>
+                    <button onclick="showSignup()" class="w-full bg-white text-calm-blue hover:bg-gray-100 py-3 rounded-lg font-semibold transition-all">
+                        Começar Agora
+                    </button>
+                </div>
+
+                <!-- Family Plan -->
+                <div class="bg-calm-card rounded-2xl p-8 border border-calm-green/20">
+                    <h3 class="text-2xl font-bold mb-2">Família</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">R$ 79,90</span>
+                        <span class="text-gray-400">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-2 text-gray-300">✓ Tudo do Premium</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Até 5 perfis</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Dashboard familiar</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Consultas ilimitadas</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Suporte prioritário</li>
+                        <li class="flex items-center gap-2 text-gray-300">✓ Acompanhamento semanal</li>
+                    </ul>
+                    <button onclick="showSignup()" class="w-full bg-calm-green hover:bg-calm-green/80 text-calm-bg py-3 rounded-lg font-semibold transition-all">
+                        Proteger Família
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-center text-gray-400 mt-8">Todos os planos incluem 7 dias de teste grátis. Cancele quando quiser.</p>
+        </div>
+    </section>
+
+    <!-- Demo Video Section -->
+    <section id="demo-video" class="py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    Veja como é <span class="text-calm-mint">simples</span>
+                </h2>
+                <p class="text-xl text-gray-400">2 minutos para entender como transformar sua saúde mental</p>
+            </div>
+            
+            <div class="relative bg-calm-card rounded-3xl overflow-hidden shadow-2xl border border-calm-blue/30">
+                <div class="aspect-video flex items-center justify-center bg-calm-bg">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4 animate-pulse-soft">▶️</div>
+                        <p class="text-gray-400">Vídeo demonstrativo em breve</p>
+                        <button onclick="showSignup()" class="mt-4 bg-calm-blue hover:bg-calm-blue-dark text-white px-6 py-3 rounded-lg transition-all">
+                            Ou comece agora mesmo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 bg-gradient-to-br from-calm-blue/20 to-calm-lavender/20">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                Pronto para sua <span class="text-calm-green">transformação?</span>
+            </h2>
+            <p class="text-xl text-gray-300 mb-8">
+                Junte-se a 12.000+ pessoas que já estão cuidando da saúde mental de forma inteligente e acolhedora
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="showSignup()" class="bg-calm-green hover:bg-calm-green/80 text-calm-bg px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-2xl hover:shadow-calm-green/50 transform hover:scale-105">
+                    🌸 Começar Jornada Grátis
+                </button>
+                <button onclick="showLogin()" class="border-2 border-calm-blue text-calm-blue hover:bg-calm-blue hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all">
+                    Já tenho conta
+                </button>
+            </div>
+            <p class="text-sm text-gray-400 mt-6">
+                ✓ Sem cartão de crédito  ✓ Cancelamento fácil  ✓ Dados 100% seguros
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-calm-bg py-12 px-4 border-t border-calm-blue/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="text-2xl">🧘‍♀️</span>
+                        <span class="text-xl font-bold text-calm-blue">Calm Mind</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Seu espaço seguro para saúde mental e bem-estar.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Recursos</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Exercícios</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Rastreamento</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Comunidade</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Psicólogos</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Empresa</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Sobre</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Carreiras</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Contato</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Suporte</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Central de Ajuda</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Emergências</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Privacidade</a></li>
+                        <li><a href="#" class="hover:text-calm-mint transition-colors">Termos</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-calm-blue/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-400 text-sm">© 2025 Calm Mind. Todos os direitos reservados.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">Instagram</a>
+                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">Facebook</a>
+                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">Twitter</a>
+                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-calm-card rounded-2xl p-8 max-w-md w-full border border-calm-blue/30 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Bem-vindo(a) de volta</h3>
+                <button onclick="closeModal('loginModal')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email</label>
+                    <input type="email" class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-blue focus:outline-none transition-colors" placeholder="seu@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Senha</label>
+                    <input type="password" class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-blue focus:outline-none transition-colors" placeholder="••••••••">
+                </div>
+                
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" class="rounded">
+                        <span class="text-gray-400">Lembrar de mim</span>
+                    </label>
+                    <a href="#" class="text-calm-blue hover:text-calm-mint transition-colors">Esqueci a senha</a>
+                </div>
+                
+                <button type="submit" class="w-full bg-calm-blue hover:bg-calm-blue-dark text-white py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-calm-blue/50">
+                    Entrar
+                </button>
+                
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-calm-blue/20"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-calm-card text-gray-400">ou continue com</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" class="bg-calm-bg hover:bg-calm-bg/70 border border-calm-blue/30 py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <span>G</span> Google
+                    </button>
+                    <button type="button" class="bg-calm-bg hover:bg-calm-bg/70 border border-calm-blue/30 py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <span>f</span> Facebook
+                    </button>
+                </div>
+                
+                <p class="text-center text-sm text-gray-400 mt-6">
+                    Não tem conta? <button type="button" onclick="closeModal('loginModal'); showSignup()" class="text-calm-blue hover:text-calm-mint transition-colors font-medium">Criar conta grátis</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-calm-card rounded-2xl p-8 max-w-md w-full border border-calm-green/30 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Comece sua jornada</h3>
+                <button onclick="closeModal('signupModal')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Nome completo</label>
+                    <input type="text" class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-green focus:outline-none transition-colors" placeholder="Seu nome">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Email</label>
+                    <input type="email" class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-green focus:outline-none transition-colors" placeholder="seu@email.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Senha</label>
+                    <input type="password" class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-green focus:outline-none transition-colors" placeholder="Mínimo 8 caracteres">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Como você se sente hoje?</label>
+                    <div class="flex justify-around">
+                        <button type="button" class="text-4xl hover:scale-110 transition-transform">😰</button>
+                        <button type="button" class="text-4xl hover:scale-110 transition-transform">😞</button>
+                        <button type="button" class="text-4xl hover:scale-110 transition-transform">😐</button>
+                        <button type="button" class="text-4xl hover:scale-110 transition-transform">😊</button>
+                        <button type="button" class="text-4xl hover:scale-110 transition-transform">😄</button>
+                    </div>
+                </div>
+                
+                <label class="flex items-start gap-2 text-sm text-gray-400">
+                    <input type="checkbox" class="mt-1 rounded" required>
+                    <span>Aceito os <a href="#" class="text-calm-blue hover:text-calm-mint">Termos de Uso</a> e <a href="#" class="text-calm-blue hover:text-calm-mint">Política de Privacidade</a></span>
+                </label>
+                
+                <button type="submit" class="w-full bg-calm-green hover:bg-calm-green/80 text-calm-bg py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-calm-green/50">
+                    Criar Conta Grátis
+                </button>
+                
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-calm-blue/20"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-calm-card text-gray-400">ou cadastre-se com</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" class="bg-calm-bg hover:bg-calm-bg/70 border border-calm-blue/30 py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <span>G</span> Google
+                    </button>
+                    <button type="button" class="bg-calm-bg hover:bg-calm-bg/70 border border-calm-blue/30 py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <span>f</span> Facebook
+                    </button>
+                </div>
+                
+                <p class="text-center text-sm text-gray-400 mt-6">
+                    Já tem conta? <button type="button" onclick="closeModal('signupModal'); showLogin()" class="text-calm-blue hover:text-calm-mint transition-colors font-medium">Fazer login</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+        
+        function showSignup() {
+            document.getElementById('signupModal').classList.remove('hidden');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+        
+        // Close modals on background click
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'loginModal' || e.target.id === 'signupModal') {
+                closeModal(e.target.id);
+            }
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // Check for SOS shortcut
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('sos') === 'true') {
+            window.location.href = '/index.html';
+        }
+    </script>
+</body>
+</html>
