@@ -131,6 +131,12 @@ function isNavigationRequest(request) {
 // Estratégia Cache First (para assets estáticos)
 async function cacheFirstStrategy(request, cacheName) {
   try {
+    // ⚠️ Cache API só suporta GET/HEAD - pular para POST/PUT/DELETE
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      console.log('🌐 Fetching from network (method not cacheable):', request.url);
+      return await fetch(request);
+    }
+    
     // Primeiro, tenta buscar no cache
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
@@ -148,8 +154,8 @@ async function cacheFirstStrategy(request, cacheName) {
     console.log('🌐 Fetching from network:', request.url);
     const networkResponse = await fetch(request);
     
-    // Adiciona ao cache se a resposta for válida
-    if (networkResponse.ok) {
+    // Adiciona ao cache se a resposta for válida (apenas GET/HEAD)
+    if (networkResponse.ok && (request.method === 'GET' || request.method === 'HEAD')) {
       cache.put(request, networkResponse.clone());
     }
     
@@ -178,8 +184,8 @@ async function networkFirstStrategy(request, cacheName) {
     console.log('🌐 Network first for:', request.url);
     const networkResponse = await fetch(request);
     
-    // Se sucesso, atualiza cache
-    if (networkResponse.ok) {
+    // Se sucesso, atualiza cache (apenas para GET/HEAD)
+    if (networkResponse.ok && (request.method === 'GET' || request.method === 'HEAD')) {
       const cache = await caches.open(cacheName);
       cache.put(request, networkResponse.clone());
     }
@@ -188,6 +194,15 @@ async function networkFirstStrategy(request, cacheName) {
     
   } catch (error) {
     console.log('🌐 Network failed, trying cache:', request.url);
+    
+    // ⚠️ Pular cache para métodos que não são GET/HEAD
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      console.log('❌ Cannot cache non-GET requests');
+      return new Response('Dados não disponíveis offline', {
+        status: 503,
+        statusText: 'Service Unavailable'
+      });
+    }
     
     // Se rede falhar, tenta cache
     const cache = await caches.open(cacheName);
