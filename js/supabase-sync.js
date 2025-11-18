@@ -6,7 +6,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 let supabaseClient = null;
 let syncInterval = null;
-const SYNC_INTERVAL_MS = 30 * 60 * 1000; // 30 minutos
+let lastSyncAttempt = 0;
+let isSyncing = false;
+let pendingSyncChanges = false;
+
+// Aumentar intervalo de sincronização para 2 horas para melhor usabilidade
+const SYNC_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 horas
+const MIN_SYNC_INTERVAL_MS = 5 * 60 * 1000; // Mínimo 5 minutos entre sincronizações automáticas
+const DEBOUNCE_SYNC_MS = 10 * 1000; // Aguardar 10 segundos após última mudança antes de sincronizar
 
 // Inicializar cliente Supabase
 function initSupabase() {
@@ -63,7 +70,45 @@ function getCurrentUserId() {
     return session?.user?.id;
 }
 
-// Sincronizar dados do IndexedDB com Supabase
+// Variáveis globais para debounce de sincronização automática
+let debounceTimeoutId = null;
+let lastAutomaticSyncTime = 0;
+
+// Sincronizar com debounce para evitar múltiplas sincronizações frequentes
+function scheduleDebouncedSync() {
+    // Limpar timeout anterior
+    if (debounceTimeoutId) {
+        clearTimeout(debounceTimeoutId);
+    }
+    
+    // Marcar que há mudanças pendentes
+    pendingSyncChanges = true;
+    
+    // Verificar se tempo mínimo passou desde última sincronização
+    const now = Date.now();
+    const timeSinceLastSync = now - lastAutomaticSyncTime;
+    
+    // Se passou tempo suficiente, sincronizar logo
+    if (timeSinceLastSync >= MIN_SYNC_INTERVAL_MS) {
+        debounceTimeoutId = setTimeout(() => {
+            lastAutomaticSyncTime = Date.now();
+            syncToSupabase().catch(err => {
+                console.log('Sincronização automática ao salvar falhou:', err);
+            });
+        }, DEBOUNCE_SYNC_MS);
+    } else {
+        // Caso contrário, aguardar o tempo restante
+        const timeToWait = MIN_SYNC_INTERVAL_MS - timeSinceLastSync + DEBOUNCE_SYNC_MS;
+        debounceTimeoutId = setTimeout(() => {
+            lastAutomaticSyncTime = Date.now();
+            syncToSupabase().catch(err => {
+                console.log('Sincronização automática ao salvar falhou:', err);
+            });
+        }, timeToWait);
+    }
+}
+
+// Sincronizar dados do IndexedDB com Supabase com controle de frequência
 async function syncToSupabase() {
     const userId = getCurrentUserId();
     if (!userId) {
@@ -78,32 +123,69 @@ async function syncToSupabase() {
         return;
     }
 
+    // Evitar sincronizações muito frequentes (mínimo 5 minutos)
+    const now = Date.now();
+    if (now - lastSyncAttempt < MIN_SYNC_INTERVAL_MS) {
+        console.log('Sincronização muito frequente, aguardando...');
+        pendingSyncChanges = true;
+        return;
+    }
+
+    // Se já está sincronizando, marcar como pendente e retornar
+    if (isSyncing) {
+        console.log('Sincronização já em andamento, mudanças serão sincronizadas em breve');
+        pendingSyncChanges = true;
+        return;
+    }
+
+    isSyncing = true;
+    lastSyncAttempt = now;
+    pendingSyncChanges = false;
+
     console.log('Iniciando sincronização com Supabase...');
     updateSyncStatusUI('syncing', 'Sincronizando dados...');
 
     try {
-        // Sincronizar registros de humor
-        await syncMoodEntries(userId);
+        // Executar sincronizações em background usando Promise.all para paralelizar
+        // mas sem bloquear a UI com await sequencial
+        await Promise.all([
+            syncMoodEntries(userId).catch(err => {
+                console.error('Erro ao sincronizar registros de humor:', err);
+                return null;
+            }),
+            syncDiaryEntries(userId).catch(err => {
+                console.error('Erro ao sincronizar entradas do diário:', err);
+                return null;
+            }),
+            syncBreathingSessions(userId).catch(err => {
+                console.error('Erro ao sincronizar sessões de respiração:', err);
+                return null;
+            }),
+            syncSleepEntries(userId).catch(err => {
+                console.error('Erro ao sincronizar registros de sono:', err);
+                return null;
+            })
+        ]);
         
-        // Sincronizar entradas do diário
-        await syncDiaryEntries(userId);
-        
-        // Sincronizar sessões de respiração
-        await syncBreathingSessions(userId);
-        
-        // Sincronizar registros de sono
-        await syncSleepEntries(userId);
-        
-        console.log('Sincronização concluída com sucesso!');
-        showToast('Dados sincronizados com sucesso! ☁️');
-        updateSyncStatusUI('synced', 'Dados sincronizados', new Date());
-        
-        // Atualizar timestamp da última sincronização
+        // Atualizar timestamp da última sincronização bem-sucedida
         localStorage.setItem('last_sync', new Date().toISOString());
+        updateSyncStatusUI('synced', 'Sincronizado', new Date());
+        
+        // Se houve mudanças pendentes e o tempo permitir, sincronizar novamente
+        if (pendingSyncChanges) {
+            setTimeout(() => {
+                syncToSupabase().catch(err => console.error('Sincronização agendada falhou:', err));
+            }, 30 * 1000);
+        }
+        
+        // Trazer dados atualizados do Supabase após sincronizar local
+        syncFromSupabase().catch(err => console.error('Download de dados falhou:', err));
+        
     } catch (error) {
-        console.error('Erro na sincronização:', error);
-        showToast('Erro ao sincronizar dados', true);
+        console.error('Erro crítico na sincronização:', error);
         updateSyncStatusUI('error', 'Erro na sincronização');
+    } finally {
+        isSyncing = false;
     }
 }
 
@@ -111,15 +193,12 @@ async function syncToSupabase() {
 async function syncMoodEntries(userId) {
     const localEntries = await getAllFromStore('moodEntries');
     
-    // Filtrar apenas entradas não sincronizadas
-    const unsyncedEntries = localEntries.filter(entry => !entry.synced);
+    // Filtrar apenas entradas não sincronizadas com ID válido
+    const unsyncedEntries = localEntries.filter(entry => !entry.synced && entry.id);
     
     if (unsyncedEntries.length === 0) {
-        console.log('Nenhum registro de humor para sincronizar');
         return;
     }
-
-    console.log(`Sincronizando ${unsyncedEntries.length} registros de humor...`);
 
     for (const entry of unsyncedEntries) {
         try {
@@ -130,14 +209,17 @@ async function syncMoodEntries(userId) {
                     local_id: entry.id,
                     date: entry.date,
                     mood: entry.mood,
-                    anxiety: entry.anxiety,
-                    notes: entry.notes,
-                    timestamp: entry.timestamp
+                    anxiety: entry.anxiety || 0,
+                    notes: entry.notes || '',
+                    timestamp: entry.timestamp || new Date().toISOString()
                 }, {
                     onConflict: 'user_id,local_id'
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Erro Supabase ao sincronizar humor:', error);
+                throw error;
+            }
 
             // Marcar como sincronizado no IndexedDB
             await updateSyncStatus('moodEntries', entry.id);
@@ -150,14 +232,11 @@ async function syncMoodEntries(userId) {
 // Sincronizar entradas do diário
 async function syncDiaryEntries(userId) {
     const localEntries = await getAllFromStore('diaryEntries');
-    const unsyncedEntries = localEntries.filter(entry => !entry.synced);
+    const unsyncedEntries = localEntries.filter(entry => !entry.synced && entry.id);
     
     if (unsyncedEntries.length === 0) {
-        console.log('Nenhuma entrada de diário para sincronizar');
         return;
     }
-
-    console.log(`Sincronizando ${unsyncedEntries.length} entradas de diário...`);
 
     for (const entry of unsyncedEntries) {
         try {
@@ -167,15 +246,18 @@ async function syncDiaryEntries(userId) {
                     user_id: userId,
                     local_id: entry.id,
                     date: entry.date,
-                    title: entry.title,
-                    content: entry.content,
-                    tags: entry.tags,
-                    timestamp: entry.timestamp
+                    title: entry.title || '',
+                    content: entry.content || '',
+                    tags: entry.tags || [],
+                    timestamp: entry.timestamp || new Date().toISOString()
                 }, {
                     onConflict: 'user_id,local_id'
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Erro Supabase ao sincronizar diário:', error);
+                throw error;
+            }
 
             await updateSyncStatus('diaryEntries', entry.id);
         } catch (error) {
@@ -187,14 +269,11 @@ async function syncDiaryEntries(userId) {
 // Sincronizar sessões de respiração
 async function syncBreathingSessions(userId) {
     const localSessions = await getAllFromStore('breathingSessions');
-    const unsyncedSessions = localSessions.filter(session => !session.synced);
+    const unsyncedSessions = localSessions.filter(session => !session.synced && session.id);
     
     if (unsyncedSessions.length === 0) {
-        console.log('Nenhuma sessão de respiração para sincronizar');
         return;
     }
-
-    console.log(`Sincronizando ${unsyncedSessions.length} sessões de respiração...`);
 
     for (const session of unsyncedSessions) {
         try {
@@ -204,15 +283,18 @@ async function syncBreathingSessions(userId) {
                     user_id: userId,
                     local_id: session.id,
                     date: session.date,
-                    exercise: session.exercise,
-                    duration: session.duration,
-                    completed: session.completed,
-                    timestamp: session.timestamp
+                    exercise: session.exercise || 'box breathing',
+                    duration: session.duration || 0,
+                    completed: session.completed || false,
+                    timestamp: session.timestamp || new Date().toISOString()
                 }, {
                     onConflict: 'user_id,local_id'
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Erro Supabase ao sincronizar respiração:', error);
+                throw error;
+            }
 
             await updateSyncStatus('breathingSessions', session.id);
         } catch (error) {
@@ -224,14 +306,11 @@ async function syncBreathingSessions(userId) {
 // Sincronizar registros de sono
 async function syncSleepEntries(userId) {
     const localEntries = await getAllFromStore('sleepEntries');
-    const unsyncedEntries = localEntries.filter(entry => !entry.synced);
+    const unsyncedEntries = localEntries.filter(entry => !entry.synced && entry.id);
     
     if (unsyncedEntries.length === 0) {
-        console.log('Nenhum registro de sono para sincronizar');
         return;
     }
-
-    console.log(`Sincronizando ${unsyncedEntries.length} registros de sono...`);
 
     for (const entry of unsyncedEntries) {
         try {
@@ -241,17 +320,20 @@ async function syncSleepEntries(userId) {
                     user_id: userId,
                     local_id: entry.id,
                     date: entry.date,
-                    sleep_time: entry.sleepTime,
-                    wake_time: entry.wakeTime,
-                    duration: entry.duration,
-                    quality: entry.quality,
-                    notes: entry.notes,
-                    timestamp: entry.timestamp
+                    sleep_time: entry.sleepTime || null,
+                    wake_time: entry.wakeTime || null,
+                    duration: entry.duration || 0,
+                    quality: entry.quality || 3,
+                    notes: entry.notes || '',
+                    timestamp: entry.timestamp || new Date().toISOString()
                 }, {
                     onConflict: 'user_id,local_id'
                 });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Erro Supabase ao sincronizar sono:', error);
+                throw error;
+            }
 
             await updateSyncStatus('sleepEntries', entry.id);
         } catch (error) {
@@ -263,21 +345,46 @@ async function syncSleepEntries(userId) {
 // Atualizar status de sincronização no IndexedDB
 async function updateSyncStatus(storeName, id) {
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction([storeName], 'readwrite');
-        const store = transaction.objectStore(storeName);
-        const request = store.get(id);
+        try {
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.get(id);
 
-        request.onsuccess = () => {
-            const data = request.result;
-            data.synced = true;
-            data.syncedAt = new Date().toISOString();
+            request.onsuccess = () => {
+                const data = request.result;
+                if (!data) {
+                    console.warn(`Registro não encontrado para atualizar: ${storeName}/${id}`);
+                    resolve();
+                    return;
+                }
+                
+                data.synced = true;
+                data.syncedAt = new Date().toISOString();
+                
+                const updateRequest = store.put(data);
+                updateRequest.onsuccess = () => {
+                    console.log(`Status de sincronização atualizado: ${storeName}/${id}`);
+                    resolve();
+                };
+                updateRequest.onerror = () => {
+                    console.error(`Erro ao atualizar status: ${updateRequest.error}`);
+                    reject(updateRequest.error);
+                };
+            };
+
+            request.onerror = () => {
+                console.error(`Erro ao obter registro: ${request.error}`);
+                reject(request.error);
+            };
             
-            const updateRequest = store.put(data);
-            updateRequest.onsuccess = () => resolve();
-            updateRequest.onerror = () => reject(updateRequest.error);
-        };
-
-        request.onerror = () => reject(request.error);
+            transaction.onerror = () => {
+                console.error(`Erro na transação: ${transaction.error}`);
+                reject(transaction.error);
+            };
+        } catch (error) {
+            console.error('Erro ao criar transação:', error);
+            reject(error);
+        }
     });
 }
 
@@ -288,14 +395,23 @@ async function updateSyncStatus(storeName, id) {
 // Baixar dados do Supabase para o IndexedDB
 async function syncFromSupabase() {
     const userId = getCurrentUserId();
-    if (!userId || !navigator.onLine) return;
+    if (!userId) {
+        console.warn('❌ Usuário não autenticado para download de dados');
+        return;
+    }
+    
+    if (!navigator.onLine) {
+        console.log('🔴 Offline - skipping download');
+        return;
+    }
 
-    console.log('Baixando dados do Supabase...');
+    console.log(`📥 Iniciando download de dados para usuário: ${userId}`);
 
     try {
         // Buscar última sincronização
         const lastSync = localStorage.getItem('last_sync');
         const timestamp = lastSync ? new Date(lastSync) : new Date(0);
+        console.log(`📅 Buscando dados modificados após: ${timestamp.toISOString()}`);
 
         // Baixar registros de humor
         await downloadMoodEntries(userId, timestamp);
@@ -308,172 +424,270 @@ async function syncFromSupabase() {
         
         // Baixar registros de sono
         await downloadSleepEntries(userId, timestamp);
-
-        console.log('Download de dados concluído!');
+        
+        console.log('✅ Download de dados concluído com sucesso');
     } catch (error) {
-        console.error('Erro ao baixar dados:', error);
+        console.error('❌ Erro ao baixar dados:', error);
     }
 }
 
 // Baixar registros de humor
 async function downloadMoodEntries(userId, since) {
     try {
+        console.log(`🔄 Buscando registros de humor para usuário: ${userId}`);
+        
         const { data, error } = await supabaseClient
             .from('mood_entries')
             .select('*')
             .eq('user_id', userId)
-            .gt('updated_at', since.toISOString());
-        if (error) throw error;
+            .gte('updated_at', since.toISOString())
+            .order('updated_at', { ascending: false });
+        
+        if (error) {
+            console.error('❌ Erro Supabase ao buscar humores:', error);
+            throw error;
+        }
 
-        for (const entry of data || []) {
-            // Verificar se já existe localmente
-            const localEntries = await getAllFromStore('moodEntries');
-            const exists = localEntries.some(e => e.id === entry.local_id);
+        console.log(`📊 Encontrados ${data?.length || 0} registros de humor`);
 
-            if (!exists) {
-                await saveToStore('moodEntries', {
-                    id: entry.local_id,
-                    date: entry.date,
-                    mood: entry.mood,
-                    anxiety: entry.anxiety,
-                    notes: entry.notes,
-                    timestamp: entry.timestamp,
-                    synced: true,
-                    syncedAt: entry.updated_at
-                });
+        if (!data || data.length === 0) {
+            console.log('ℹ️ Nenhum novo registro de humor para sincronizar');
+            return;
+        }
+
+        for (const entry of data) {
+            try {
+                // Verificar se já existe localmente pelo local_id
+                const localEntries = await getAllFromStore('moodEntries');
+                const exists = localEntries.some(e => e.id === entry.local_id);
+
+                if (!exists) {
+                    console.log(`💾 Salvando humor baixado: ${entry.local_id}`);
+                    await saveToStore('moodEntries', {
+                        id: entry.local_id,
+                        date: entry.date,
+                        mood: entry.mood,
+                        anxiety: entry.anxiety,
+                        notes: entry.notes,
+                        timestamp: entry.timestamp,
+                        synced: true,
+                        syncedAt: entry.updated_at
+                    });
+                } else {
+                    console.log(`ℹ️ Registro ${entry.local_id} já existe localmente`);
+                }
+            } catch (err) {
+                console.error('❌ Erro ao processar humor baixado:', err);
             }
         }
     } catch (error) {
-        console.error('Erro ao baixar registros de humor:', error);
+        console.error('❌ Erro ao baixar registros de humor:', error);
     }
 }
 
 // Baixar entradas do diário
 async function downloadDiaryEntries(userId, since) {
     try {
+        console.log(`🔄 Buscando entradas de diário para usuário: ${userId}`);
+        
         const { data, error } = await supabaseClient
             .from('diary_entries')
             .select('*')
             .eq('user_id', userId)
-            .gt('updated_at', since.toISOString());
-        if (error) throw error;
+            .gte('updated_at', since.toISOString())
+            .order('updated_at', { ascending: false });
+        
+        if (error) {
+            console.error('❌ Erro Supabase ao buscar diários:', error);
+            throw error;
+        }
 
-        for (const entry of data || []) {
-            // Verificar se já existe localmente
-            const localEntries = await getAllFromStore('diaryEntries');
-            const exists = localEntries.some(e => e.id === entry.local_id);
+        console.log(`📔 Encontradas ${data?.length || 0} entradas de diário`);
 
-            if (!exists) {
-                await saveToStore('diaryEntries', {
-                    id: entry.local_id,
-                    date: entry.date,
-                    title: entry.title,
-                    content: entry.content,
-                    tags: entry.tags,
-                    timestamp: entry.timestamp,
-                    synced: true,
-                    syncedAt: entry.updated_at
-                });
+        if (!data || data.length === 0) {
+            console.log('ℹ️ Nenhuma nova entrada de diário para sincronizar');
+            return;
+        }
+
+        for (const entry of data) {
+            try {
+                const localEntries = await getAllFromStore('diaryEntries');
+                const exists = localEntries.some(e => e.id === entry.local_id);
+
+                if (!exists) {
+                    console.log(`💾 Salvando diário baixado: ${entry.local_id}`);
+                    await saveToStore('diaryEntries', {
+                        id: entry.local_id,
+                        date: entry.date,
+                        title: entry.title,
+                        content: entry.content,
+                        tags: entry.tags,
+                        timestamp: entry.timestamp,
+                        synced: true,
+                        syncedAt: entry.updated_at
+                    });
+                } else {
+                    console.log(`ℹ️ Entrada ${entry.local_id} já existe localmente`);
+                }
+            } catch (err) {
+                console.error('❌ Erro ao processar entrada de diário:', err);
             }
         }
     } catch (error) {
-        console.error('Erro ao baixar entradas de diário:', error);
+        console.error('❌ Erro ao baixar entradas de diário:', error);
     }
 }
 
 // Baixar sessões de respiração
 async function downloadBreathingSessions(userId, since) {
     try {
+        console.log(`🔄 Buscando sessões de respiração para usuário: ${userId}`);
+        
         const { data, error } = await supabaseClient
             .from('breathing_sessions')
             .select('*')
             .eq('user_id', userId)
-            .gt('updated_at', since.toISOString());
-        if (error) throw error;
+            .gte('updated_at', since.toISOString())
+            .order('updated_at', { ascending: false });
+        
+        if (error) {
+            console.error('❌ Erro Supabase ao buscar sessões de respiração:', error);
+            throw error;
+        }
 
-        for (const session of data || []) {
-            // Verificar se já existe localmente
-            const localSessions = await getAllFromStore('breathingSessions');
-            const exists = localSessions.some(s => s.id === session.local_id);
+        console.log(`🌬️ Encontradas ${data?.length || 0} sessões de respiração`);
 
-            if (!exists) {
-                await saveToStore('breathingSessions', {
-                    id: session.local_id,
-                    date: session.date,
-                    exercise: session.exercise,
-                    duration: session.duration,
-                    completed: session.completed,
-                    timestamp: session.timestamp,
-                    synced: true,
-                    syncedAt: session.updated_at
-                });
+        if (!data || data.length === 0) {
+            console.log('ℹ️ Nenhuma nova sessão de respiração para sincronizar');
+            return;
+        }
+
+        for (const session of data) {
+            try {
+                const localSessions = await getAllFromStore('breathingSessions');
+                const exists = localSessions.some(s => s.id === session.local_id);
+
+                if (!exists) {
+                    console.log(`💾 Salvando sessão de respiração baixada: ${session.local_id}`);
+                    await saveToStore('breathingSessions', {
+                        id: session.local_id,
+                        date: session.date,
+                        exercise: session.exercise,
+                        duration: session.duration,
+                        completed: session.completed,
+                        timestamp: session.timestamp,
+                        synced: true,
+                        syncedAt: session.updated_at
+                    });
+                } else {
+                    console.log(`ℹ️ Sessão ${session.local_id} já existe localmente`);
+                }
+            } catch (err) {
+                console.error('❌ Erro ao processar sessão de respiração:', err);
             }
         }
     } catch (error) {
-        console.error('Erro ao baixar sessões de respiração:', error);
+        console.error('❌ Erro ao baixar sessões de respiração:', error);
     }
 }
 
 // Baixar registros de sono
 async function downloadSleepEntries(userId, since) {
     try {
+        console.log(`🔄 Buscando registros de sono para usuário: ${userId}`);
+        
         const { data, error } = await supabaseClient
             .from('sleep_entries')
             .select('*')
             .eq('user_id', userId)
-            .gt('updated_at', since.toISOString());
-        if (error) throw error;
+            .gte('updated_at', since.toISOString())
+            .order('updated_at', { ascending: false });
+        
+        if (error) {
+            console.error('❌ Erro Supabase ao buscar registros de sono:', error);
+            throw error;
+        }
 
-        for (const entry of data || []) {
-            // Verificar se já existe localmente
-            const localEntries = await getAllFromStore('sleepEntries');
-            const exists = localEntries.some(e => e.id === entry.local_id);
+        console.log(`😴 Encontrados ${data?.length || 0} registros de sono`);
 
-            if (!exists) {
-                await saveToStore('sleepEntries', {
-                    id: entry.local_id,
-                    date: entry.date,
-                    sleepTime: entry.sleep_time,
-                    wakeTime: entry.wake_time,
-                    duration: entry.duration,
-                    quality: entry.quality,
-                    notes: entry.notes,
-                    timestamp: entry.timestamp,
-                    synced: true,
-                    syncedAt: entry.updated_at
-                });
+        if (!data || data.length === 0) {
+            console.log('ℹ️ Nenhum novo registro de sono para sincronizar');
+            return;
+        }
+
+        for (const entry of data) {
+            try {
+                const localEntries = await getAllFromStore('sleepEntries');
+                const exists = localEntries.some(e => e.id === entry.local_id);
+
+                if (!exists) {
+                    console.log(`💾 Salvando registro de sono baixado: ${entry.local_id}`);
+                    await saveToStore('sleepEntries', {
+                        id: entry.local_id,
+                        date: entry.date,
+                        sleepTime: entry.sleep_time,
+                        wakeTime: entry.wake_time,
+                        duration: entry.duration,
+                        quality: entry.quality,
+                        notes: entry.notes,
+                        timestamp: entry.timestamp,
+                        synced: true,
+                        syncedAt: entry.updated_at
+                    });
+                } else {
+                    console.log(`ℹ️ Registro ${entry.local_id} já existe localmente`);
+                }
+            } catch (err) {
+                console.error('❌ Erro ao processar registro de sono:', err);
             }
         }
     } catch (error) {
-        console.error('Erro ao baixar registros de sono:', error);
+        console.error('❌ Erro ao baixar registros de sono:', error);
     }
 }
 
-// Iniciar sincronização periódica
+// Iniciar sincronização periódica em background sem impactar usabilidade
 function startAutoSync() {
     if (syncInterval) {
         clearInterval(syncInterval);
     }
     
-    // Sincronizar imediatamente ao iniciar
+    console.log('Iniciando sincronização automática em background...');
+    
+    // Sincronizar imediatamente apenas se houver dados não sincronizados
     syncToSupabase().catch(err => {
         console.log('Primeira sincronização falhou, tentará novamente:', err);
     });
     
-    syncInterval = setInterval(async () => {
-        await syncToSupabase();
-        await syncFromSupabase();
-    }, SYNC_INTERVAL_MS);
-    
-    console.log(`Sincronização automática iniciada a cada ${SYNC_INTERVAL_MS/1000/60} minutos`);
+    // Sincronizar a cada 2 horas em background sem interrupções
+    // Usar requestIdleCallback se disponível para sincronizar apenas quando browser está ocioso
+    if ('requestIdleCallback' in window) {
+        // Usar requestIdleCallback para não impactar performance
+        let idleCallbackId = null;
+        
+        syncInterval = setInterval(() => {
+            idleCallbackId = requestIdleCallback(() => {
+                syncToSupabase().catch(err => console.log('Sincronização automática falhou:', err));
+                syncFromSupabase().catch(err => console.log('Download automático falhou:', err));
+            }, { timeout: 5000 }); // Timeout de 5 segundos para garantir execução
+        }, SYNC_INTERVAL_MS);
+    } else {
+        // Fallback para setInterval normal em browsers que não suportam requestIdleCallback
+        syncInterval = setInterval(async () => {
+            await syncToSupabase();
+            await syncFromSupabase();
+        }, SYNC_INTERVAL_MS);
+    }
 }
 
 // Sincronização manual
 async function manualSync() {
-    console.log('Sincronização manual iniciada...');
-    showToast('Iniciando sincronização...');
-    await syncToSupabase();
-    await syncFromSupabase();
+    try {
+        await syncToSupabase();
+        await syncFromSupabase();
+    } catch (error) {
+        console.error('Erro na sincronização manual:', error);
+    }
 }
 
 // Atualizar UI de status de sincronização

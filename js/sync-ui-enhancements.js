@@ -16,22 +16,23 @@ function openSyncSettings() {
             <div class="space-y-6">
                 <div>
                     <h4 class="font-semibold mb-3">Frequência de Sincronização</h4>
+                    <p class="text-xs text-gray-400 mb-3">Maior intervalo = melhor usabilidade. Dados sincronizam automaticamente ao salvar.</p>
                     <div class="space-y-2">
                         <label class="flex items-center gap-3">
                             <input type="radio" name="syncFrequency" value="manual" class="text-calm-blue">
                             <span>Somente manual</span>
                         </label>
                         <label class="flex items-center gap-3">
-                            <input type="radio" name="syncFrequency" value="15min" class="text-calm-blue">
-                            <span>A cada 15 minutos</span>
-                        </label>
-                        <label class="flex items-center gap-3">
-                            <input type="radio" name="syncFrequency" value="30min" class="text-calm-blue" checked>
-                            <span>A cada 30 minutos (padrão)</span>
-                        </label>
-                        <label class="flex items-center gap-3">
                             <input type="radio" name="syncFrequency" value="60min" class="text-calm-blue">
                             <span>A cada hora</span>
+                        </label>
+                        <label class="flex items-center gap-3">
+                            <input type="radio" name="syncFrequency" value="120min" class="text-calm-blue" checked>
+                            <span>A cada 2 horas (recomendado)</span>
+                        </label>
+                        <label class="flex items-center gap-3">
+                            <input type="radio" name="syncFrequency" value="240min" class="text-calm-blue">
+                            <span>A cada 4 horas</span>
                         </label>
                     </div>
                 </div>
@@ -44,7 +45,7 @@ function openSyncSettings() {
                     </label>
                     <label class="flex items-center gap-3">
                         <input type="checkbox" id="syncOnDataChange" class="rounded text-calm-blue" checked>
-                        <span>Sincronizar automaticamente ao salvar dados</span>
+                        <span>Sincronizar automaticamente ao salvar dados (com atraso inteligente)</span>
                     </label>
                 </div>
                 
@@ -79,8 +80,8 @@ function closeSyncSettings() {
 
 // Carregar configurações de sincronização
 function loadSyncSettings() {
-    // Frequência de sincronização
-    const frequency = localStorage.getItem('syncFrequency') || '30min';
+    // Frequência de sincronização (padrão: 120min = 2 horas)
+    const frequency = localStorage.getItem('syncFrequency') || '120min';
     const frequencyRadios = document.querySelectorAll('input[name="syncFrequency"]');
     frequencyRadios.forEach(radio => {
         radio.checked = radio.value === frequency;
@@ -116,32 +117,43 @@ function reconfigureAutoSync() {
         clearInterval(syncInterval);
     }
     
-    const frequency = localStorage.getItem('syncFrequency') || '30min';
+    const frequency = localStorage.getItem('syncFrequency') || '120min'; // Padrão: 2 horas
     let intervalMs;
     
     switch (frequency) {
         case 'manual':
             // Não configurar intervalo automático
+            console.log('✅ Modo de sincronização: Manual');
             return;
-        case '15min':
-            intervalMs = 15 * 60 * 1000;
-            break;
-        case '30min':
-            intervalMs = 30 * 60 * 1000;
-            break;
         case '60min':
-            intervalMs = 60 * 60 * 1000;
+            intervalMs = 60 * 60 * 1000; // 1 hora
+            break;
+        case '120min':
+            intervalMs = 120 * 60 * 1000; // 2 horas (novo padrão)
+            break;
+        case '240min':
+            intervalMs = 240 * 60 * 1000; // 4 horas
             break;
         default:
-            intervalMs = 30 * 60 * 1000;
+            intervalMs = 120 * 60 * 1000; // 2 horas por padrão
     }
     
-    syncInterval = setInterval(async () => {
-        await syncToSupabase();
-        await syncFromSupabase();
-    }, intervalMs);
+    // Usar requestIdleCallback se disponível para não impactar a usabilidade
+    if ('requestIdleCallback' in window) {
+        syncInterval = setInterval(() => {
+            requestIdleCallback(() => {
+                syncToSupabase().catch(err => console.log('Sincronização automática falhou:', err));
+                syncFromSupabase().catch(err => console.log('Download automático falhou:', err));
+            }, { timeout: 5000 });
+        }, intervalMs);
+    } else {
+        syncInterval = setInterval(async () => {
+            await syncToSupabase();
+            await syncFromSupabase();
+        }, intervalMs);
+    }
     
-    console.log(`Sincronização automática reconfigurada para ${intervalMs/1000/60} minutos`);
+    console.log(`✅ Sincronização automática reconfigurada: a cada ${intervalMs/1000/60} minutos`);
 }
 
 // Atualizar exibição da última sincronização
