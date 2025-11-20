@@ -3,60 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calm Mind - Seu espaço seguro para saúde mental</title>
+    <title>Calm Mind - Seu refúgio para saúde mental</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom Calm Mind Color Palette */
+        /* Enhanced Color Palette - Softer, More Therapeutic */
         :root {
-            --calm-blue: #7c9cbf;
-            --calm-blue-dark: #5a7a9e;
-            --calm-green: #a8c5a8;
-            --calm-lavender: #b8a9d4;
-            --calm-sand: #e8dcc4;
-            --calm-mint: #b8d8d8;
-            --calm-bg: #2a3d4a;
-            --calm-card: #3a5260;
+            /* Primary Colors - Calming Blues */
+            --primary-50: #f0f7ff;
+            --primary-100: #e0f0ff;
+            --primary-200: #b9e0ff;
+            --primary-300: #7cc5ff;
+            --primary-400: #36a9ff;
+            --primary-500: #0891e6;
+            --primary-600: #0073c4;
+            --primary-700: #005a9e;
+            --primary-800: #004d83;
+            --primary-900: #00406d;
+            
+            /* Secondary Colors - Healing Greens */
+            --secondary-50: #f0fdf4;
+            --secondary-100: #dcfce7;
+            --secondary-200: #bbf7d0;
+            --secondary-300: #86efac;
+            --secondary-400: #4ade80;
+            --secondary-500: #22c55e;
+            --secondary-600: #16a34a;
+            --secondary-700: #15803d;
+            
+            /* Accent Colors - Warm & Inviting */
+            --accent-lavender: #e9d5ff;
+            --accent-lavender-dark: #c084fc;
+            --accent-peach: #fed7aa;
+            --accent-mint: #ccfbf1;
+            --accent-rose: #fce7f3;
+            
+            /* Neutrals - Sophisticated Grays */
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #e5e5e5;
+            --gray-300: #d4d4d4;
+            --gray-400: #a3a3a3;
+            --gray-500: #737373;
+            --gray-600: #525252;
+            --gray-700: #404040;
+            --gray-800: #262626;
+            --gray-900: #171717;
+            
+            /* Backgrounds */
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafbfc;
+            --bg-dark: #1a1f2e;
+            --bg-card: #ffffff;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            /* Blur */
+            --blur-sm: 8px;
+            --blur-md: 16px;
+            --blur-lg: 24px;
         }
         
-        .bg-calm-blue { background-color: var(--calm-blue); }
-        .bg-calm-blue-dark { background-color: var(--calm-blue-dark); }
-        .bg-calm-green { background-color: var(--calm-green); }
-        .bg-calm-lavender { background-color: var(--calm-lavender); }
-        .bg-calm-sand { background-color: var(--calm-sand); }
-        .bg-calm-mint { background-color: var(--calm-mint); }
-        .bg-calm-bg { background-color: var(--calm-bg); }
-        .bg-calm-card { background-color: var(--calm-card); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        .text-calm-blue { color: var(--calm-blue); }
-        .text-calm-blue-dark { color: var(--calm-blue-dark); }
-        .text-calm-green { color: var(--calm-green); }
-        .text-calm-lavender { color: var(--calm-lavender); }
-        .text-calm-sand { color: var(--calm-sand); }
-        .text-calm-mint { color: var(--calm-mint); }
-        .text-calm-bg { color: var(--calm-bg); }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: var(--bg-primary);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
         
-        .border-calm-blue { border-color: var(--calm-blue); }
-        .border-calm-green { border-color: var(--calm-green); }
-        .border-calm-lavender { border-color: var(--calm-lavender); }
-        .border-calm-sand { border-color: var(--calm-sand); }
-        .border-calm-mint { border-color: var(--calm-mint); }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
         
-        .hover\:bg-calm-blue-dark:hover { background-color: var(--calm-blue-dark); }
-        .hover\:bg-calm-green:hover { background-color: var(--calm-green); }
-        .hover\:text-calm-mint:hover { color: var(--calm-mint); }
-        .hover\:text-calm-green:hover { color: var(--calm-green); }
-        .hover\:bg-calm-blue:hover { background-color: var(--calm-blue); }
+        /* Gradient Backgrounds */
+        .gradient-hero {
+            background: linear-gradient(135deg, 
+                rgba(8, 145, 230, 0.03) 0%, 
+                rgba(192, 132, 252, 0.05) 50%,
+                rgba(34, 197, 94, 0.03) 100%);
+        }
         
+        .gradient-section {
+            background: linear-gradient(180deg, 
+                var(--bg-primary) 0%, 
+                var(--primary-50) 100%);
+        }
+        
+        .gradient-cta {
+            background: linear-gradient(135deg, 
+                var(--primary-500) 0%, 
+                var(--primary-600) 100%);
+        }
+        
+        .gradient-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(255, 255, 255, 0.8) 100%);
+            backdrop-filter: blur(var(--blur-md));
+        }
+        
+        /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
         
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
@@ -64,9 +138,19 @@
             }
         }
         
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(8, 145, 230, 0.3);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(8, 145, 230, 0.5);
+            }
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .animate-float {
@@ -74,87 +158,275 @@
         }
         
         .animate-fadeInUp {
-            animation: fadeInUp 1s ease-out forwards;
+            animation: fadeInUp 0.8s ease-out forwards;
         }
         
-        .animate-pulse-soft {
-            animation: pulse-soft 3s ease-in-out infinite;
+        .animate-pulse-glow {
+            animation: pulse-glow 3s ease-in-out infinite;
         }
         
-        .gradient-bg {
-            background: linear-gradient(135deg, #2a3d4a 0%, #1a2a35 100%);
+        /* Custom Components */
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(8, 145, 230, 0.3);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        .feature-card {
+        .btn-primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(8, 145, 230, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--primary-600);
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--primary-600);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--primary-50);
+            transform: translateY(-2px);
+        }
+        
+        .card-feature {
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-feature:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--primary-300);
+        }
+        
+        .card-testimonial {
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-lg);
             transition: all 0.3s ease;
         }
         
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(124, 156, 191, 0.2);
-        }
-        
-        .testimonial-card {
-            backdrop-filter: blur(10px);
-            background: rgba(58, 82, 96, 0.6);
+        .card-testimonial:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
         }
         
         .stat-number {
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #b8d8d8, #7c9cbf);
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-600), var(--accent-lavender-dark));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-family: 'Inter', sans-serif;
         }
-
+        
+        /* Navigation */
+        nav {
+            backdrop-filter: blur(var(--blur-md));
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        /* Social Proof */
+        .social-proof {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--secondary-50);
+            border-radius: 9999px;
+            border: 1px solid var(--secondary-200);
+        }
+        
+        .avatar-group {
+            display: flex;
+            margin-left: -0.5rem;
+        }
+        
+        .avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-left: -0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-2xl);
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--gray-50);
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(8, 145, 230, 0.1);
+        }
+        
+        /* Alerts */
         .alert-error {
-            background-color: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
+            color: #dc2626;
+            padding: 0.875rem;
+            border-radius: 0.75rem;
         }
-
+        
         .alert-success {
-            background-color: rgba(34, 197, 94, 0.1);
+            background: rgba(34, 197, 94, 0.1);
             border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #86efac;
+            color: #16a34a;
+            padding: 0.875rem;
+            border-radius: 0.75rem;
         }
-
+        
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 3px solid white;
             width: 20px;
             height: 20px;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 2.5rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem !important;
+            }
+            
+            h2 {
+                font-size: 2rem !important;
+            }
+        }
+        
+        /* Trust Badges */
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-50);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: var(--primary-700);
+            font-weight: 500;
+        }
+        
+        /* Pricing Cards */
+        .pricing-card {
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .pricing-card:hover {
+            border-color: var(--primary-400);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary-500);
+            box-shadow: var(--shadow-xl);
+            transform: scale(1.05);
+        }
+        
+        .pricing-badge {
+            position: absolute;
+            top: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--secondary-500), var(--secondary-600));
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+        }
     </style>
 </head>
-<body class="gradient-bg text-white">
-    <!-- Header/Navigation -->
-    <nav class="fixed top-0 w-full z-50 bg-calm-card/80 backdrop-blur-md border-b border-calm-blue/20">
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+            <div class="flex justify-between items-center h-20">
                 <div class="flex items-center space-x-3">
-                    <span class="text-3xl">🧘‍♀️</span>
-                    <span class="text-2xl font-bold text-calm-blue">Calm Mind</span>
+                    <span class="text-4xl">🧘‍♀️</span>
+                    <span class="text-2xl font-bold" style="background: linear-gradient(135deg, var(--primary-600), var(--accent-lavender-dark)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Calm Mind</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="#features" class="text-gray-300 hover:text-calm-mint transition-colors">Recursos</a>
-                    <a href="#community" class="text-gray-300 hover:text-calm-mint transition-colors">Comunidade</a>
-                    <a href="#testimonials" class="text-gray-300 hover:text-calm-mint transition-colors">Depoimentos</a>
-                    <a href="#pricing" class="text-gray-300 hover:text-calm-mint transition-colors">Planos</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary-600 transition-colors font-medium">Recursos</a>
+                    <a href="#community" class="text-gray-700 hover:text-primary-600 transition-colors font-medium">Comunidade</a>
+                    <a href="#testimonials" class="text-gray-700 hover:text-primary-600 transition-colors font-medium">Histórias</a>
+                    <a href="#pricing" class="text-gray-700 hover:text-primary-600 transition-colors font-medium">Planos</a>
                 </div>
-                <div class="flex space-x-4">
-                    <button onclick="showLogin()" class="text-calm-blue hover:text-calm-mint transition-colors font-medium">
+                <div class="flex space-x-3">
+                    <button onclick="showLogin()" class="px-6 py-2 text-primary-600 hover:text-primary-700 transition-colors font-semibold">
                         Entrar
                     </button>
-                    <button onclick="showSignup()" class="bg-calm-blue hover:bg-calm-blue-dark text-white px-6 py-2 rounded-full transition-all shadow-lg hover:shadow-calm-blue/50">
+                    <button onclick="showSignup()" class="btn-primary">
                         Começar Grátis
                     </button>
                 </div>
@@ -163,58 +435,70 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-32 pb-20 px-4">
+    <section class="pt-32 pb-24 px-4 gradient-hero">
         <div class="max-w-7xl mx-auto">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="space-y-8 animate-fadeInUp">
-                    <h1 class="text-5xl md:text-6xl font-bold leading-tight">
-                        Seu espaço seguro para 
-                        <span class="text-calm-mint">saúde mental</span>
+                    <div class="inline-block">
+                        <span class="trust-badge">
+                            ✓ Aprovado por 350+ psicólogos
+                        </span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight" style="color: var(--gray-900);">
+                        Seu refúgio para 
+                        <span style="background: linear-gradient(135deg, var(--primary-600), var(--accent-lavender-dark)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">saúde mental</span>
                     </h1>
-                    <p class="text-xl text-gray-300">
-                        Controle sua ansiedade, melhore seu sono e encontre paz interior com ferramentas comprovadas e uma comunidade acolhedora ao seu lado.
+                    
+                    <p class="text-xl md:text-2xl" style="color: var(--gray-600); line-height: 1.7;">
+                        Transforme ansiedade em serenidade. Encontre paz interior com ferramentas cientificamente comprovadas e uma comunidade que te acolhe.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <button onclick="showSignup()" class="bg-calm-green hover:bg-calm-green/80 text-calm-bg px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-2xl hover:shadow-calm-green/50 transform hover:scale-105">
-                            🌸 Começar Jornada Grátis
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button onclick="showSignup()" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 2.5rem;">
+                            <span>🌸</span>
+                            Começar Gratuitamente
                         </button>
-                        <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})" class="border-2 border-calm-blue text-calm-blue hover:bg-calm-blue hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all">
-                            ▶️ Ver Como Funciona
+                        <button onclick="document.getElementById('demo-video').scrollIntoView({behavior: 'smooth'})" class="btn-secondary">
+                            <span>▶️</span>
+                            Ver Como Funciona
                         </button>
                     </div>
-                    <div class="flex items-center space-x-8 pt-4">
-                        <div class="flex -space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-calm-lavender flex items-center justify-center border-2 border-calm-bg">👤</div>
-                            <div class="w-10 h-10 rounded-full bg-calm-mint flex items-center justify-center border-2 border-calm-bg">👤</div>
-                            <div class="w-10 h-10 rounded-full bg-calm-sand flex items-center justify-center border-2 border-calm-bg">👤</div>
-                            <div class="w-10 h-10 rounded-full bg-calm-green flex items-center justify-center border-2 border-calm-bg">👤</div>
+                    
+                    <div class="social-proof">
+                        <div class="avatar-group">
+                            <div class="avatar" style="background: var(--accent-lavender);">👤</div>
+                            <div class="avatar" style="background: var(--accent-mint);">👤</div>
+                            <div class="avatar" style="background: var(--accent-peach);">👤</div>
+                            <div class="avatar" style="background: var(--secondary-200);">👤</div>
                         </div>
-                        <div class="text-sm">
-                            <div class="flex items-center gap-1 text-yellow-400">
-                                ⭐⭐⭐⭐⭐
-                            </div>
-                            <p class="text-gray-400">+12.000 pessoas transformando suas vidas</p>
+                        <div>
+                            <div style="color: #fbbf24; font-size: 1rem; letter-spacing: 0.05em;">★★★★★</div>
+                            <p style="color: var(--gray-700); font-size: 0.875rem; font-weight: 500; margin-top: 0.125rem;">
+                                <strong>12.000+</strong> vidas transformadas
+                            </p>
                         </div>
                     </div>
                 </div>
+                
                 <div class="relative animate-float">
-                    <div class="absolute inset-0 bg-calm-blue/20 rounded-full blur-3xl"></div>
-                    <div class="relative bg-calm-card rounded-3xl p-8 shadow-2xl border border-calm-blue/30">
-                        <div class="text-center space-y-6">
-                            <div class="text-6xl animate-pulse-soft">🌙</div>
-                            <h3 class="text-2xl font-semibold">Monitore seu bem-estar</h3>
+                    <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(8, 145, 230, 0.15), transparent); border-radius: 50%; filter: blur(60px);"></div>
+                    <div class="relative gradient-card" style="border-radius: 2rem; padding: 3rem; box-shadow: var(--shadow-2xl); border: 1px solid var(--gray-200);">
+                        <div class="text-center space-y-8">
+                            <div class="text-7xl animate-pulse-glow">🌙</div>
+                            <h3 class="text-3xl font-semibold" style="color: var(--gray-900);">Acompanhe seu bem-estar</h3>
                             <div class="grid grid-cols-3 gap-4">
-                                <div class="bg-calm-bg/50 p-4 rounded-xl">
-                                    <div class="text-3xl mb-2">💭</div>
-                                    <div class="text-sm text-gray-400">Humor</div>
+                                <div style="background: var(--primary-50); padding: 1.5rem; border-radius: 1rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div class="text-4xl mb-2">💭</div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem; font-weight: 500;">Humor</div>
                                 </div>
-                                <div class="bg-calm-bg/50 p-4 rounded-xl">
-                                    <div class="text-3xl mb-2">😴</div>
-                                    <div class="text-sm text-gray-400">Sono</div>
+                                <div style="background: var(--secondary-50); padding: 1.5rem; border-radius: 1rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div class="text-4xl mb-2">😴</div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem; font-weight: 500;">Sono</div>
                                 </div>
-                                <div class="bg-calm-bg/50 p-4 rounded-xl">
-                                    <div class="text-3xl mb-2">🧘</div>
-                                    <div class="text-sm text-gray-400">Calma</div>
+                                <div style="background: var(--accent-lavender); padding: 1.5rem; border-radius: 1rem; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div class="text-4xl mb-2">🧘</div>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem; font-weight: 500;">Calma</div>
                                 </div>
                             </div>
                         </div>
@@ -225,109 +509,159 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="py-16 bg-calm-card/30 backdrop-blur-sm">
+    <section class="py-20" style="background: var(--primary-50);">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
                 <div>
                     <div class="stat-number">12k+</div>
-                    <p class="text-gray-400 mt-2">Usuários ativos</p>
+                    <p style="color: var(--gray-600); margin-top: 0.5rem; font-size: 1.125rem; font-weight: 500;">Usuários ativos</p>
                 </div>
                 <div>
                     <div class="stat-number">350+</div>
-                    <p class="text-gray-400 mt-2">Psicólogos parceiros</p>
+                    <p style="color: var(--gray-600); margin-top: 0.5rem; font-size: 1.125rem; font-weight: 500;">Psicólogos parceiros</p>
                 </div>
                 <div>
                     <div class="stat-number">89%</div>
-                    <p class="text-gray-400 mt-2">Melhora relatada</p>
+                    <p style="color: var(--gray-600); margin-top: 0.5rem; font-size: 1.125rem; font-weight: 500;">Relatam melhora</p>
                 </div>
                 <div>
                     <div class="stat-number">24/7</div>
-                    <p class="text-gray-400 mt-2">Suporte disponível</p>
+                    <p style="color: var(--gray-600); margin-top: 0.5rem; font-size: 1.125rem; font-weight: 500;">Suporte disponível</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 px-4">
+    <section id="features" class="py-24 px-4">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                    Ferramentas que <span class="text-calm-lavender">realmente funcionam</span>
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" style="color: var(--gray-900);">
+                    Ferramentas que <span style="background: linear-gradient(135deg, var(--accent-lavender-dark), var(--primary-600)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">transformam vidas</span>
                 </h2>
-                <p class="text-xl text-gray-400">Baseadas em ciência, aprovadas por especialistas, testadas por milhares</p>
+                <p class="text-xl md:text-2xl" style="color: var(--gray-600); max-width: 42rem; margin: 0 auto;">
+                    Cada recurso foi desenvolvido com base em anos de pesquisa científica e validado por profissionais de saúde mental
+                </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-blue/20">
-                    <div class="text-5xl mb-4">💨</div>
-                    <h3 class="text-2xl font-semibold mb-3">Exercícios de Respiração</h3>
-                    <p class="text-gray-400 mb-4">Técnicas guiadas como 4-7-8 e Box Breathing para acalmar a mente em momentos de crise. Com áudio guiado e animações relaxantes.</p>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="flex items-center gap-2">✓ Modo SOS para crises</li>
-                        <li class="flex items-center gap-2">✓ Guia de voz opcional</li>
-                        <li class="flex items-center gap-2">✓ Funciona offline</li>
+                <div class="card-feature">
+                    <div class="text-5xl mb-6">💨</div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--gray-900);">Respiração Guiada</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; line-height: 1.7;">
+                        Técnicas como 4-7-8 e Box Breathing para acalmar crises de ansiedade em minutos. Com áudio terapêutico e animações relaxantes.
+                    </p>
+                    <ul class="space-y-3">
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Modo SOS para emergências
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Guia de voz profissional
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Funciona 100% offline
+                        </li>
                     </ul>
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-green/20">
-                    <div class="text-5xl mb-4">🌙</div>
-                    <h3 class="text-2xl font-semibold mb-3">Rastreamento de Sono</h3>
-                    <p class="text-gray-400 mb-4">Monitore seus ciclos de sono, qualidade e padrões. Receba insights personalizados e lembretes inteligentes.</p>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="flex items-center gap-2">✓ Análise de regularidade</li>
-                        <li class="flex items-center gap-2">✓ Lembretes de sono</li>
-                        <li class="flex items-center gap-2">✓ Relatórios semanais</li>
+                <div class="card-feature">
+                    <div class="text-5xl mb-6">🌙</div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--gray-900);">Análise de Sono</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; line-height: 1.7;">
+                        Monitore ciclos de sono e receba insights personalizados para melhorar sua qualidade de descanso noturno.
+                    </p>
+                    <ul class="space-y-3">
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Análise de padrões
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Lembretes inteligentes
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Relatórios detalhados
+                        </li>
                     </ul>
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-lavender/20">
-                    <div class="text-5xl mb-4">✍️</div>
-                    <h3 class="text-2xl font-semibold mb-3">Diário Emocional</h3>
-                    <p class="text-gray-400 mb-4">Registre seus pensamentos e emoções de forma privada e segura. Identifique padrões e gatilhos.</p>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="flex items-center gap-2">✓ 100% privado</li>
-                        <li class="flex items-center gap-2">✓ Análise de humor</li>
-                        <li class="flex items-center gap-2">✓ Tags personalizadas</li>
+                <div class="card-feature">
+                    <div class="text-5xl mb-6">✍️</div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--gray-900);">Diário Terapêutico</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; line-height: 1.7;">
+                        Registre pensamentos e emoções de forma privada. Identifique padrões e gatilhos emocionais com segurança total.
+                    </p>
+                    <ul class="space-y-3">
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Privacidade garantida
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Análise de humor
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Tags personalizadas
+                        </li>
                     </ul>
                 </div>
 
                 <!-- Feature 4 -->
-                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-mint/20">
-                    <div class="text-5xl mb-4">🆘</div>
-                    <h3 class="text-2xl font-semibold mb-3">Modo SOS</h3>
-                    <p class="text-gray-400 mb-4">Em momentos críticos, acesse técnicas de ancoragem, respiração guiada e contatos de emergência instantaneamente.</p>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="flex items-center gap-2">✓ Técnica 5-4-3-2-1</li>
-                        <li class="flex items-center gap-2">✓ Contatos rápidos</li>
-                        <li class="flex items-center gap-2">✓ CVV integrado</li>
+                <div class="card-feature">
+                    <div class="text-5xl mb-6">🆘</div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--gray-900);">Botão SOS</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; line-height: 1.7;">
+                        Em momentos críticos, acesse técnicas de ancoragem instantâneas e contatos de emergência com um único toque.
+                    </p>
+                    <ul class="space-y-3">
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Técnica 5-4-3-2-1
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Contatos rápidos
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> CVV integrado
+                        </li>
                     </ul>
                 </div>
 
                 <!-- Feature 5 -->
-                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-sand/20">
-                    <div class="text-5xl mb-4">📊</div>
-                    <h3 class="text-2xl font-semibold mb-3">Dashboard Inteligente</h3>
-                    <p class="text-gray-400 mb-4">Visualize seu progresso com gráficos intuitivos e insights personalizados baseados nos seus dados.</p>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="flex items-center gap-2">✓ Métricas visuais</li>
-                        <li class="flex items-center gap-2">✓ Tendências mensais</li>
-                        <li class="flex items-center gap-2">✓ Conquistas desbloqueáveis</li>
+                <div class="card-feature">
+                    <div class="text-5xl mb-6">📊</div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--gray-900);">Dashboard Inteligente</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; line-height: 1.7;">
+                        Visualize seu progresso com gráficos intuitivos. Receba insights personalizados baseados em seus dados.
+                    </p>
+                    <ul class="space-y-3">
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Métricas visuais claras
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Tendências mensais
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Conquistas motivacionais
+                        </li>
                     </ul>
                 </div>
 
                 <!-- Feature 6 -->
-                <div class="feature-card bg-calm-card rounded-2xl p-8 border border-calm-blue/20">
-                    <div class="text-5xl mb-4">💬</div>
-                    <h3 class="text-2xl font-semibold mb-3">PWA Offline</h3>
-                    <p class="text-gray-400 mb-4">Funciona completamente offline. Instale como app no celular e acesse sempre que precisar, com ou sem internet.</p>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="flex items-center gap-2">✓ Instalável</li>
-                        <li class="flex items-center gap-2">✓ Sem anúncios</li>
-                        <li class="flex items-center gap-2">✓ Dados locais seguros</li>
+                <div class="card-feature">
+                    <div class="text-5xl mb-6">📱</div>
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--gray-900);">App PWA Offline</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 1.5rem; line-height: 1.7;">
+                        Funciona completamente offline. Instale como aplicativo e acesse sempre que precisar, com ou sem internet.
+                    </p>
+                    <ul class="space-y-3">
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Instalável no celular
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Sem anúncios
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-700); font-size: 0.875rem;">
+                            <span style="color: var(--secondary-600);">✓</span> Dados seguros locais
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -335,92 +669,102 @@
     </section>
 
     <!-- Community Section -->
-    <section id="community" class="py-20 px-4 bg-calm-card/20">
+    <section id="community" class="py-24 px-4 gradient-section">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                    Você não está <span class="text-calm-green">sozinho(a)</span>
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" style="color: var(--gray-900);">
+                    Você não está <span style="background: linear-gradient(135deg, var(--secondary-600), var(--secondary-500)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">sozinho(a)</span>
                 </h2>
-                <p class="text-xl text-gray-400">Uma comunidade de mais de 12 mil pessoas e 350+ psicólogos prontos para acolher</p>
+                <p class="text-xl md:text-2xl" style="color: var(--gray-600); max-width: 42rem; margin: 0 auto;">
+                    Uma comunidade de 12 mil pessoas e 350+ psicólogos prontos para te acolher com empatia e respeito
+                </p>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6">
-                    <div class="flex items-start gap-4">
-                        <div class="bg-calm-green/20 p-3 rounded-full">
-                            <span class="text-2xl">🤝</span>
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <div class="flex items-start gap-6">
+                        <div style="background: var(--secondary-100); padding: 1rem; border-radius: 1rem; flex-shrink: 0;">
+                            <span class="text-3xl">🤝</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold mb-2">Comunidade Acolhedora</h3>
-                            <p class="text-gray-400">Conecte-se com pessoas que entendem o que você está passando. Compartilhe experiências, conquistas e desafios em um ambiente seguro e livre de julgamentos.</p>
+                            <h3 class="text-2xl font-semibold mb-3" style="color: var(--gray-900);">Comunidade Acolhedora</h3>
+                            <p style="color: var(--gray-600); line-height: 1.7;">
+                                Conecte-se com pessoas que verdadeiramente entendem sua jornada. Compartilhe conquistas e desafios em um espaço livre de julgamentos.
+                            </p>
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-4">
-                        <div class="bg-calm-lavender/20 p-3 rounded-full">
-                            <span class="text-2xl">👨‍⚕️</span>
+                    <div class="flex items-start gap-6">
+                        <div style="background: var(--accent-lavender); padding: 1rem; border-radius: 1rem; flex-shrink: 0;">
+                            <span class="text-3xl">👨‍⚕️</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold mb-2">Psicólogos Parceiros</h3>
-                            <p class="text-gray-400">Acesso a uma rede de 350+ profissionais especializados em ansiedade, depressão e saúde mental. Agende consultas com valores acessíveis.</p>
+                            <h3 class="text-2xl font-semibold mb-3" style="color: var(--gray-900);">Rede de Profissionais</h3>
+                            <p style="color: var(--gray-600); line-height: 1.7;">
+                                Acesso direto a 350+ psicólogos especializados. Agende consultas com valores acessíveis e acompanhamento contínuo.
+                            </p>
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-4">
-                        <div class="bg-calm-mint/20 p-3 rounded-full">
-                            <span class="text-2xl">🎯</span>
+                    <div class="flex items-start gap-6">
+                        <div style="background: var(--accent-mint); padding: 1rem; border-radius: 1rem; flex-shrink: 0;">
+                            <span class="text-3xl">🎯</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold mb-2">Grupos de Apoio</h3>
-                            <p class="text-gray-400">Participe de grupos temáticos: ansiedade no trabalho, insônia, relacionamentos, autoestima e muito mais. Sessões semanais moderadas por profissionais.</p>
+                            <h3 class="text-2xl font-semibold mb-3" style="color: var(--gray-900);">Grupos Temáticos</h3>
+                            <p style="color: var(--gray-600); line-height: 1.7;">
+                                Participe de grupos sobre ansiedade, insônia, autoestima e muito mais. Sessões semanais com moderação profissional.
+                            </p>
                         </div>
                     </div>
 
-                    <div class="flex items-start gap-4">
-                        <div class="bg-calm-blue/20 p-3 rounded-full">
-                            <span class="text-2xl">🔒</span>
+                    <div class="flex items-start gap-6">
+                        <div style="background: var(--primary-100); padding: 1rem; border-radius: 1rem; flex-shrink: 0;">
+                            <span class="text-3xl">🔒</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold mb-2">Privacidade Total</h3>
-                            <p class="text-gray-400">Seus dados são 100% privados e criptografados. Você decide o que e quando compartilhar. Anonimato garantido na comunidade.</p>
+                            <h3 class="text-2xl font-semibold mb-3" style="color: var(--gray-900);">Privacidade Absoluta</h3>
+                            <p style="color: var(--gray-600); line-height: 1.7;">
+                                Seus dados são 100% criptografados. Você controla o que compartilhar. Anonimato garantido na comunidade.
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 <div class="relative">
-                    <div class="absolute inset-0 bg-calm-lavender/10 rounded-3xl blur-3xl"></div>
-                    <div class="relative bg-calm-card rounded-3xl p-8 border border-calm-lavender/30">
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-3 bg-calm-bg/50 p-4 rounded-xl">
-                                <div class="w-12 h-12 bg-calm-green rounded-full flex items-center justify-center">👤</div>
-                                <div class="flex-1">
-                                    <p class="font-medium">Maria Silva</p>
-                                    <p class="text-sm text-gray-400">Compartilhou uma vitória</p>
+                    <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(192, 132, 252, 0.2), transparent); border-radius: 50%; filter: blur(60px);"></div>
+                    <div class="relative" style="background: white; border-radius: 2rem; padding: 2.5rem; box-shadow: var(--shadow-2xl); border: 1px solid var(--gray-200);">
+                        <div class="space-y-5">
+                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--gray-50); padding: 1.5rem; border-radius: 1rem; transition: all 0.3s ease;" onmouseover="this.style.transform='translateX(8px)'" onmouseout="this.style.transform='translateX(0)'">
+                                <div style="width: 3.5rem; height: 3.5rem; background: var(--secondary-200); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 600; color: var(--gray-900);">Maria Silva</p>
+                                    <p style="font-size: 0.875rem; color: var(--gray-600);">Compartilhou uma vitória</p>
                                 </div>
-                                <span class="text-xs text-gray-500">2h</span>
+                                <span style="font-size: 0.75rem; color: var(--gray-500);">2h</span>
                             </div>
 
-                            <div class="flex items-center gap-3 bg-calm-bg/50 p-4 rounded-xl">
-                                <div class="w-12 h-12 bg-calm-lavender rounded-full flex items-center justify-center">👨‍⚕️</div>
-                                <div class="flex-1">
-                                    <p class="font-medium">Dr. João Santos</p>
-                                    <p class="text-sm text-gray-400">Respondeu sua dúvida</p>
+                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--gray-50); padding: 1.5rem; border-radius: 1rem; transition: all 0.3s ease;" onmouseover="this.style.transform='translateX(8px)'" onmouseout="this.style.transform='translateX(0)'">
+                                <div style="width: 3.5rem; height: 3.5rem; background: var(--accent-lavender); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👨‍⚕️</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 600; color: var(--gray-900);">Dr. João Santos</p>
+                                    <p style="font-size: 0.875rem; color: var(--gray-600);">Respondeu sua dúvida</p>
                                 </div>
-                                <span class="text-xs text-gray-500">4h</span>
+                                <span style="font-size: 0.75rem; color: var(--gray-500);">4h</span>
                             </div>
 
-                            <div class="flex items-center gap-3 bg-calm-bg/50 p-4 rounded-xl">
-                                <div class="w-12 h-12 bg-calm-mint rounded-full flex items-center justify-center">👤</div>
-                                <div class="flex-1">
-                                    <p class="font-medium">Grupo: Ansiedade Social</p>
-                                    <p class="text-sm text-gray-400">Nova sessão amanhã às 19h</p>
+                            <div style="display: flex; align-items: center; gap: 1rem; background: var(--gray-50); padding: 1.5rem; border-radius: 1rem; transition: all 0.3s ease;" onmouseover="this.style.transform='translateX(8px)'" onmouseout="this.style.transform='translateX(0)'">
+                                <div style="width: 3.5rem; height: 3.5rem; background: var(--accent-mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👥</div>
+                                <div style="flex: 1;">
+                                    <p style="font-weight: 600; color: var(--gray-900);">Grupo: Ansiedade Social</p>
+                                    <p style="font-size: 0.875rem; color: var(--gray-600);">Nova sessão amanhã às 19h</p>
                                 </div>
-                                <span class="text-xs text-gray-500">6h</span>
+                                <span style="font-size: 0.75rem; color: var(--gray-500);">6h</span>
                             </div>
 
                             <div class="text-center pt-4">
-                                <button onclick="showSignup()" class="text-calm-mint hover:text-calm-green transition-colors font-medium">
-                                    Ver mais da comunidade →
+                                <button onclick="showSignup()" style="color: var(--primary-600); font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.color='var(--primary-700)'" onmouseout="this.style.color='var(--primary-600)'">
+                                    Explorar comunidade →
                                 </button>
                             </div>
                         </div>
@@ -431,54 +775,56 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section id="testimonials" class="py-20 px-4">
+    <section id="testimonials" class="py-24 px-4">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                    Histórias que <span class="text-calm-sand">inspiram</span>
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" style="color: var(--gray-900);">
+                    Histórias que <span style="background: linear-gradient(135deg, var(--accent-peach), var(--primary-600)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">inspiram</span>
                 </h2>
-                <p class="text-xl text-gray-400">Veja como o Calm Mind tem transformado vidas</p>
+                <p class="text-xl md:text-2xl" style="color: var(--gray-600); max-width: 42rem; margin: 0 auto;">
+                    Veja como o Calm Mind está transformando vidas reais de pessoas como você
+                </p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="testimonial-card rounded-2xl p-6 border border-calm-blue/20">
-                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
-                        ⭐⭐⭐⭐⭐
-                    </div>
-                    <p class="text-gray-300 mb-4">"Sofria com crises de ansiedade há anos. O Calm Mind me ensinou técnicas que realmente funcionam. O modo SOS já me salvou várias vezes."</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-calm-lavender rounded-full flex items-center justify-center">A</div>
+                <div class="card-testimonial">
+                    <div style="color: #fbbf24; font-size: 1.25rem; margin-bottom: 1.5rem; letter-spacing: 0.05em;">★★★★★</div>
+                    <p style="color: var(--gray-700); margin-bottom: 2rem; line-height: 1.7; font-size: 1.0625rem;">
+                        "Sofri com crises de pânico por anos. O Calm Mind me deu ferramentas que realmente funcionam. O modo SOS já me salvou inúmeras vezes. Minha vida mudou."
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 3rem; height: 3rem; background: var(--accent-lavender); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 600;">A</div>
                         <div>
-                            <p class="font-medium">Ana Paula</p>
-                            <p class="text-sm text-gray-400">São Paulo, SP</p>
+                            <p style="font-weight: 600; color: var(--gray-900);">Ana Paula</p>
+                            <p style="font-size: 0.875rem; color: var(--gray-600);">São Paulo, SP</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="testimonial-card rounded-2xl p-6 border border-calm-green/20">
-                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
-                        ⭐⭐⭐⭐⭐
-                    </div>
-                    <p class="text-gray-300 mb-4">"Melhorei minha qualidade de sono em 80%. O rastreamento me ajudou a identificar padrões que eu nem sabia que existiam. Indispensável!"</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-calm-mint rounded-full flex items-center justify-center">R</div>
+                <div class="card-testimonial">
+                    <div style="color: #fbbf24; font-size: 1.25rem; margin-bottom: 1.5rem; letter-spacing: 0.05em;">★★★★★</div>
+                    <p style="color: var(--gray-700); margin-bottom: 2rem; line-height: 1.7; font-size: 1.0625rem;">
+                        "Melhorei 80% da minha qualidade de sono. O rastreamento me ajudou a identificar padrões que nem sabia que existiam. Hoje durmo como não dormia há anos."
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 3rem; height: 3rem; background: var(--accent-mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 600;">R</div>
                         <div>
-                            <p class="font-medium">Ricardo Almeida</p>
-                            <p class="text-sm text-gray-400">Rio de Janeiro, RJ</p>
+                            <p style="font-weight: 600; color: var(--gray-900);">Ricardo Almeida</p>
+                            <p style="font-size: 0.875rem; color: var(--gray-600);">Rio de Janeiro, RJ</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="testimonial-card rounded-2xl p-6 border border-calm-sand/20">
-                    <div class="flex items-center gap-1 text-yellow-400 mb-4">
-                        ⭐⭐⭐⭐⭐
-                    </div>
-                    <p class="text-gray-300 mb-4">"A comunidade é incrível! Encontrei pessoas que me entenderam como ninguém. Não me sinto mais sozinha nessa jornada."</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-calm-green rounded-full flex items-center justify-center">C</div>
+                <div class="card-testimonial">
+                    <div style="color: #fbbf24; font-size: 1.25rem; margin-bottom: 1.5rem; letter-spacing: 0.05em;">★★★★★</div>
+                    <p style="color: var(--gray-700); margin-bottom: 2rem; line-height: 1.7; font-size: 1.0625rem;">
+                        "A comunidade é transformadora! Encontrei pessoas que me entendem profundamente. Não me sinto mais sozinha nessa jornada. É um verdadeiro refúgio."
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 3rem; height: 3rem; background: var(--secondary-200); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 600;">C</div>
                         <div>
-                            <p class="font-medium">Carla Mendes</p>
-                            <p class="text-sm text-gray-400">Belo Horizonte, MG</p>
+                            <p style="font-weight: 600; color: var(--gray-900);">Carla Mendes</p>
+                            <p style="font-size: 0.875rem; color: var(--gray-600);">Belo Horizonte, MG</p>
                         </div>
                     </div>
                 </div>
@@ -487,100 +833,155 @@
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="py-20 px-4 bg-calm-card/20">
+    <section id="pricing" class="py-24 px-4 gradient-section">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                    Planos para sua <span class="text-calm-blue">jornada</span>
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" style="color: var(--gray-900);">
+                    Escolha seu <span style="background: linear-gradient(135deg, var(--primary-600), var(--accent-lavender-dark)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">plano ideal</span>
                 </h2>
-                <p class="text-xl text-gray-400">Comece grátis, evolua quando quiser</p>
+                <p class="text-xl md:text-2xl" style="color: var(--gray-600); max-width: 42rem; margin: 0 auto;">
+                    Comece gratuitamente e evolua no seu ritmo. Sem compromisso, cancele quando quiser
+                </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 <!-- Free Plan -->
-                <div class="bg-calm-card rounded-2xl p-8 border border-calm-blue/20">
-                    <h3 class="text-2xl font-bold mb-2">Essencial</h3>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold">Grátis</span>
-                        <span class="text-gray-400">/sempre</span>
+                <div class="pricing-card">
+                    <h3 class="text-2xl font-bold mb-2" style="color: var(--gray-900);">Essencial</h3>
+                    <div class="mb-8">
+                        <span style="font-size: 3rem; font-weight: 700; color: var(--gray-900);">Grátis</span>
+                        <span style="color: var(--gray-600); font-size: 1.125rem;">/sempre</span>
                     </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-2 text-gray-300">✓ Exercícios de respiração</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Rastreamento de humor</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Diário emocional</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Modo SOS</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Funciona offline</li>
+                    <ul class="space-y-4 mb-10">
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Exercícios de respiração</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Rastreamento de humor</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Diário emocional privado</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Modo SOS emergencial</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Funciona offline</span>
+                        </li>
                     </ul>
-                    <button onclick="showSignup()" class="w-full bg-calm-bg hover:bg-calm-bg/70 text-white py-3 rounded-lg transition-all">
+                    <button onclick="showSignup()" style="width: 100%; background: var(--gray-900); color: white; padding: 1rem; border-radius: 0.75rem; font-weight: 600; font-size: 1.0625rem; transition: all 0.3s ease; border: none; cursor: pointer;" onmouseover="this.style.background='var(--gray-800)'" onmouseout="this.style.background='var(--gray-900)'">
                         Começar Grátis
                     </button>
                 </div>
 
-                <!-- Pro Plan -->
-                <div class="bg-gradient-to-br from-calm-blue to-calm-lavender rounded-2xl p-8 transform scale-105 shadow-2xl relative">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-calm-green text-calm-bg px-4 py-1 rounded-full text-sm font-semibold">
-                        Mais Popular
+                <!-- Pro Plan - Featured -->
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">✨ Mais Popular</div>
+                    <h3 class="text-2xl font-bold mb-2" style="color: var(--gray-900);">Premium</h3>
+                    <div class="mb-8">
+                        <span style="font-size: 3rem; font-weight: 700; color: var(--primary-600);">R$ 29,90</span>
+                        <span style="color: var(--gray-600); font-size: 1.125rem;">/mês</span>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2">Premium</h3>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold">R$ 29,90</span>
-                        <span class="text-gray-200">/mês</span>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-2 text-white">✓ Tudo do Essencial</li>
-                        <li class="flex items-center gap-2 text-white">✓ Análises avançadas</li>
-                        <li class="flex items-center gap-2 text-white">✓ Rastreamento de sono</li>
-                        <li class="flex items-center gap-2 text-white">✓ Relatórios personalizados</li>
-                        <li class="flex items-center gap-2 text-white">✓ Acesso aos grupos</li>
-                        <li class="flex items-center gap-2 text-white">✓ 2 consultas/mês com desconto</li>
+                    <ul class="space-y-4 mb-10">
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--primary-600); font-size: 1.25rem;">✓</span>
+                            <span><strong>Tudo do Essencial</strong></span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--primary-600); font-size: 1.25rem;">✓</span>
+                            <span>Análises avançadas de humor</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--primary-600); font-size: 1.25rem;">✓</span>
+                            <span>Rastreamento completo de sono</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--primary-600); font-size: 1.25rem;">✓</span>
+                            <span>Relatórios personalizados</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--primary-600); font-size: 1.25rem;">✓</span>
+                            <span>Acesso total aos grupos</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--primary-600); font-size: 1.25rem;">✓</span>
+                            <span>2 consultas/mês com desconto</span>
+                        </li>
                     </ul>
-                    <button onclick="showSignup()" class="w-full bg-white text-calm-blue hover:bg-gray-100 py-3 rounded-lg font-semibold transition-all">
+                    <button onclick="showSignup()" class="btn-primary" style="width: 100%; justify-content: center;">
                         Começar Agora
                     </button>
                 </div>
 
                 <!-- Family Plan -->
-                <div class="bg-calm-card rounded-2xl p-8 border border-calm-green/20">
-                    <h3 class="text-2xl font-bold mb-2">Família</h3>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold">R$ 79,90</span>
-                        <span class="text-gray-400">/mês</span>
+                <div class="pricing-card">
+                    <h3 class="text-2xl font-bold mb-2" style="color: var(--gray-900);">Família</h3>
+                    <div class="mb-8">
+                        <span style="font-size: 3rem; font-weight: 700; color: var(--gray-900);">R$ 79,90</span>
+                        <span style="color: var(--gray-600); font-size: 1.125rem;">/mês</span>
                     </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-2 text-gray-300">✓ Tudo do Premium</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Até 5 perfis</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Dashboard familiar</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Consultas ilimitadas</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Suporte prioritário</li>
-                        <li class="flex items-center gap-2 text-gray-300">✓ Acompanhamento semanal</li>
+                    <ul class="space-y-4 mb-10">
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span><strong>Tudo do Premium</strong></span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Até 5 perfis incluídos</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Dashboard familiar compartilhado</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Consultas ilimitadas</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Suporte prioritário 24/7</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 0.75rem; color: var(--gray-700);">
+                            <span style="color: var(--secondary-600); font-size: 1.25rem;">✓</span>
+                            <span>Acompanhamento semanal</span>
+                        </li>
                     </ul>
-                    <button onclick="showSignup()" class="w-full bg-calm-green hover:bg-calm-green/80 text-calm-bg py-3 rounded-lg font-semibold transition-all">
+                    <button onclick="showSignup()" style="width: 100%; background: var(--secondary-600); color: white; padding: 1rem; border-radius: 0.75rem; font-weight: 600; font-size: 1.0625rem; transition: all 0.3s ease; border: none; cursor: pointer;" onmouseover="this.style.background='var(--secondary-700)'" onmouseout="this.style.background='var(--secondary-600)'">
                         Proteger Família
                     </button>
                 </div>
             </div>
 
-            <p class="text-center text-gray-400 mt-8">Todos os planos incluem 7 dias de teste grátis. Cancele quando quiser.</p>
+            <p class="text-center mt-12" style="color: var(--gray-600); font-size: 1rem;">
+                ✓ Todos os planos incluem 7 dias de teste grátis  ✓ Cancele quando quiser  ✓ Sem taxas ocultas
+            </p>
         </div>
     </section>
 
     <!-- Demo Video Section -->
-    <section id="demo-video" class="py-20 px-4">
+    <section id="demo-video" class="py-24 px-4">
         <div class="max-w-5xl mx-auto">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">
-                    Veja como é <span class="text-calm-mint">simples</span>
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6" style="color: var(--gray-900);">
+                    Veja como é <span style="background: linear-gradient(135deg, var(--accent-mint), var(--primary-600)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">simples começar</span>
                 </h2>
-                <p class="text-xl text-gray-400">2 minutos para entender como transformar sua saúde mental</p>
+                <p class="text-xl md:text-2xl" style="color: var(--gray-600);">
+                    2 minutos para entender como transformar sua saúde mental
+                </p>
             </div>
             
-            <div class="relative bg-calm-card rounded-3xl overflow-hidden shadow-2xl border border-calm-blue/30">
-                <div class="aspect-video flex items-center justify-center bg-calm-bg">
-                    <div class="text-center">
-                        <div class="text-6xl mb-4 animate-pulse-soft">▶️</div>
-                        <p class="text-gray-400">Vídeo demonstrativo em breve</p>
-                        <button onclick="showSignup()" class="mt-4 bg-calm-blue hover:bg-calm-blue-dark text-white px-6 py-3 rounded-lg transition-all">
-                            Ou comece agora mesmo
+            <div style="border-radius: 2rem; overflow: hidden; box-shadow: var(--shadow-2xl); border: 1px solid var(--gray-200);">
+                <div style="aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));">
+                    <div class="text-center" style="padding: 3rem;">
+                        <div class="text-7xl mb-6 animate-pulse-glow">▶️</div>
+                        <p style="color: var(--gray-600); font-size: 1.125rem; margin-bottom: 2rem;">Vídeo demonstrativo em breve</p>
+                        <button onclick="showSignup()" class="btn-primary">
+                            Começar minha jornada agora
                         </button>
                     </div>
                 </div>
@@ -588,173 +989,178 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-20 px-4 bg-gradient-to-br from-calm-blue/20 to-calm-lavender/20">
+    <!-- Final CTA Section -->
+    <section class="py-24 px-4" style="background: linear-gradient(135deg, var(--primary-50) 0%, var(--accent-lavender) 50%, var(--secondary-50) 100%);">
         <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-4xl md:text-5xl font-bold mb-6">
-                Pronto para sua <span class="text-calm-green">transformação?</span>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-8" style="color: var(--gray-900);">
+                Pronto para sua <span style="background: linear-gradient(135deg, var(--secondary-600), var(--primary-600)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">transformação?</span>
             </h2>
-            <p class="text-xl text-gray-300 mb-8">
-                Junte-se a 12.000+ pessoas que já estão cuidando da saúde mental de forma inteligente e acolhedora
+            <p class="text-xl md:text-2xl mb-12" style="color: var(--gray-700); line-height: 1.7;">
+                Junte-se a mais de 12.000 pessoas que já estão cuidando da saúde mental de forma inteligente, acolhedora e eficaz
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="showSignup()" class="bg-calm-green hover:bg-calm-green/80 text-calm-bg px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-2xl hover:shadow-calm-green/50 transform hover:scale-105">
-                    🌸 Começar Jornada Grátis
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <button onclick="showSignup()" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 2.5rem;">
+                    <span>🌸</span>
+                    Começar Gratuitamente
                 </button>
-                <button onclick="showLogin()" class="border-2 border-calm-blue text-calm-blue hover:bg-calm-blue hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all">
+                <button onclick="showLogin()" class="btn-secondary">
                     Já tenho conta
                 </button>
             </div>
-            <p class="text-sm text-gray-400 mt-6">
-                ✓ Sem cartão de crédito  ✓ Cancelamento fácil  ✓ Dados 100% seguros
-            </p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin-top: 2rem;">
+                <span class="trust-badge">✓ Sem cartão de crédito</span>
+                <span class="trust-badge">✓ Cancele quando quiser</span>
+                <span class="trust-badge">✓ Dados 100% seguros</span>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-calm-bg py-12 px-4 border-t border-calm-blue/20">
+    <footer style="background: var(--bg-dark); padding: 4rem 1rem 2rem; border-top: 1px solid var(--gray-800);">
         <div class="max-w-7xl mx-auto">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
+            <div class="grid md:grid-cols-4 gap-12 mb-12">
                 <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <span class="text-2xl">🧘‍♀️</span>
-                        <span class="text-xl font-bold text-calm-blue">Calm Mind</span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <span class="text-3xl">🧘‍♀️</span>
+                        <span style="font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-400), var(--accent-lavender-dark)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Calm Mind</span>
                     </div>
-                    <p class="text-gray-400 text-sm">Seu espaço seguro para saúde mental e bem-estar.</p>
+                    <p style="color: var(--gray-400); font-size: 0.9375rem; line-height: 1.6;">
+                        Seu refúgio digital para saúde mental e bem-estar emocional.
+                    </p>
                 </div>
                 
                 <div>
-                    <h4 class="font-semibold mb-4">Recursos</h4>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Exercícios</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Rastreamento</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Comunidade</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Psicólogos</a></li>
+                    <h4 style="font-weight: 600; margin-bottom: 1.5rem; color: white;">Recursos</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Exercícios de Respiração</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Rastreamento de Sono</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Diário Terapêutico</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Comunidade</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="font-semibold mb-4">Empresa</h4>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Sobre</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Blog</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Carreiras</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Contato</a></li>
+                    <h4 style="font-weight: 600; margin-bottom: 1.5rem; color: white;">Empresa</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Sobre Nós</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Blog de Saúde Mental</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Trabalhe Conosco</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Contato</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="font-semibold mb-4">Suporte</h4>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Central de Ajuda</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Emergências</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Privacidade</a></li>
-                        <li><a href="#" class="hover:text-calm-mint transition-colors">Termos</a></li>
+                    <h4 style="font-weight: 600; margin-bottom: 1.5rem; color: white;">Suporte</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Central de Ajuda</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Emergências 24/7</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Política de Privacidade</a></li>
+                        <li><a href="#" style="color: var(--gray-400); text-decoration: none; font-size: 0.9375rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-400)'">Termos de Uso</a></li>
                     </ul>
                 </div>
             </div>
             
-            <div class="border-t border-calm-blue/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-gray-400 text-sm">© 2025 Calm Mind. Todos os direitos reservados.</p>
-                <div class="flex gap-6">
-                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">Instagram</a>
-                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">Facebook</a>
-                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">Twitter</a>
-                    <a href="#" class="text-gray-400 hover:text-calm-mint transition-colors">LinkedIn</a>
+            <div style="border-top: 1px solid var(--gray-800); padding-top: 2rem; display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 1.5rem;">
+                <p style="color: var(--gray-500); font-size: 0.875rem;">© 2025 Calm Mind. Todos os direitos reservados. Feito com 💙 para sua saúde mental.</p>
+                <div style="display: flex; gap: 2rem;">
+                    <a href="#" style="color: var(--gray-500); text-decoration: none; font-size: 0.875rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-500)'">Instagram</a>
+                    <a href="#" style="color: var(--gray-500); text-decoration: none; font-size: 0.875rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-500)'">Facebook</a>
+                    <a href="#" style="color: var(--gray-500); text-decoration: none; font-size: 0.875rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-500)'">Twitter</a>
+                    <a href="#" style="color: var(--gray-500); text-decoration: none; font-size: 0.875rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-400)'" onmouseout="this.style.color='var(--gray-500)'">LinkedIn</a>
                 </div>
             </div>
         </div>
     </footer>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-calm-card rounded-2xl p-8 max-w-md w-full border border-calm-blue/30 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Bem-vindo(a) de volta</h3>
-                <button onclick="closeModal('loginModal')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+    <div id="loginModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+        <div class="modal-content max-w-md w-full" style="padding: 3rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 class="text-3xl font-bold" style="color: var(--gray-900);">Bem-vindo(a) de volta</h3>
+                <button onclick="closeModal('loginModal')" style="color: var(--gray-400); font-size: 2rem; line-height: 1; background: none; border: none; cursor: pointer; transition: color 0.3s ease;" onmouseover="this.style.color='var(--gray-900)'" onmouseout="this.style.color='var(--gray-400)'">&times;</button>
             </div>
             
-            <div id="loginAlert" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+            <div id="loginAlert" class="hidden mb-4"></div>
             
-            <form id="loginForm" class="space-y-4">
+            <form id="loginForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <div>
-                    <label class="block text-sm font-medium mb-2">Email</label>
-                    <input type="email" id="loginEmail" required class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-blue focus:outline-none transition-colors" placeholder="seu@email.com">
+                    <label style="display: block; font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-900);">Email</label>
+                    <input type="email" id="loginEmail" required class="input-field" placeholder="seu@email.com">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Senha</label>
-                    <input type="password" id="loginPassword" required class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-blue focus:outline-none transition-colors" placeholder="••••••••">
+                    <label style="display: block; font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-900);">Senha</label>
+                    <input type="password" id="loginPassword" required class="input-field" placeholder="••••••••">
                 </div>
                 
-                <div class="flex items-center justify-between text-sm">
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" class="rounded">
-                        <span class="text-gray-400">Lembrar de mim</span>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.875rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" style="width: 1rem; height: 1rem; border-radius: 0.25rem;">
+                        <span style="color: var(--gray-600);">Lembrar de mim</span>
                     </label>
-                    <a href="#" class="text-calm-blue hover:text-calm-mint transition-colors">Esqueci a senha</a>
+                    <a href="#" style="color: var(--primary-600); text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-700)'" onmouseout="this.style.color='var(--primary-600)'">Esqueci a senha</a>
                 </div>
                 
-                <button type="submit" id="loginButton" class="w-full bg-calm-blue hover:bg-calm-blue-dark text-white py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-calm-blue/50 flex items-center justify-center gap-2">
-                    Entrar
+                <button type="submit" id="loginButton" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
+                    Entrar na minha conta
                 </button>
                 
-                <p class="text-center text-sm text-gray-400 mt-6">
-                    Não tem conta? <button type="button" onclick="closeModal('loginModal'); showSignup()" class="text-calm-blue hover:text-calm-mint transition-colors font-medium">Criar conta grátis</button>
+                <p style="text-align: center; font-size: 0.9375rem; color: var(--gray-600); margin-top: 1rem;">
+                    Não tem conta? <button type="button" onclick="closeModal('loginModal'); showSignup()" style="color: var(--primary-600); font-weight: 600; background: none; border: none; cursor: pointer; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-700)'" onmouseout="this.style.color='var(--primary-600)'">Criar conta grátis</button>
                 </p>
             </form>
         </div>
     </div>
 
     <!-- Signup Modal -->
-    <div id="signupModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-calm-card rounded-2xl p-8 max-w-md w-full border border-calm-green/30 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Comece sua jornada</h3>
-                <button onclick="closeModal('signupModal')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+    <div id="signupModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+        <div class="modal-content max-w-md w-full" style="padding: 3rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 class="text-3xl font-bold" style="color: var(--gray-900);">Comece sua jornada</h3>
+                <button onclick="closeModal('signupModal')" style="color: var(--gray-400); font-size: 2rem; line-height: 1; background: none; border: none; cursor: pointer; transition: color 0.3s ease;" onmouseover="this.style.color='var(--gray-900)'" onmouseout="this.style.color='var(--gray-400)'">&times;</button>
             </div>
             
-            <div id="signupAlert" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+            <div id="signupAlert" class="hidden mb-4"></div>
             
-            <form id="signupForm" class="space-y-4">
+            <form id="signupForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <div>
-                    <label class="block text-sm font-medium mb-2">Nome completo</label>
-                    <input type="text" id="signupName" required class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-green focus:outline-none transition-colors" placeholder="Seu nome">
+                    <label style="display: block; font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-900);">Nome completo</label>
+                    <input type="text" id="signupName" required class="input-field" placeholder="Como você gostaria de ser chamado(a)?">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Email</label>
-                    <input type="email" id="signupEmail" required class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-green focus:outline-none transition-colors" placeholder="seu@email.com">
+                    <label style="display: block; font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-900);">Email</label>
+                    <input type="email" id="signupEmail" required class="input-field" placeholder="seu@email.com">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Senha</label>
-                    <input type="password" id="signupPassword" required minlength="8" class="w-full bg-calm-bg border border-calm-blue/30 rounded-lg px-4 py-3 focus:border-calm-green focus:outline-none transition-colors" placeholder="Mínimo 8 caracteres">
+                    <label style="display: block; font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-900);">Senha</label>
+                    <input type="password" id="signupPassword" required minlength="8" class="input-field" placeholder="Mínimo 8 caracteres">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium mb-2">Como você se sente hoje?</label>
-                    <div class="flex justify-around">
-                        <button type="button" onclick="selectMood(1)" class="mood-btn text-4xl hover:scale-110 transition-transform opacity-50" data-mood="1">😰</button>
-                        <button type="button" onclick="selectMood(2)" class="mood-btn text-4xl hover:scale-110 transition-transform opacity-50" data-mood="2">😞</button>
-                        <button type="button" onclick="selectMood(3)" class="mood-btn text-4xl hover:scale-110 transition-transform opacity-50" data-mood="3">😐</button>
-                        <button type="button" onclick="selectMood(4)" class="mood-btn text-4xl hover:scale-110 transition-transform opacity-50" data-mood="4">😊</button>
-                        <button type="button" onclick="selectMood(5)" class="mood-btn text-4xl hover:scale-110 transition-transform opacity-50" data-mood="5">😄</button>
+                    <label style="display: block; font-size: 0.9375rem; font-weight: 600; margin-bottom: 1rem; color: var(--gray-900);">Como você se sente hoje?</label>
+                    <div style="display: flex; justify-content: space-around;">
+                        <button type="button" onclick="selectMood(1)" class="mood-btn" data-mood="1" style="font-size: 2.5rem; background: none; border: none; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">😰</button>
+                        <button type="button" onclick="selectMood(2)" class="mood-btn" data-mood="2" style="font-size: 2.5rem; background: none; border: none; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">😞</button>
+                        <button type="button" onclick="selectMood(3)" class="mood-btn" data-mood="3" style="font-size: 2.5rem; background: none; border: none; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">😐</button>
+                        <button type="button" onclick="selectMood(4)" class="mood-btn" data-mood="4" style="font-size: 2.5rem; background: none; border: none; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">😊</button>
+                        <button type="button" onclick="selectMood(5)" class="mood-btn" data-mood="5" style="font-size: 2.5rem; background: none; border: none; cursor: pointer; transition: all 0.3s ease; opacity: 0.5;">😄</button>
                     </div>
                     <input type="hidden" id="initialMood" required>
                 </div>
                 
-                <label class="flex items-start gap-2 text-sm text-gray-400">
-                    <input type="checkbox" id="termsCheckbox" required class="mt-1 rounded">
-                    <span>Aceito os <a href="#" class="text-calm-blue hover:text-calm-mint">Termos de Uso</a> e <a href="#" class="text-calm-blue hover:text-calm-mint">Política de Privacidade</a></span>
+                <label style="display: flex; align-items: start; gap: 0.75rem; font-size: 0.875rem; color: var(--gray-600); cursor: pointer;">
+                    <input type="checkbox" id="termsCheckbox" required style="margin-top: 0.125rem; width: 1rem; height: 1rem; border-radius: 0.25rem; flex-shrink: 0;">
+                    <span>Aceito os <a href="#" style="color: var(--primary-600); text-decoration: none; font-weight: 500;">Termos de Uso</a> e <a href="#" style="color: var(--primary-600); text-decoration: none; font-weight: 500;">Política de Privacidade</a></span>
                 </label>
                 
-                <button type="submit" id="signupButton" class="w-full bg-calm-green hover:bg-calm-green/80 text-calm-bg py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-calm-green/50 flex items-center justify-center gap-2">
+                <button type="submit" id="signupButton" class="btn-primary" style="width: 100%; justify-content: center; background: var(--secondary-600); box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);" onmouseover="this.style.background='var(--secondary-700)'" onmouseout="this.style.background='var(--secondary-600)'">
                     Criar Conta Grátis
                 </button>
                 
-                <p class="text-center text-sm text-gray-400 mt-6">
-                    Já tem conta? <button type="button" onclick="closeModal('signupModal'); showLogin()" class="text-calm-blue hover:text-calm-mint transition-colors font-medium">Fazer login</button>
+                <p style="text-align: center; font-size: 0.9375rem; color: var(--gray-600); margin-top: 1rem;">
+                    Já tem conta? <button type="button" onclick="closeModal('signupModal'); showLogin()" style="color: var(--primary-600); font-weight: 600; background: none; border: none; cursor: pointer; transition: color 0.3s ease;" onmouseover="this.style.color='var(--primary-700)'" onmouseout="this.style.color='var(--primary-600)'">Fazer login</button>
                 </p>
             </form>
         </div>
@@ -773,7 +1179,6 @@
         async function checkAuth() {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                // User is logged in, redirect to index.html
                 window.location.href = 'index.html';
             }
         }
@@ -784,7 +1189,6 @@
             selectedMood = mood;
             document.getElementById('initialMood').value = mood;
             
-            // Update UI
             document.querySelectorAll('.mood-btn').forEach(btn => {
                 if (btn.dataset.mood == mood) {
                     btn.style.opacity = '1';
@@ -822,7 +1226,7 @@
         function showAlert(elementId, message, type) {
             const alert = document.getElementById(elementId);
             alert.textContent = message;
-            alert.className = type === 'error' ? 'alert-error mb-4 p-3 rounded-lg text-sm' : 'alert-success mb-4 p-3 rounded-lg text-sm';
+            alert.className = type === 'error' ? 'alert-error mb-4' : 'alert-success mb-4';
             alert.classList.remove('hidden');
         }
 
@@ -834,7 +1238,7 @@
             } else {
                 button.disabled = false;
                 if (buttonId === 'loginButton') {
-                    button.innerHTML = 'Entrar';
+                    button.innerHTML = 'Entrar na minha conta';
                 } else {
                     button.innerHTML = 'Criar Conta Grátis';
                 }
@@ -859,7 +1263,6 @@
 
                 if (error) throw error;
 
-                // Success - redirect to index.html
                 window.location.href = 'index.html';
                 
             } catch (error) {
@@ -892,7 +1295,6 @@
             clearAlerts();
 
             try {
-                // Sign up the user
                 const { data, error } = await supabase.auth.signUp({
                     email: email,
                     password: password,
@@ -906,23 +1308,18 @@
 
                 if (error) throw error;
 
-                // Check if email confirmation is required
                 if (data.user && data.user.identities && data.user.identities.length === 0) {
                     showAlert('signupAlert', 'Este email já está cadastrado. Faça login.', 'error');
                     showLoading('signupButton', false);
                     return;
                 }
 
-                // Success
                 if (data.session) {
-                    // User is automatically logged in
                     window.location.href = 'index.html';
                 } else {
-                    // Email confirmation required
                     showAlert('signupAlert', 'Conta criada! Verifique seu email para confirmar.', 'success');
                     showLoading('signupButton', false);
                     
-                    // Auto-redirect to login after 3 seconds
                     setTimeout(() => {
                         closeModal('signupModal');
                         showLogin();
@@ -942,7 +1339,7 @@
             }
         });
         
-        // Smooth scroll for anchor links
+        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -956,7 +1353,6 @@
         // Check for SOS shortcut
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('sos') === 'true') {
-            // If user is logged in, redirect to index.html with SOS
             supabase.auth.getUser().then(({ data: { user } }) => {
                 if (user) {
                     window.location.href = 'index.html?sos=true';
