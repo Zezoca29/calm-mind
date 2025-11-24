@@ -1229,6 +1229,623 @@
 
     <script>
         // ==========================================
+        // SISTEMA DE MOMENTOS DE REFLEXÃO INTELIGENTES
+        // ==========================================
+        
+        const reflectionMoments = {
+            wakeUp: {
+                time: { hour: 5, minute: 30 },
+                title: "☀️ Bom dia!",
+                message: "Como você dormiu? Que tal registrar sua noite de sono?",
+                action: "Registrar Sono",
+                section: "sleep",
+                condition: async () => {
+                    // Verifica se já registrou sono hoje
+                    const entries = await getAllFromStore('sleepEntries');
+                    const today = new Date().toDateString();
+                    return !entries.some(e => new Date(e.date).toDateString() === today);
+                }
+            },
+            midMorning: {
+                time: { hour: 7, minute: 30 },
+                title: "🌱 Momento de Check-in",
+                message: "Já passou algumas horas do seu dia. Como está se sentindo?",
+                action: "Registrar Humor",
+                section: "mood",
+                condition: async () => {
+                    const entries = await getAllFromStore('moodEntries');
+                    const today = new Date().toDateString();
+                    const morningEntries = entries.filter(e => {
+                        const entryDate = new Date(e.date);
+                        return entryDate.toDateString() === today && entryDate.getHours() < 12;
+                    });
+                    return morningEntries.length === 0;
+                }
+            },
+            midDay: {
+                time: { hour: 10, minute: 0 },
+                title: "🌊 Pausa para Respirar",
+                message: "Que tal uma pausa? Um exercício de respiração pode renovar sua energia.",
+                action: "Fazer Exercício",
+                section: "breathing",
+                condition: async () => {
+                    const sessions = await getAllFromStore('breathingSessions');
+                    const today = new Date().toDateString();
+                    const todaySessions = sessions.filter(s => 
+                        new Date(s.date).toDateString() === today
+                    );
+                    return todaySessions.length === 0;
+                }
+            },
+            afternoon: {
+                time: { hour: 15, minute: 0 },
+                title: "🌤️ Energia da Tarde",
+                message: "Como está sua energia? Registre como se sente agora.",
+                action: "Registrar Humor",
+                section: "mood",
+                condition: async () => {
+                    const entries = await getAllFromStore('moodEntries');
+                    const today = new Date().toDateString();
+                    const afternoonEntries = entries.filter(e => {
+                        const entryDate = new Date(e.date);
+                        return entryDate.toDateString() === today && entryDate.getHours() >= 12 && entryDate.getHours() < 18;
+                    });
+                    return afternoonEntries.length === 0;
+                }
+            },
+            evening: {
+                time: { hour: 18, minute: 0 },
+                title: "🌅 Momento de Transição",
+                message: "O dia está chegando ao fim. Que tal fazer um exercício de respiração?",
+                action: "Fazer Exercício",
+                section: "breathing",
+                condition: async () => {
+                    const sessions = await getAllFromStore('breathingSessions');
+                    const today = new Date().toDateString();
+                    const count = sessions.filter(s => 
+                        new Date(s.date).toDateString() === today
+                    ).length;
+                    return count < 2;
+                }
+            },
+            night: {
+                time: { hour: 21, minute: 0 },
+                title: "🌙 Fim de Dia",
+                message: "Como foi seu dia? Escrever sobre ele pode trazer clareza e paz.",
+                action: "Escrever no Diário",
+                section: "diary",
+                condition: async () => {
+                    const entries = await getAllFromStore('diaryEntries');
+                    const today = new Date().toDateString();
+                    return !entries.some(e => new Date(e.date).toDateString() === today);
+                }
+            },
+            lateNight: {
+                time: { hour: 23, minute: 30 },
+                title: "✨ Hora de Descansar",
+                message: "Está quase na hora de dormir. Que tal um último check-in antes de descansar?",
+                action: "Check-in Final",
+                section: "mood",
+                condition: async () => {
+                    const entries = await getAllFromStore('moodEntries');
+                    const today = new Date().toDateString();
+                    const nightEntries = entries.filter(e => {
+                        const entryDate = new Date(e.date);
+                        return entryDate.toDateString() === today && entryDate.getHours() >= 21;
+                    });
+                    return nightEntries.length === 0;
+                }
+            }
+        };
+
+        let reflectionCheckInterval = null;
+        let lastReflectionShown = null;
+
+        // Verificar se é hora de mostrar reflexão
+        async function checkReflectionMoments() {
+            try {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+                
+                // Verificar se está dentro do período de 5:30 até 00:00
+                const currentTimeInMinutes = currentHour * 60 + currentMinute;
+                const startTime = 5 * 60 + 30; // 5:30
+                
+                const isWithinTimeWindow = currentTimeInMinutes >= startTime;
+                
+                if (!isWithinTimeWindow) {
+                    console.log(`Reflexão fora do horário. Horário de exibição: 5:30 - 00:00. Agora: ${currentHour}:${currentMinute.toString().padStart(2, '0')}`);
+                    return;
+                }
+                
+                // Verificar se é o primeiro login do dia
+                const today = new Date().toDateString();
+                const lastLoginKey = 'last_reflection_login_day';
+                const lastLoginDay = localStorage.getItem(lastLoginKey);
+                
+                // Se já fez reflexão hoje, não mostrar novamente
+                if (lastLoginDay === today) {
+                    console.log('Reflexão já foi exibida hoje');
+                    return;
+                }
+                
+                // Marcar que o login foi feito hoje
+                localStorage.setItem(lastLoginKey, today);
+
+                // Verificar cada momento de reflexão com base no horário atual
+                for (const [key, moment] of Object.entries(reflectionMoments)) {
+                    // Calcular qual período o usuário está
+                    const currentMinutesTotal = currentHour * 60 + currentMinute;
+                    const momentMinutesTotal = moment.time.hour * 60 + moment.time.minute;
+                    
+                    // Encontrar o período atual (dentro de 2 horas após cada horário marcado)
+                    const timeDiff = currentMinutesTotal - momentMinutesTotal;
+                    
+                    // Se o usuário entrar dentro de 2 horas após o período marcado, usar aquele período
+                    if (timeDiff >= 0 && timeDiff < 120) {
+                        // Verificar condição específica
+                        console.log(`Verificando condição para reflexão: ${key}`);
+                        const shouldShow = await moment.condition();
+                        
+                        if (shouldShow) {
+                            console.log(`Mostrando reflexão: ${key}`);
+                            showReflectionModal(key, moment);
+                            return;
+                        } else {
+                            console.log(`Condição não atendida para reflexão: ${key}`);
+                            return;
+                        }
+                    }
+                }
+                
+                // Se nenhum período específico se aplica, usar o mais próximo anterior
+                let closestMoment = null;
+                let closestKey = null;
+                let closestDiff = -Infinity;
+                
+                for (const [key, moment] of Object.entries(reflectionMoments)) {
+                    const momentMinutesTotal = moment.time.hour * 60 + moment.time.minute;
+                    const timeDiff = currentMinutesTotal - momentMinutesTotal;
+                    
+                    if (timeDiff >= 0 && timeDiff > closestDiff) {
+                        closestDiff = timeDiff;
+                        closestMoment = moment;
+                        closestKey = key;
+                    }
+                }
+                
+                if (closestMoment && closestKey) {
+                    console.log(`Reflexão mais próxima: ${closestKey}`);
+                    const shouldShow = await closestMoment.condition();
+                    
+                    if (shouldShow) {
+                        console.log(`Mostrando reflexão próxima: ${closestKey}`);
+                        showReflectionModal(closestKey, closestMoment);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro em checkReflectionMoments:', error);
+            }
+        }
+
+        // Mostrar modal de reflexão
+        function showReflectionModal(key, moment) {
+            try {
+                // Remover modal anterior se existir
+                const existingModal = document.getElementById('reflectionModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // Criar modal
+                const modal = document.createElement('div');
+                modal.id = 'reflectionModal';
+                modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4';
+                modal.style.animation = 'fadeInZoom 0.3s ease-out';
+                
+                modal.innerHTML = `
+                    <div class="bg-gradient-to-br from-white to-primary-50 rounded-3xl p-8 max-w-md w-full shadow-2xl" style="animation: fadeInZoom 0.3s ease-out;">
+                        <!-- Animação de entrada com partículas -->
+                        <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-primary-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-secondary-200 rounded-full blur-2xl opacity-30 animate-pulse" style="animation-delay: 0.5s;"></div>
+                        </div>
+                        
+                        <div class="relative z-10">
+                            <!-- Ícone e Título -->
+                            <div class="text-center mb-6">
+                                <div class="text-6xl mb-4 animate-float">${moment.title.split(' ')[0]}</div>
+                                <h2 class="text-2xl font-bold text-primary-700 mb-2">${moment.title.substring(3)}</h2>
+                                <p class="text-gray-700 text-lg leading-relaxed">${moment.message}</p>
+                            </div>
+
+                            <!-- Insight Personalizado -->
+                            <div id="reflectionInsight" class="bg-white/50 backdrop-blur-sm border border-primary-200 rounded-xl p-4 mb-6 text-center">
+                                <p class="text-sm text-gray-600">Carregando seu insight...</p>
+                            </div>
+
+                            <!-- Botões de Ação -->
+                            <div class="space-y-3">
+                                <button 
+                                    onclick="acceptReflection('${moment.section}')" 
+                                    class="w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                                    ${moment.action} →
+                                </button>
+                                
+                                <button 
+                                    onclick="dismissReflection()" 
+                                    class="w-full bg-white/50 hover:bg-white/80 text-gray-700 font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-gray-200">
+                                    Não agora
+                                </button>
+                            </div>
+
+                            <!-- Progresso do dia -->
+                            <div class="mt-6 pt-6 border-t border-primary-200">
+                                <div class="flex items-center justify-between text-xs text-gray-600">
+                                    <span>Seu progresso hoje</span>
+                                    <span id="dailyProgress">Carregando...</span>
+                                </div>
+                                <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div id="progressBar" class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Carregar insight personalizado e progresso
+                try {
+                    loadReflectionInsight(key);
+                    loadDailyProgress();
+                } catch (err) {
+                    console.warn('Erro ao carregar detalhes do modal:', err);
+                }
+                
+                console.log('✅ Modal exibido:', key);
+                
+                // Animação de entrada do progresso
+                setTimeout(() => {
+                    try {
+                        const progressBar = document.getElementById('progressBar');
+                        if (progressBar && progressBar.dataset.progress) {
+                            progressBar.style.width = progressBar.dataset.progress + '%';
+                        }
+                    } catch (err) {
+                        console.warn('Erro ao animar progresso:', err);
+                    }
+                }, 300);
+            } catch (error) {
+                console.error('❌ Erro ao exibir modal de reflexão:', error);
+            }
+        }
+
+        // Carregar insight personalizado baseado em dados do usuário
+        async function loadReflectionInsight(momentKey) {
+            const insightElement = document.getElementById('reflectionInsight');
+            if (!insightElement) return;
+
+            try {
+                const insights = {
+                    wakeUp: await getWakeUpInsight(),
+                    midMorning: await getMidMorningInsight(),
+                    midDay: await getMidDayInsight(),
+                    afternoon: await getAfternoonInsight(),
+                    evening: await getEveningInsight(),
+                    night: await getNightInsight(),
+                    lateNight: await getLateNightInsight()
+                };
+
+                const insight = insights[momentKey] || "Continue cuidando de você. Cada pequeno passo importa.";
+                
+                insightElement.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl">💡</span>
+                        <p class="text-sm text-gray-700 text-left">${insight}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('❌ Erro ao carregar insight:', error);
+                insightElement.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl">💡</span>
+                        <p class="text-sm text-gray-700 text-left">Continue cuidando de você. Cada pequeno passo importa.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Insights personalizados por período
+        async function getWakeUpInsight() {
+            try {
+                const entries = await getAllFromStore('sleepEntries');
+                if (entries.length > 0) {
+                    const avgQuality = entries.reduce((sum, e) => sum + (e.quality || 0), 0) / entries.length;
+                    if (avgQuality < 3) {
+                        return "Sua qualidade de sono pode melhorar. Registrar ajuda a identificar padrões!";
+                    } else if (avgQuality >= 4) {
+                        return `Você tem dormido bem! Média: ${avgQuality.toFixed(1)}/5 ⭐`;
+                    }
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar wake up insight:', err);
+            }
+            return "Registrar seu sono ajuda a entender seus padrões de descanso.";
+        }
+
+        async function getMorningInsight() {
+            try {
+                const entries = await getAllFromStore('sleepEntries');
+                if (entries.length > 0) {
+                    const avgQuality = entries.reduce((sum, e) => sum + (e.quality || 0), 0) / entries.length;
+                    if (avgQuality < 3) {
+                        return "Sua qualidade de sono pode melhorar. Registrar ajuda a identificar padrões!";
+                    } else if (avgQuality >= 4) {
+                        return `Você tem dormido bem! Média: ${avgQuality.toFixed(1)}/5 ⭐`;
+                    }
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar morning insight:', err);
+            }
+            return "Registrar seu sono ajuda a entender seus padrões de descanso.";
+        }
+
+        async function getMidMorningInsight() {
+            try {
+                const entries = await getAllFromStore('moodEntries');
+                const recentEntries = entries.filter(e => {
+                    const daysDiff = (Date.now() - new Date(e.date)) / (1000 * 60 * 60 * 24);
+                    return daysDiff <= 7;
+                });
+                
+                if (recentEntries.length >= 3) {
+                    const avgMood = recentEntries.reduce((sum, e) => sum + (e.mood || 0), 0) / recentEntries.length;
+                    if (avgMood >= 4) {
+                        return `Você está mantendo um humor positivo! 🌟`;
+                    } else if (avgMood < 3) {
+                        return "Está sendo uma semana difícil? Registrar pode ajudar.";
+                    }
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar midMorning insight:', err);
+            }
+            return "Como começou sua manhã? Registrar ajuda a reconhecer padrões.";
+        }
+
+        async function getMidDayInsight() {
+            try {
+                const sessions = await getAllFromStore('breathingSessions');
+                const today = sessions.filter(s => 
+                    new Date(s.date).toDateString() === new Date().toDateString()
+                );
+                if (today.length === 0) {
+                    return "Exercícios de respiração reduzem ansiedade em 2 minutos!";
+                } else {
+                    return "Você já fez um exercício hoje! Que tal mais um? 🌟";
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar midDay insight:', err);
+            }
+            return "Uma pausa para respirar pode renovar sua energia.";
+        }
+
+        async function getAfternoonInsight() {
+            try {
+                const sessions = await getAllFromStore('breathingSessions');
+                const thisWeek = sessions.filter(s => {
+                    const daysDiff = (Date.now() - new Date(s.date)) / (1000 * 60 * 60 * 24);
+                    return daysDiff <= 7;
+                });
+                
+                if (thisWeek.length >= 3) {
+                    return `Você já fez ${thisWeek.length} exercícios esta semana! 🌟`;
+                } else if (thisWeek.length === 0) {
+                    return "Exercícios de respiração reduzem ansiedade!";
+                }
+                return "Uma pausa para respirar pode renovar sua energia.";
+            } catch (err) {
+                console.warn('Erro ao buscar afternoon insight:', err);
+            }
+            return "Uma pausa para respirar pode renovar sua energia.";
+        }
+
+        async function getEveningInsight() {
+            try {
+                const sessions = await getAllFromStore('breathingSessions');
+                const today = sessions.filter(s => 
+                    new Date(s.date).toDateString() === new Date().toDateString()
+                );
+                if (today.length < 2) {
+                    return "O dia está chegando ao fim. Um exercício de respiração ajuda.";
+                } else {
+                    return "Você já fez 2 exercícios hoje! Que dedicação! 💚";
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar evening insight:', err);
+            }
+            return "O dia está chegando ao fim. Cuide-se bem.";
+        }
+
+        async function getNightInsight() {
+            try {
+                const entries = await getAllFromStore('diaryEntries');
+                const thisMonth = entries.filter(e => {
+                    const entryDate = new Date(e.date);
+                    const now = new Date();
+                    return entryDate.getMonth() === now.getMonth() && entryDate.getFullYear() === now.getFullYear();
+                });
+                
+                if (thisMonth.length >= 5) {
+                    return `Você tem sido consistente! ${thisMonth.length} entradas. Continue! 📝`;
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar night insight:', err);
+            }
+            return "Escrever sobre seu dia ajuda a processar emoções.";
+        }
+
+        async function getLateNightInsight() {
+            try {
+                const moodEntries = await getAllFromStore('moodEntries');
+                const today = moodEntries.filter(e => {
+                    return new Date(e.date).toDateString() === new Date().toDateString();
+                });
+                
+                if (today.length === 0) {
+                    return "Antes de dormir, um check-in rápido ajuda.";
+                } else if (today.length >= 2) {
+                    return "Você está cuidando bem de si! 💚 Durma bem!";
+                }
+            } catch (err) {
+                console.warn('Erro ao buscar late night insight:', err);
+            }
+            return "Um registro antes de dormir encerra o dia com consciência.";
+        }
+
+        // Carregar progresso diário
+        async function loadDailyProgress() {
+            const progressElement = document.getElementById('dailyProgress');
+            const progressBar = document.getElementById('progressBar');
+            if (!progressElement || !progressBar) {
+                console.warn('Elementos de progresso não encontrados');
+                return;
+            }
+
+            try {
+                const today = new Date().toDateString();
+                
+                // Se getAllFromStore não existir, usar valores padrão
+                if (typeof getAllFromStore === 'undefined') {
+                    console.warn('getAllFromStore não disponível');
+                    progressElement.textContent = `0/4 atividades`;
+                    progressBar.style.width = '0%';
+                    return;
+                }
+                
+                // Verificar completude de cada categoria
+                const checks = await Promise.all([
+                    getAllFromStore('moodEntries').then(entries => 
+                        entries.some(e => new Date(e.date).toDateString() === today)
+                    ).catch(err => {
+                        console.warn('Erro ao buscar moodEntries:', err);
+                        return false;
+                    }),
+                    getAllFromStore('sleepEntries').then(entries => 
+                        entries.some(e => new Date(e.date).toDateString() === today)
+                    ).catch(err => {
+                        console.warn('Erro ao buscar sleepEntries:', err);
+                        return false;
+                    }),
+                    getAllFromStore('breathingSessions').then(sessions => 
+                        sessions.some(s => new Date(s.date).toDateString() === today)
+                    ).catch(err => {
+                        console.warn('Erro ao buscar breathingSessions:', err);
+                        return false;
+                    }),
+                    getAllFromStore('diaryEntries').then(entries => 
+                        entries.some(e => new Date(e.date).toDateString() === today)
+                    ).catch(err => {
+                        console.warn('Erro ao buscar diaryEntries:', err);
+                        return false;
+                    })
+                ]);
+
+                const completed = checks.filter(Boolean).length;
+                const progress = (completed / 4) * 100;
+
+                progressElement.textContent = `${completed}/4 atividades`;
+                progressBar.dataset.progress = progress;
+                progressBar.style.width = progress + '%';
+                
+                console.log('✅ Progresso carregado:', completed, '/', 4);
+            } catch (error) {
+                console.error('❌ Erro ao carregar progresso:', error);
+                // Fallback
+                document.getElementById('dailyProgress').textContent = `0/4 atividades`;
+            }
+        }
+
+        // Aceitar reflexão e ir para seção
+        function acceptReflection(section) {
+            try {
+                console.log('✅ acceptReflection chamado com seção:', section);
+                dismissReflection();
+                
+                // Feedback positivo
+                setTimeout(() => {
+                    try {
+                        console.log('Navegando para:', section);
+                        if (typeof showSection === 'function') {
+                            showSection(section);
+                        }
+                        if (typeof showToast === 'function') {
+                            showToast('Ótima escolha! Vamos lá! 💚');
+                        }
+                    } catch (err) {
+                        console.warn('Erro ao navegar:', err);
+                    }
+                }, 300);
+            } catch (error) {
+                console.error('❌ Erro em acceptReflection:', error);
+            }
+        }
+
+        // Adiar reflexão
+        function snoozeReflection(key) {
+            console.log('✅ snoozeReflection chamado para:', key);
+            dismissReflection();
+            
+            // Agendar lembrete para 1 hora depois
+            const snoozeTime = Date.now() + (60 * 60 * 1000);
+            localStorage.setItem(`reflection_snooze_${key}`, snoozeTime.toString());
+            
+            console.log('Reflexão adiada para 1 hora');
+            showToast('Ok! Vou te lembrar em 1 hora 😊');
+        }
+
+        // Dispensar reflexão
+        function dismissReflection() {
+            try {
+                const modal = document.getElementById('reflectionModal');
+                if (modal) {
+                    modal.style.animation = 'fadeInZoom 0.3s ease-out reverse';
+                    setTimeout(() => {
+                        try {
+                            if (modal && modal.parentElement) {
+                                modal.remove();
+                            }
+                        } catch (err) {
+                            console.warn('Erro ao remover modal:', err);
+                        }
+                    }, 300);
+                }
+            } catch (error) {
+                console.warn('Erro em dismissReflection:', error);
+            }
+        }
+
+        // Iniciar verificação periódica de momentos de reflexão
+        function startReflectionSystem() {
+            // Verificar imediatamente ao iniciar (primeiro login)
+            setTimeout(() => {
+                try {
+                    checkReflectionMoments().catch(err => {
+                        console.warn('⚠️ Erro ao verificar reflexão:', err);
+                    });
+                } catch (err) {
+                    console.warn('⚠️ Erro ao iniciar reflexão:', err);
+                }
+            }, 500);
+        }
+
+        // Parar sistema de reflexão
+        function stopReflectionSystem() {
+            // Sistema não usa mais interval, apenas verifica no login
+        }
+
+        // ==========================================
         // SISTEMA DE FRASES MOTIVACIONAIS
         // ==========================================
         
@@ -3318,6 +3935,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Inicia rotação de frases motivacionais
                 startPhraseRotation();
                 
+                // 🆕 INICIAR SISTEMA DE MOMENTOS DE REFLEXÃO
+                startReflectionSystem();
+                
                 // Initialize sleep tracking
                 await loadSleepHistory();
                 await updateSleepInsights();
@@ -3502,6 +4122,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Logout
         async function logout() {
             try {
+                // 🆕 PARAR SISTEMA DE REFLEXÃO
+                stopReflectionSystem();
+                
                 const { error } = await supabaseClient.auth.signOut();
                 if (error) throw error;
                 
