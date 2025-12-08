@@ -314,6 +314,18 @@ async function syncSleepEntries(userId) {
 
     for (const entry of unsyncedEntries) {
         try {
+            // Validate duration to prevent numeric overflow in database (NUMERIC(4,2) max is 99.99)
+            let duration = entry.duration || 0;
+            if (typeof duration === 'string') {
+                duration = parseFloat(duration);
+            }
+            
+            // Cap duration at maximum allowed value to prevent overflow
+            if (duration > 99.99) {
+                console.warn(`Duração do sono muito longa (${duration}h), limitando a 99.99h para evitar overflow numérico`);
+                duration = 99.99;
+            }
+
             const { data, error } = await supabaseClient
                 .from('sleep_entries')
                 .upsert({
@@ -322,7 +334,7 @@ async function syncSleepEntries(userId) {
                     date: entry.date,
                     sleep_time: entry.sleepTime || null,
                     wake_time: entry.wakeTime || null,
-                    duration: entry.duration || 0,
+                    duration: duration,
                     quality: entry.quality || 3,
                     notes: entry.notes || '',
                     timestamp: entry.timestamp || new Date().toISOString()
@@ -338,6 +350,8 @@ async function syncSleepEntries(userId) {
             await updateSyncStatus('sleepEntries', entry.id);
         } catch (error) {
             console.error('Erro ao sincronizar registro de sono:', error);
+            // Log the specific entry that caused the error for debugging
+            console.error('Entry data:', entry);
         }
     }
 }
@@ -622,12 +636,20 @@ async function downloadSleepEntries(userId, since) {
 
                 if (!exists) {
                     console.log(`💾 Salvando registro de sono baixado: ${entry.local_id}`);
+                    
+                    // Validate duration to prevent issues with invalid data from server
+                    let duration = entry.duration || 0;
+                    if (typeof duration === 'number' && duration > 99.99) {
+                        console.warn(`Duração do sono muito longa (${duration}h) recebida do servidor, limitando a 99.99h`);
+                        duration = 99.99;
+                    }
+                    
                     await saveToStore('sleepEntries', {
                         id: entry.local_id,
                         date: entry.date,
                         sleepTime: entry.sleep_time,
                         wakeTime: entry.wake_time,
-                        duration: entry.duration,
+                        duration: duration,
                         quality: entry.quality,
                         notes: entry.notes,
                         timestamp: entry.timestamp,

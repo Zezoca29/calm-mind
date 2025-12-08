@@ -23,6 +23,75 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- React e ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Framer Motion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/framer-motion/11.0.3/framer-motion.min.js"></script>
+
+    <!-- Babel Standalone para JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+
+    <!-- Ocean Mind Integration -->
+   <!-- Carregar Ocean Mind Component -->
+    <script type="text/babel" src="js/oceanmind.jsx"></script>
+
+<!-- Script de Integração -->
+<script type="text/babel">
+    const { useState } = React;
+    let oceanMindRoot = null;
+
+    function openOceanMind() {
+        const container = document.getElementById('ocean-mind-root');
+        if (!container) {
+            console.error('Container ocean-mind-root não encontrado');
+            return;
+        }
+        
+        // Verificar se OceanoEmocional está disponível
+        if (typeof window.OceanoEmocional === 'undefined') {
+            console.error('OceanoEmocional não carregado');
+            return;
+        }
+        
+        // Esconder app principal temporariamente
+        const mainApp = document.getElementById('main-app');
+        if (mainApp) mainApp.style.display = 'none';
+        
+        // Criar root do React se ainda não existir
+        if (!oceanMindRoot) {
+            oceanMindRoot = ReactDOM.createRoot(container);
+        }
+        
+        // Renderizar Ocean Mind
+        oceanMindRoot.render(React.createElement(window.OceanoEmocional));
+    }
+
+    function closeOceanMind() {
+        // Mostrar app principal novamente
+        const mainApp = document.getElementById('main-app');
+        if (mainApp) mainApp.style.display = 'block';
+        
+        // Limpar Ocean Mind
+        if (oceanMindRoot) {
+            oceanMindRoot.unmount();
+            oceanMindRoot = null;
+        }
+    }
+    
+    // Tornar funções globais
+    window.openOceanMind = openOceanMind;
+    window.closeOceanMind = closeOceanMind;
+</script>
+```
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -561,7 +630,10 @@
             </div>
         </div>
 
-        <!-- Main App -->
+        <!-- Ocean Mind Container -->
+    <div id="ocean-mind-root"></div>
+
+    <!-- Main App -->
         <div id="main-app" class="hidden">
             <!-- Header -->
             <header class="bg-white p-4 shadow-lg">
@@ -594,6 +666,13 @@
                         <!-- Botão SOS -->
                         <button onclick="activateSOS()" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 hover:shadow-lg hover:scale-105 text-white font-bold py-2 px-4 rounded-full animate-pulse shadow-md z-50 text-sm transition-all duration-200" title="Ativar modo de emergência SOS">
                             🆘 <span class="hidden md:inline">SOS</span>
+                        </button>
+                        
+                        <!-- Botão Ocean Mind -->
+                        <button onclick="openOceanMind()" 
+                            class="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-2 px-4 rounded-full animate-pulse shadow-md z-50 text-sm transition-all duration-200" 
+                            title="Abrir Ocean Mind - Experiência Imersiva">
+                            🌊 <span class="hidden md:inline">Ocean Mind</span>
                         </button>
                     </div>
                 </div>
@@ -3521,6 +3600,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 duration = (wakeDate - sleepDate) / (1000 * 60 * 60);
             }
             
+            // Validate duration to prevent numeric overflow in database (NUMERIC(4,2) max is 99.99)
+            if (duration > 99.99) {
+                console.warn('Duração do sono muito longa, limitando a 99.99h para evitar overflow numérico');
+                duration = 99.99;
+            }
+            
             return duration;
         }
 
@@ -3634,7 +3719,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 const entries = await getAllFromStore('sleepEntries');
                 const cutoffDate = new Date();
                 cutoffDate.setDate(cutoffDate.getDate() - days);
-                return entries.filter(r => new Date(r.date) >= cutoffDate);
+                
+                // Filter out invalid entries and ensure duration is a valid number
+                const validEntries = entries.filter(r => {
+                    // Check if entry has required fields
+                    if (!r.date) return false;
+                    
+                    // Check if date is valid
+                    const entryDate = new Date(r.date);
+                    if (isNaN(entryDate.getTime())) return false;
+                    
+                    // Check if duration is valid (between 0 and 99.99 hours)
+                    const duration = r.duration || 0;
+                    if (typeof duration !== 'number' && typeof duration !== 'string') return false;
+                    
+                    const durationValue = typeof duration === 'string' ? parseFloat(duration) : duration;
+                    if (isNaN(durationValue) || durationValue < 0 || durationValue > 99.99) return false;
+                    
+                    // Check if quality is valid (between 1 and 5)
+                    const quality = r.quality || 0;
+                    if (typeof quality !== 'number' || quality < 1 || quality > 5) return false;
+                    
+                    return entryDate >= cutoffDate;
+                });
+                
+                return validEntries;
             } catch (error) {
                 console.error('Error getting sleep records:', error);
                 return [];
@@ -3691,13 +3800,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Sleep insights updated successfully');
             } catch (error) {
                 console.error('Error updating sleep insights:', error);
+            }
+        }
                 // Show error state
                 document.getElementById('avgSleepHours').textContent = 'Erro';
                 document.getElementById('avgSleepHoursInsights').textContent = 'Erro';
                 document.getElementById('sleepRegularity').textContent = 'Erro';
                 document.getElementById('avgSleepQuality').textContent = 'Erro';
-            }
-        }
+
 
         // Load and display sleep history
         async function loadSleepHistory() {
@@ -3810,6 +3920,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     duration = (wakeTimeNextDay - sleepTime) / (1000 * 60 * 60); // hours
                 } else {
                     duration = (wakeTime - sleepTime) / (1000 * 60 * 60); // hours
+                }
+
+                // Validate duration to prevent numeric overflow in database (NUMERIC(4,2) max is 99.99)
+                if (duration > 99.99) {
+                    showToast('Duração do sono muito longa. Máximo permitido é 99.99 horas (aprox. 4 dias).');
+                    return;
                 }
 
                 try {
@@ -4300,6 +4416,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
             for (const entry of unsyncedEntries) {
                 try {
+                    // Validate duration to prevent numeric overflow in database (NUMERIC(4,2) max is 99.99)
+                    let duration = entry.duration || 0;
+                    
+                    // Convert to number if it's a string
+                    if (typeof duration === 'string') {
+                        duration = parseFloat(duration);
+                    }
+                    
+                    // Ensure duration is a valid number
+                    if (isNaN(duration) || typeof duration !== 'number' || !isFinite(duration)) {
+                        console.warn(`Duração inválida (${entry.duration}), definindo como 0`);
+                        duration = 0;
+                    }
+                    
+                    // Cap duration at maximum allowed value to prevent overflow
+                    if (duration > 99.99) {
+                        console.warn(`Duração do sono muito longa (${duration}h), limitando a 99.99h para evitar overflow numérico`);
+                        duration = 99.99;
+                    }
+                    
+                    // Ensure duration is not negative
+                    if (duration < 0) {
+                        console.warn(`Duração negativa (${duration}h), definindo como 0`);
+                        duration = 0;
+                    }
+                    
+                    // Ensure duration is formatted correctly for NUMERIC(4,2) field
+                    duration = Number(duration.toFixed(2));
+
+                    // Log the data being sent for debugging
+                    console.log('Sending sleep entry to Supabase:', {
+                        user_id: userId,
+                        local_id: entry.id,
+                        date: entry.date,
+                        sleep_time: entry.sleepTime,
+                        wake_time: entry.wakeTime,
+                        duration: duration,
+                        quality: entry.quality,
+                        notes: entry.notes,
+                        timestamp: entry.timestamp
+                    });
+                    
                     const { data, error } = await supabaseClient
                         .from('sleep_entries')
                         .upsert({
@@ -4308,7 +4466,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             date: entry.date,
                             sleep_time: entry.sleepTime,
                             wake_time: entry.wakeTime,
-                            duration: entry.duration,
+                            duration: duration,
                             quality: entry.quality,
                             notes: entry.notes,
                             timestamp: entry.timestamp
@@ -4499,12 +4657,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     const exists = localEntries.some(e => e.id === entry.local_id);
 
                     if (!exists) {
+                        // Validate duration to prevent issues with invalid data from server
+                        let duration = entry.duration || 0;
+                        
+                        // Convert to number if it's a string
+                        if (typeof duration === 'string') {
+                            duration = parseFloat(duration);
+                        }
+                        
+                        // Ensure duration is a valid number
+                        if (isNaN(duration) || typeof duration !== 'number' || !isFinite(duration)) {
+                            console.warn(`Duração inválida (${entry.duration}) recebida do servidor, definindo como 0`);
+                            duration = 0;
+                        }
+                        
+                        // Cap duration at maximum allowed value to prevent overflow
+                        if (duration > 99.99) {
+                            console.warn(`Duração do sono muito longa (${duration}h) recebida do servidor, limitando a 99.99h`);
+                            duration = 99.99;
+                        }
+                        
+                        // Ensure duration is not negative
+                        if (duration < 0) {
+                            console.warn(`Duração negativa (${duration}h) recebida do servidor, definindo como 0`);
+                            duration = 0;
+                        }
+                        
+                        // Ensure duration is formatted correctly for NUMERIC(4,2) field
+                        duration = Number(duration.toFixed(2));
+                        
                         await saveToStore('sleepEntries', {
                             id: entry.local_id,
                             date: entry.date,
                             sleepTime: entry.sleep_time,
                             wakeTime: entry.wake_time,
-                            duration: entry.duration,
+                            duration: duration,
                             quality: entry.quality,
                             notes: entry.notes,
                             timestamp: entry.timestamp,
@@ -4547,6 +4734,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (wakeTime <= sleepTime) {
             e.preventDefault();
             alert("A hora que acordou deve ser maior que a hora que dormiu.");
+            return;
+        }
+        
+        // Validate duration to prevent numeric overflow in database (NUMERIC(4,2) max is 99.99)
+        let duration;
+        if (wakeTime < sleepTime) {
+            // If wake time is before sleep time, assume it's the next day
+            const wakeTimeNextDay = new Date(wakeTime);
+            wakeTimeNextDay.setDate(wakeTimeNextDay.getDate() + 1);
+            duration = (wakeTimeNextDay - sleepTime) / (1000 * 60 * 60); // hours
+        } else {
+            duration = (wakeTime - sleepTime) / (1000 * 60 * 60); // hours
+        }
+        
+        if (duration > 99.99) {
+            e.preventDefault();
+            alert("Duração do sono muito longa. Máximo permitido é 99.99 horas (aprox. 4 dias).");
             return;
         }
     });
@@ -4605,6 +4809,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     <!-- Melhorias de UI para Sincronização -->
     <script src="/js/sync-ui-enhancements.js"></script>
+    
+    <!-- Carregar o Componente React -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="/js/oceanmind.jsx"></script>
 </body>
 </html>
 

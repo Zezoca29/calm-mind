@@ -60,14 +60,22 @@ class SmartRecommendationEngine {
     analyzeSleepQuality(entries) {
         if (!entries.length) return null;
 
-        const avgDuration = entries.reduce((sum, e) => sum + (e.duration || 0), 0) / entries.length;
-        const avgQuality = entries.reduce((sum, e) => sum + (e.quality || 0), 0) / entries.length;
+        // Filter out invalid entries and ensure duration is a valid number
+        const validEntries = entries.filter(e => {
+            const duration = e.duration || 0;
+            return typeof duration === 'number' && !isNaN(duration) && duration >= 0 && duration <= 99.99;
+        });
+
+        if (!validEntries.length) return null;
+
+        const avgDuration = validEntries.reduce((sum, e) => sum + (e.duration || 0), 0) / validEntries.length;
+        const avgQuality = validEntries.reduce((sum, e) => sum + (e.quality || 0), 0) / validEntries.length;
 
         return {
             averageDuration: Math.round(avgDuration * 10) / 10,
             averageQuality: Math.round(avgQuality * 10) / 10,
             status: avgQuality >= 3.5 ? 'good' : avgQuality >= 2.5 ? 'fair' : 'poor',
-            trend: this.calculateSleepTrend(entries)
+            trend: this.calculateSleepTrend(validEntries)
         };
     }
 
@@ -262,10 +270,16 @@ class SmartRecommendationEngine {
      * Calcula tendência de sono
      */
     calculateSleepTrend(entries) {
-        if (entries.length < 3) return 'insufficient_data';
+        // Filter out invalid entries
+        const validEntries = entries.filter(e => {
+            const duration = e.duration || 0;
+            return typeof duration === 'number' && !isNaN(duration) && duration >= 0 && duration <= 99.99;
+        });
 
-        const recentQuality = entries.slice(-7).reduce((sum, e) => sum + (e.quality || 0), 0) / Math.min(7, entries.length);
-        const previousQuality = entries.slice(-14, -7).reduce((sum, e) => sum + (e.quality || 0), 0) / Math.min(7, entries.slice(-14, -7).length);
+        if (validEntries.length < 3) return 'insufficient_data';
+
+        const recentQuality = validEntries.slice(-7).reduce((sum, e) => sum + (e.quality || 0), 0) / Math.min(7, validEntries.length);
+        const previousQuality = validEntries.slice(-14, -7).reduce((sum, e) => sum + (e.quality || 0), 0) / Math.min(7, validEntries.slice(-14, -7).length);
 
         if (recentQuality > previousQuality + 0.5) return 'improving';
         if (recentQuality < previousQuality - 0.5) return 'declining';
@@ -732,7 +746,30 @@ class SmartRecommendationEngine {
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-            return entries.filter(e => new Date(e.date) >= thirtyDaysAgo) || [];
+            // Filter out invalid entries and ensure duration is a valid number
+            const validEntries = entries.filter(e => {
+                // Check if entry has required fields
+                if (!e.date) return false;
+                
+                // Check if date is valid
+                const entryDate = new Date(e.date);
+                if (isNaN(entryDate.getTime())) return false;
+                
+                // Check if duration is valid (between 0 and 99.99 hours)
+                const duration = e.duration || 0;
+                if (typeof duration !== 'number' && typeof duration !== 'string') return false;
+                
+                const durationValue = typeof duration === 'string' ? parseFloat(duration) : duration;
+                if (isNaN(durationValue) || durationValue < 0 || durationValue > 99.99) return false;
+                
+                // Check if quality is valid (between 1 and 5)
+                const quality = e.quality || 0;
+                if (typeof quality !== 'number' || quality < 1 || quality > 5) return false;
+                
+                return entryDate >= thirtyDaysAgo;
+            });
+
+            return validEntries;
         } catch {
             return [];
         }
@@ -750,6 +787,7 @@ class SmartRecommendationEngine {
         }
     }
 
+    
     async getLastMoodEntry() {
         try {
             const entries = await getAllFromStore('moodEntries');

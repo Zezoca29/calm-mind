@@ -16,6 +16,9 @@ if (!AnimatePresence) {
   AnimatePresence = ({ children }) => children;
 }
 
+// Add logging to track component loading
+console.log('OceanMind: Component script loaded');
+
 const Icon = ({ children, size = 18, className = '' }) => (
   <span className={className} style={{ fontSize: size }}>{children}</span>
 );
@@ -135,6 +138,7 @@ const exercises = {
 
 // Fundo Oceano com Ondas Animadas
 const OceanBackground = ({ timeOfDay }) => {
+  console.log('OceanMind: Rendering OceanBackground with timeOfDay:', timeOfDay);
   return (
     <div 
       className="fixed inset-0 -z-10 transition-all duration-[2000ms] ease-in-out"
@@ -186,6 +190,7 @@ const OceanBackground = ({ timeOfDay }) => {
 
 // Esfera Emocional Central
 const EmotionalSphere = ({ emotion, onTap }) => {
+  console.log('OceanMind: Rendering EmotionalSphere with emotion:', emotion);
   const colors = emotionColors[emotion];
   
   return (
@@ -218,6 +223,7 @@ const EmotionalSphere = ({ emotion, onTap }) => {
 
 // Texto Animado (palavra por palavra)
 const AnimatedText = ({ text }) => {
+  console.log('OceanMind: Rendering AnimatedText:', text);
   const words = text.split(' ');
   
   return (
@@ -239,6 +245,7 @@ const AnimatedText = ({ text }) => {
 
 // Painel Inferior Glassmorphism
 const GlassPanel = ({ message, actions, onInputSubmit }) => {
+  console.log('OceanMind: Rendering GlassPanel with message:', message);
   const [inputText, setInputText] = useState('');
   
   const handleSubmit = () => {
@@ -298,6 +305,7 @@ const GlassPanel = ({ message, actions, onInputSubmit }) => {
 
 // Menu Radial
 const RadialMenu = ({ onClose, onSelectExercise }) => {
+  console.log('OceanMind: Rendering RadialMenu');
   const buttons = [
     { icon: Wind, label: 'Respirar', action: () => onSelectExercise('breathing-478') },
     { icon: Sparkles, label: 'Meditar', action: () => onSelectExercise('meditation') },
@@ -349,10 +357,12 @@ const RadialMenu = ({ onClose, onSelectExercise }) => {
 
 // Modal de Exercício
 const ExerciseModal = ({ exercise, onClose }) => {
+  console.log('OceanMind: Rendering ExerciseModal with exercise:', exercise?.name);
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   
   useEffect(() => {
+    console.log('OceanMind: Initializing ExerciseModal effect');
     const stepDuration = (exercise.duration / exercise.script.length) * 1000;
     const progressInterval = setInterval(() => {
       setProgress(p => {
@@ -375,6 +385,7 @@ const ExerciseModal = ({ exercise, onClose }) => {
     }, stepDuration);
     
     return () => {
+      console.log('OceanMind: Cleaning up ExerciseModal intervals');
       clearInterval(progressInterval);
       clearInterval(stepInterval);
     };
@@ -437,6 +448,7 @@ const ExerciseModal = ({ exercise, onClose }) => {
 
 // ============= APP PRINCIPAL =============
 function OceanoEmocional() {
+  console.log('OceanMind: Initializing OceanoEmocional component');
   const [emotion, setEmotion] = useState('neutral');
   const [timeOfDay, setTimeOfDay] = useState('morning');
   const [showMenu, setShowMenu] = useState(false);
@@ -446,6 +458,7 @@ function OceanoEmocional() {
   
   // Detectar horário do dia
   useEffect(() => {
+    console.log('OceanMind: Initializing time of day detection');
     const updateTimeOfDay = () => {
       const hour = new Date().getHours();
       if (hour >= 5 && hour < 8) setTimeOfDay('dawn');
@@ -462,6 +475,7 @@ function OceanoEmocional() {
   
   // Mensagem inicial do assistente
   useEffect(() => {
+    console.log('OceanMind: Setting initial assistant message');
     const hour = new Date().getHours();
     let greeting = '';
     
@@ -475,6 +489,7 @@ function OceanoEmocional() {
   
   // Interpretar mensagem do usuário
   const interpretMessage = useCallback((text) => {
+    console.log('OceanMind: Interpreting user message:', text);
     const lower = text.toLowerCase();
     
     const keywords = {
@@ -519,6 +534,14 @@ function OceanoEmocional() {
     { icon: Moon, label: 'Dormir', onClick: () => setCurrentExercise('deep-sleep') }
   ];
   
+  console.log('OceanMind: Rendering main component with state:', {
+    emotion,
+    timeOfDay,
+    showMenu,
+    currentExercise,
+    assistantMessage
+  });
+  
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <OceanBackground timeOfDay={timeOfDay} />
@@ -558,5 +581,8 @@ function OceanoEmocional() {
   );
 }
 
+// Add logging to track export
+console.log('OceanMind: Exporting OceanoEmocional component');
+
+// Make the component available globally
 window.OceanoEmocional = OceanoEmocional;
-export default OceanoEmocional;
