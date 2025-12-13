@@ -1,23 +1,4 @@
-const { useState, useEffect, useCallback } = React;
-const fm = window.framerMotion || window.FramerMotion || {};
-let motion = fm.motion;
-let AnimatePresence = fm.AnimatePresence;
-if (!motion) {
-  motion = {
-    div: (props) => React.createElement('div', props),
-    span: (props) => React.createElement('span', props),
-    button: (props) => React.createElement('button', props),
-    svg: (props) => React.createElement('svg', props),
-    path: (props) => React.createElement('path', props),
-    h2: (props) => React.createElement('h2', props),
-  };
-}
-if (!AnimatePresence) {
-  AnimatePresence = ({ children }) => children;
-}
-
-// Add logging to track component loading
-console.log('OceanMind: Component script loaded');
+import React, { useState, useEffect, useCallback } from 'react';
 
 const Icon = ({ children, size = 18, className = '' }) => (
   <span className={className} style={{ fontSize: size }}>{children}</span>
@@ -31,15 +12,25 @@ const BookOpen = (props) => <Icon {...props}>📖</Icon>;
 const Settings = (props) => <Icon {...props}>⚙️</Icon>;
 const X = (props) => <Icon {...props}>✕</Icon>;
 const Send = (props) => <Icon {...props}>📨</Icon>;
+const Home = (props) => <Icon {...props}>🏠</Icon>;
 
 // ============= CONFIGURAÇÕES =============
 const emotionColors = {
-  calm: { from: '#6DD5FA', to: '#2980B9', glow: 'rgba(109, 213, 250, 0.4)' },
-  anxious: { from: '#FFB347', to: '#FF8C42', glow: 'rgba(255, 179, 71, 0.4)' },
-  sleep: { from: '#B19CD9', to: '#6A5ACD', glow: 'rgba(177, 156, 217, 0.4)' },
-  happy: { from: '#FFD93D', to: '#FFBE0B', glow: 'rgba(255, 217, 61, 0.4)' },
-  sad: { from: '#B0C4DE', to: '#778899', glow: 'rgba(176, 196, 222, 0.4)' },
-  neutral: { from: '#E8F5E9', to: '#A5D6A7', glow: 'rgba(232, 245, 233, 0.4)' }
+  calm: { from: '#6DD5FA', to: '#2980B9', glow: 'rgba(109, 213, 250, 0.3)' },
+  anxious: { from: '#FFB347', to: '#FF8C42', glow: 'rgba(255, 179, 71, 0.35)' },
+  sleep: { from: '#B19CD9', to: '#6A5ACD', glow: 'rgba(177, 156, 217, 0.25)' },
+  happy: { from: '#FFD93D', to: '#FFBE0B', glow: 'rgba(255, 217, 61, 0.3)' },
+  sad: { from: '#B0C4DE', to: '#778899', glow: 'rgba(176, 196, 222, 0.25)' },
+  neutral: { from: '#E8F5E9', to: '#A5D6A7', glow: 'rgba(232, 245, 233, 0.3)' }
+};
+
+const emotionAnimations = {
+  calm: { scale: [1, 1.03, 1], duration: 6, glow: '35px' },
+  anxious: { scale: [1, 1.08, 1], duration: 2.5, glow: '55px' },
+  sleep: { scale: [1, 1.01, 1], duration: 10, glow: '20px' },
+  happy: { scale: [1, 1.05, 1], duration: 4, glow: '40px' },
+  sad: { scale: [1, 1.02, 1], duration: 7, glow: '25px' },
+  neutral: { scale: [1, 1.02, 1], duration: 5, glow: '30px' }
 };
 
 const gradients = {
@@ -136,116 +127,100 @@ const exercises = {
 
 // ============= COMPONENTES =============
 
-// Fundo Oceano com Ondas Animadas
 const OceanBackground = ({ timeOfDay }) => {
-  console.log('OceanMind: Rendering OceanBackground with timeOfDay:', timeOfDay);
   return (
-    <div 
-      className="fixed inset-0 -z-10 transition-all duration-[2000ms] ease-in-out"
-      style={{ background: gradients[timeOfDay] }}
-    >
-      <svg className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="none">
+    <div className="fixed inset-0 -z-10">
+      <div 
+        className="absolute inset-0 transition-all duration-[3000ms] ease-in-out"
+        style={{ background: gradients[timeOfDay] }}
+      />
+      
+      <div className="absolute inset-0 bg-black/15" />
+      
+      <svg className="absolute inset-0 w-full h-full opacity-10" preserveAspectRatio="none">
         <defs>
           <linearGradient id="wave1" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </linearGradient>
-          <linearGradient id="wave2" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </linearGradient>
-          <linearGradient id="wave3" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.15)" />
             <stop offset="100%" stopColor="rgba(255,255,255,0)" />
           </linearGradient>
         </defs>
         
-        {/* Onda 1 - Lenta */}
-        <motion.path
+        <path
           d="M0,100 Q250,80 500,100 T1000,100 T1500,100 L1500,300 L0,300 Z"
           fill="url(#wave1)"
-          animate={{ x: [-500, 0] }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-        />
-        
-        {/* Onda 2 - Média */}
-        <motion.path
-          d="M0,150 Q200,130 400,150 T800,150 T1200,150 L1200,300 L0,300 Z"
-          fill="url(#wave2)"
-          animate={{ x: [-400, 0] }}
-          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-        />
-        
-        {/* Onda 3 - Rápida */}
-        <motion.path
-          d="M0,180 Q150,165 300,180 T600,180 T900,180 L900,300 L0,300 Z"
-          fill="url(#wave3)"
-          animate={{ x: [-300, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        />
+        >
+          <animate
+            attributeName="d"
+            dur="90s"
+            repeatCount="indefinite"
+            values="
+              M0,100 Q250,80 500,100 T1000,100 T1500,100 L1500,300 L0,300 Z;
+              M0,100 Q250,120 500,100 T1000,100 T1500,100 L1500,300 L0,300 Z;
+              M0,100 Q250,80 500,100 T1000,100 T1500,100 L1500,300 L0,300 Z
+            "
+          />
+        </path>
       </svg>
     </div>
   );
 };
 
-// Esfera Emocional Central
 const EmotionalSphere = ({ emotion, onTap }) => {
-  console.log('OceanMind: Rendering EmotionalSphere with emotion:', emotion);
   const colors = emotionColors[emotion];
+  const animation = emotionAnimations[emotion];
   
   return (
-    <motion.div
+    <div
       className="absolute top-[30%] left-1/2 cursor-pointer"
       style={{
-        width: 180,
-        height: 180,
-        marginLeft: -90,
-        marginTop: -90,
+        width: 150,
+        height: 150,
+        marginLeft: -75,
+        marginTop: -75,
         borderRadius: '50%',
         background: `radial-gradient(circle at 30% 30%, ${colors.from}, ${colors.to})`,
-        boxShadow: `0 0 60px ${colors.glow}, 0 0 100px ${colors.glow}`,
-      }}
-      animate={{ 
-        scale: [1, 1.08, 1],
-        rotate: [0, 5, -5, 0]
-      }}
-      transition={{ 
-        duration: 4, 
-        repeat: Infinity, 
-        ease: "easeInOut" 
+        boxShadow: `0 0 ${animation.glow} ${colors.glow}`,
+        animation: `breathe-${emotion} ${animation.duration}s ease-in-out infinite`,
       }}
       onClick={onTap}
-      whileTap={{ scale: 0.95 }}
-      whileHover={{ scale: 1.05 }}
-    />
-  );
-};
-
-// Texto Animado (palavra por palavra)
-const AnimatedText = ({ text }) => {
-  console.log('OceanMind: Rendering AnimatedText:', text);
-  const words = text.split(' ');
-  
-  return (
-    <div className="text-white/90 text-lg font-medium leading-relaxed">
-      {words.map((word, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.08 }}
-          className="inline-block mr-1"
-        >
-          {word}
-        </motion.span>
-      ))}
+    >
+      <style>{`
+        @keyframes breathe-${emotion} {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(${animation.scale[1]}); }
+        }
+      `}</style>
     </div>
   );
 };
 
-// Painel Inferior Glassmorphism
-const GlassPanel = ({ message, actions, onInputSubmit }) => {
-  console.log('OceanMind: Rendering GlassPanel with message:', message);
+const AnimatedText = ({ text }) => {
+  const words = text.split(' ');
+  
+  return (
+    <div className="text-white/75 text-lg font-light leading-loose">
+      {words.map((word, i) => (
+        <span
+          key={i}
+          className="inline-block mr-1 opacity-0"
+          style={{
+            animation: `fadeInWord 0.4s ease-out ${i * 0.12}s forwards`
+          }}
+        >
+          {word}
+        </span>
+      ))}
+      <style>{`
+        @keyframes fadeInWord {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+const GlassPanel = ({ message, primaryAction, secondaryActions, onInputSubmit }) => {
   const [inputText, setInputText] = useState('');
   
   const handleSubmit = () => {
@@ -256,56 +231,55 @@ const GlassPanel = ({ message, actions, onInputSubmit }) => {
   };
   
   return (
-    <motion.div
-      initial={{ y: 400 }}
-      animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-xl rounded-t-[32px] border-t border-white/20 shadow-2xl p-6"
-      style={{ height: '35vh', minHeight: 280 }}
-    >
+    <div className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-xl rounded-t-[40px] border-t border-white/20 shadow-2xl p-8" style={{ height: '38vh', minHeight: 300 }}>
       <AnimatedText text={message} />
       
-      <div className="flex gap-3 mt-6 flex-wrap">
-        {actions.map((action, i) => (
-          <motion.button
-            key={i}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 + i * 0.1 }}
-            onClick={action.onClick}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white text-sm font-semibold transition-all border border-white/30"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <action.icon size={18} />
-            {action.label}
-          </motion.button>
-        ))}
-      </div>
+      {primaryAction && (
+        <button
+          onClick={primaryAction.onClick}
+          className="mt-8 px-8 py-4 bg-white/30 hover:bg-white/40 backdrop-blur-md rounded-full text-white text-base font-medium transition-all border border-white/40 shadow-lg inline-flex items-center gap-3"
+        >
+          <primaryAction.icon size={20} />
+          {primaryAction.label}
+        </button>
+      )}
       
-      <div className="mt-4 flex gap-2">
+      {secondaryActions.length > 0 && (
+        <div className="flex gap-3 mt-4">
+          {secondaryActions.map((action, i) => (
+            <button
+              key={i}
+              onClick={action.onClick}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white/70 text-sm font-light transition-all border border-white/20"
+            >
+              <action.icon size={16} className="inline mr-2" />
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+      
+      <div className="mt-6 flex gap-2">
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder="Digite como você está se sentindo..."
-          className="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition-all"
+          className="flex-1 px-5 py-3 bg-white/5 backdrop-blur-sm border border-white/15 rounded-full text-white/80 placeholder-white/40 focus:outline-none focus:border-white/30 transition-all text-sm font-light"
         />
-        <motion.button
+        <button
           onClick={handleSubmit}
-          className="w-12 h-12 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full transition-all border border-white/30"
-          whileTap={{ scale: 0.9 }}
+          className="w-12 h-12 flex items-center justify-center bg-white/15 hover:bg-white/25 rounded-full transition-all border border-white/20"
         >
-          <Send size={20} className="text-white" />
-        </motion.button>
+          <Send size={18} className="text-white/70" />
+        </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
-// Menu Radial
 const RadialMenu = ({ onClose, onSelectExercise }) => {
-  console.log('OceanMind: Rendering RadialMenu');
   const buttons = [
     { icon: Wind, label: 'Respirar', action: () => onSelectExercise('breathing-478') },
     { icon: Sparkles, label: 'Meditar', action: () => onSelectExercise('meditation') },
@@ -319,14 +293,8 @@ const RadialMenu = ({ onClose, onSelectExercise }) => {
   const radius = 100;
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-40 flex items-center justify-center"
-      onClick={onClose}
-    >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+    <div className="fixed inset-0 z-40 flex items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" />
       
       <div className="relative" onClick={(e) => e.stopPropagation()}>
         {buttons.map((btn, i) => {
@@ -335,130 +303,113 @@ const RadialMenu = ({ onClose, onSelectExercise }) => {
           const y = Math.sin(angle) * radius;
           
           return (
-            <motion.button
+            <button
               key={i}
-              initial={{ scale: 0, x: 0, y: 0 }}
-              animate={{ scale: 1, x, y }}
-              transition={{ delay: i * 0.05, type: 'spring', stiffness: 200 }}
               onClick={btn.action}
-              className="absolute w-16 h-16 -ml-8 -mt-8 flex flex-col items-center justify-center gap-1 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:scale-110 transition-transform"
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
+              className="absolute w-16 h-16 -ml-8 -mt-8 flex flex-col items-center justify-center gap-1 bg-white/95 backdrop-blur-md rounded-full shadow-xl hover:scale-110 transition-transform"
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+                animation: `fadeInScale 0.3s ease-out ${i * 0.05}s both`
+              }}
             >
-              <btn.icon size={24} className="text-slate-700" />
+              <btn.icon size={22} className="text-slate-700" />
               <span className="text-[9px] font-semibold text-slate-700">{btn.label}</span>
-            </motion.button>
+            </button>
           );
         })}
       </div>
-    </motion.div>
+      
+      <style>{`
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: translate(0, 0) scale(0); }
+          to { opacity: 1; transform: translate(var(--x), var(--y)) scale(1); }
+        }
+      `}</style>
+    </div>
   );
 };
 
-// Modal de Exercício
 const ExerciseModal = ({ exercise, onClose }) => {
-  console.log('OceanMind: Rendering ExerciseModal with exercise:', exercise?.name);
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
   
   useEffect(() => {
-    console.log('OceanMind: Initializing ExerciseModal effect');
     const stepDuration = (exercise.duration / exercise.script.length) * 1000;
     const progressInterval = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return p + (100 / exercise.duration);
-      });
+      setProgress(p => (p >= 100 ? 100 : p + (100 / exercise.duration)));
     }, 1000);
     
     const stepInterval = setInterval(() => {
-      setCurrentStep(s => {
-        if (s >= exercise.script.length - 1) {
-          clearInterval(stepInterval);
-          return s;
-        }
-        return s + 1;
-      });
+      setCurrentStep(s => (s >= exercise.script.length - 1 ? s : s + 1));
     }, stepDuration);
     
     return () => {
-      console.log('OceanMind: Cleaning up ExerciseModal intervals');
       clearInterval(progressInterval);
       clearInterval(stepInterval);
     };
   }, [exercise]);
   
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-gradient-to-b from-slate-900 to-slate-800"
-    >
+    <div className="fixed inset-0 z-50 bg-gradient-to-b from-slate-900 to-slate-800">
       <button
         onClick={onClose}
-        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-white/50 hover:text-white/80 transition-colors z-10"
+        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-white/40 hover:text-white/70 transition-colors z-10"
       >
         <X size={24} />
       </button>
       
-      <div className="flex flex-col items-center justify-center h-full px-6">
-        <motion.div
-          className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-2xl"
-          animate={{ 
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360]
-          }}
-          transition={{ 
-            duration: 4, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
+      <div className="flex flex-col items-center justify-center h-full px-8">
+        <div
+          className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-2xl"
+          style={{
+            animation: 'breatheSphere 5s ease-in-out infinite'
           }}
         />
         
-        <motion.h2
+        <h2
           key={currentStep}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-12 text-2xl text-center text-white font-semibold max-w-md leading-relaxed"
+          className="mt-16 text-2xl text-center text-white/90 font-light max-w-lg leading-loose"
+          style={{ animation: 'fadeInText 0.8s ease-out' }}
         >
           {exercise.script[currentStep]}
-        </motion.h2>
+        </h2>
         
-        <div className="absolute bottom-12 left-6 right-6">
-          <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-white/80 rounded-full"
-              initial={{ width: '0%' }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
+        <div className="absolute bottom-12 left-8 right-8">
+          <div className="h-1 bg-white/15 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white/70 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-center text-white/60 text-sm mt-2">
+          <p className="text-center text-white/50 text-sm mt-3 font-light">
             {Math.floor(progress)}% concluído
           </p>
         </div>
       </div>
-    </motion.div>
+      
+      <style>{`
+        @keyframes breatheSphere {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+        }
+        @keyframes fadeInText {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
   );
 };
 
 // ============= APP PRINCIPAL =============
-function OceanoEmocional() {
-  console.log('OceanMind: Initializing OceanoEmocional component');
+export default function OceanoEmocional() {
   const [emotion, setEmotion] = useState('neutral');
   const [timeOfDay, setTimeOfDay] = useState('morning');
   const [showMenu, setShowMenu] = useState(false);
   const [currentExercise, setCurrentExercise] = useState(null);
   const [assistantMessage, setAssistantMessage] = useState('');
-  const [userName] = useState('Luna');
   
-  // Detectar horário do dia
   useEffect(() => {
-    console.log('OceanMind: Initializing time of day detection');
     const updateTimeOfDay = () => {
       const hour = new Date().getHours();
       if (hour >= 5 && hour < 8) setTimeOfDay('dawn');
@@ -473,23 +424,26 @@ function OceanoEmocional() {
     return () => clearInterval(interval);
   }, []);
   
-  // Mensagem inicial do assistente
   useEffect(() => {
-    console.log('OceanMind: Setting initial assistant message');
     const hour = new Date().getHours();
     let greeting = '';
     
-    if (hour >= 5 && hour < 12) greeting = `Bom dia. Como você está se sentindo hoje?`;
-    else if (hour >= 12 && hour < 18) greeting = `Boa tarde. Vejo que você voltou. Como foi o seu dia até agora?`;
-    else if (hour >= 18 && hour < 22) greeting = `Boa noite. Está tudo bem?`;
-    else greeting = `Oi. Parece que o sono não vem fácil hoje, né?`;
+    if (hour >= 5 && hour < 12) greeting = 'Bom dia. Como você está se sentindo hoje?';
+    else if (hour >= 12 && hour < 18) greeting = 'Boa tarde. Vejo que você voltou. Como foi o seu dia até agora?';
+    else if (hour >= 18 && hour < 22) greeting = 'Boa noite. Está tudo bem?';
+    else greeting = 'Oi. Parece que o sono não vem fácil hoje, né?';
     
     setAssistantMessage(greeting);
   }, []);
   
-  // Interpretar mensagem do usuário
+  const handleReturnHome = () => {
+    setCurrentExercise(null);
+    setShowMenu(false);
+    setEmotion('neutral');
+    setAssistantMessage('Olá. Estou aqui. Como você está agora?');
+  };
+  
   const interpretMessage = useCallback((text) => {
-    console.log('OceanMind: Interpreting user message:', text);
     const lower = text.toLowerCase();
     
     const keywords = {
@@ -504,19 +458,15 @@ function OceanoEmocional() {
     if (keywords.anxiety.some(k => lower.includes(k))) {
       setEmotion('anxious');
       setAssistantMessage('Sinto que você está ansioso. Vamos respirar juntos? Só 2 minutos do 4-7-8.');
-      setTimeout(() => setCurrentExercise('breathing-478'), 2000);
     } else if (keywords.sleep.some(k => lower.includes(k))) {
       setEmotion('sleep');
       setAssistantMessage('Percebi que você está com dificuldade para dormir. Vamos tentar uma meditação para sono profundo?');
-      setTimeout(() => setCurrentExercise('deep-sleep'), 2000);
     } else if (keywords.panic.some(k => lower.includes(k))) {
       setEmotion('anxious');
       setAssistantMessage('Você está seguro. Vamos fazer a técnica 5-4-3-2-1 para te trazer de volta ao presente.');
-      setTimeout(() => setCurrentExercise('grounding'), 2000);
     } else if (keywords.calm.some(k => lower.includes(k))) {
       setEmotion('calm');
       setAssistantMessage('Que tal uma meditação rápida de 3 minutos para acalmar a mente?');
-      setTimeout(() => setCurrentExercise('meditation'), 2000);
     } else if (keywords.sad.some(k => lower.includes(k))) {
       setEmotion('sad');
       setAssistantMessage('Está difícil hoje, né? Tudo bem ter dias assim. Quer escrever um pouco no diário?');
@@ -528,23 +478,40 @@ function OceanoEmocional() {
     }
   }, []);
   
-  const quickActions = [
-    { icon: Wind, label: 'Respirar', onClick: () => setCurrentExercise('breathing-478') },
-    { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') },
-    { icon: Moon, label: 'Dormir', onClick: () => setCurrentExercise('deep-sleep') }
-  ];
+  let primaryAction = null;
+  let secondaryActions = [];
   
-  console.log('OceanMind: Rendering main component with state:', {
-    emotion,
-    timeOfDay,
-    showMenu,
-    currentExercise,
-    assistantMessage
-  });
+  if (emotion === 'anxious') {
+    primaryAction = { icon: Wind, label: 'Respirar agora', onClick: () => setCurrentExercise('breathing-478') };
+    secondaryActions = [
+      { icon: Heart, label: 'Grounding', onClick: () => setCurrentExercise('grounding') }
+    ];
+  } else if (emotion === 'sleep') {
+    primaryAction = { icon: Moon, label: 'Começar meditação', onClick: () => setCurrentExercise('deep-sleep') };
+    secondaryActions = [
+      { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') }
+    ];
+  } else {
+    secondaryActions = [
+      { icon: Wind, label: 'Respirar', onClick: () => setCurrentExercise('breathing-478') },
+      { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') },
+      { icon: Moon, label: 'Dormir', onClick: () => setCurrentExercise('deep-sleep') }
+    ];
+  }
   
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <OceanBackground timeOfDay={timeOfDay} />
+      
+      <button
+        onClick={handleReturnHome}
+        onKeyDown={(e) => e.key === 'Enter' && handleReturnHome()}
+        tabIndex={0}
+        className="fixed top-6 left-6 w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all border border-white/20 z-30 opacity-40 hover:opacity-100"
+        aria-label="Retornar ao início"
+      >
+        <Home size={20} className="text-white" />
+      </button>
       
       <EmotionalSphere 
         emotion={emotion} 
@@ -553,36 +520,27 @@ function OceanoEmocional() {
       
       <GlassPanel 
         message={assistantMessage}
-        actions={quickActions}
+        primaryAction={primaryAction}
+        secondaryActions={secondaryActions}
         onInputSubmit={interpretMessage}
       />
       
-      <AnimatePresence>
-        {showMenu && (
-          <RadialMenu 
-            onClose={() => setShowMenu(false)}
-            onSelectExercise={(type) => {
-              setShowMenu(false);
-              setCurrentExercise(type);
-            }}
-          />
-        )}
-      </AnimatePresence>
+      {showMenu && (
+        <RadialMenu 
+          onClose={() => setShowMenu(false)}
+          onSelectExercise={(type) => {
+            setShowMenu(false);
+            setCurrentExercise(type);
+          }}
+        />
+      )}
       
-      <AnimatePresence>
-        {currentExercise && (
-          <ExerciseModal 
-            exercise={exercises[currentExercise]}
-            onClose={() => setCurrentExercise(null)}
-          />
-        )}
-      </AnimatePresence>
+      {currentExercise && (
+        <ExerciseModal 
+          exercise={exercises[currentExercise]}
+          onClose={() => setCurrentExercise(null)}
+        />
+      )}
     </div>
   );
 }
-
-// Add logging to track export
-console.log('OceanMind: Exporting OceanoEmocional component');
-
-// Make the component available globally
-window.OceanoEmocional = OceanoEmocional;
