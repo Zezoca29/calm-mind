@@ -14,6 +14,36 @@ const X = (props) => <Icon {...props}>✕</Icon>;
 const Send = (props) => <Icon {...props}>📨</Icon>;
 const Home = (props) => <Icon {...props}>🏠</Icon>;
 
+// Ícones SVG para controles de áudio (melhor compatibilidade que emojis)
+const Volume = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+  </svg>
+);
+
+const VolumeOff = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <line x1="23" y1="9" x2="17" y2="15"></line>
+    <line x1="17" y1="9" x2="23" y2="15"></line>
+  </svg>
+);
+
+const Play = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+  </svg>
+);
+
+const Pause = ({ size = 18, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <rect x="6" y="4" width="4" height="16"></rect>
+    <rect x="14" y="4" width="4" height="16"></rect>
+  </svg>
+);
+
 // ============= CONFIGURAÇÕES =============
 const emotionColors = {
   calm: { from: '#6DD5FA', to: '#2980B9', glow: 'rgba(109, 213, 250, 0.3)' },
@@ -123,6 +153,98 @@ const exercises = {
       'O que você precisa ouvir agora para se sentir melhor?'
     ]
   }
+};
+
+// ============= HOOKS CUSTOMIZADOS =============
+
+/**
+ * Hook para Text-to-Speech (narração de áudio)
+ */
+const useTextToSpeech = () => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+
+  useEffect(() => {
+    setIsSupported('speechSynthesis' in window);
+  }, []);
+
+  const speak = useCallback((text, options = {}) => {
+    if (!isSupported) {
+      console.warn('Text-to-Speech não é suportado neste navegador');
+      return;
+    }
+
+    // Cancela qualquer fala anterior
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    // Configurações de voz em português do Brasil
+    utterance.lang = 'pt-BR';
+    utterance.rate = options.rate || 0.85; // Velocidade um pouco mais lenta para relaxamento
+    utterance.pitch = options.pitch || 1.0;
+    utterance.volume = options.volume || 1.0;
+
+    // Tenta encontrar uma voz em português
+    const voices = window.speechSynthesis.getVoices();
+    const ptBRVoice = voices.find(voice => voice.lang === 'pt-BR') ||
+                      voices.find(voice => voice.lang.startsWith('pt')) ||
+                      voices.find(voice => voice.lang === 'pt-PT');
+
+    if (ptBRVoice) {
+      utterance.voice = ptBRVoice;
+    }
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      setIsPaused(false);
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setIsPaused(false);
+      if (options.onEnd) options.onEnd();
+    };
+
+    utterance.onerror = (event) => {
+      console.error('Erro no Text-to-Speech:', event);
+      setIsSpeaking(false);
+      setIsPaused(false);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, [isSupported]);
+
+  const pause = useCallback(() => {
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
+      setIsPaused(true);
+    }
+  }, []);
+
+  const resume = useCallback(() => {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      setIsPaused(false);
+    }
+  }, []);
+
+  const stop = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
+  }, []);
+
+  return {
+    speak,
+    pause,
+    resume,
+    stop,
+    isSpeaking,
+    isPaused,
+    isSupported
+  };
 };
 
 // ============= COMPONENTES =============
@@ -332,32 +454,134 @@ const RadialMenu = ({ onClose, onSelectExercise }) => {
 const ExerciseModal = ({ exercise, onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
-  
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const { speak, pause, resume, stop, isSpeaking, isPaused } = useTextToSpeech();
+
+  // Refs para controlar os intervalos
+  const progressIntervalRef = React.useRef(null);
+  const stepIntervalRef = React.useRef(null);
+
+  // Cleanup quando fechar
+  useEffect(() => {
+    return () => {
+      stop();
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
+    };
+  }, [stop]);
+
+  // Inicia o exercício
   useEffect(() => {
     const stepDuration = (exercise.duration / exercise.script.length) * 1000;
-    const progressInterval = setInterval(() => {
+
+    // Intervalo de progresso
+    progressIntervalRef.current = setInterval(() => {
       setProgress(p => (p >= 100 ? 100 : p + (100 / exercise.duration)));
     }, 1000);
-    
-    const stepInterval = setInterval(() => {
-      setCurrentStep(s => (s >= exercise.script.length - 1 ? s : s + 1));
+
+    // Intervalo de mudança de step
+    stepIntervalRef.current = setInterval(() => {
+      setCurrentStep(s => {
+        const nextStep = s >= exercise.script.length - 1 ? s : s + 1;
+        return nextStep;
+      });
     }, stepDuration);
-    
+
     return () => {
-      clearInterval(progressInterval);
-      clearInterval(stepInterval);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
     };
   }, [exercise]);
-  
+
+  // Narra o texto quando muda de step (se áudio estiver ativado)
+  useEffect(() => {
+    if (audioEnabled && exercise.script[currentStep]) {
+      speak(exercise.script[currentStep], {
+        rate: 0.85,
+        pitch: 1.0,
+        volume: 1.0
+      });
+    }
+  }, [currentStep, audioEnabled, exercise, speak]);
+
+  // Toggle de play/pause
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      // Pausar
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (stepIntervalRef.current) clearInterval(stepIntervalRef.current);
+      if (audioEnabled && isSpeaking) pause();
+      setIsPlaying(false);
+    } else {
+      // Retomar
+      const stepDuration = (exercise.duration / exercise.script.length) * 1000;
+
+      progressIntervalRef.current = setInterval(() => {
+        setProgress(p => (p >= 100 ? 100 : p + (100 / exercise.duration)));
+      }, 1000);
+
+      stepIntervalRef.current = setInterval(() => {
+        setCurrentStep(s => (s >= exercise.script.length - 1 ? s : s + 1));
+      }, stepDuration);
+
+      if (audioEnabled && isPaused) resume();
+      setIsPlaying(true);
+    }
+  };
+
+  // Toggle de áudio
+  const toggleAudio = () => {
+    if (audioEnabled) {
+      stop();
+      setAudioEnabled(false);
+    } else {
+      setAudioEnabled(true);
+      // Fala o texto atual
+      speak(exercise.script[currentStep], {
+        rate: 0.85,
+        pitch: 1.0,
+        volume: 1.0
+      });
+    }
+  };
+
+  const handleClose = () => {
+    stop();
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-b from-slate-900 to-slate-800">
+      {/* Botão Fechar */}
       <button
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-white/40 hover:text-white/70 transition-colors z-10"
       >
         <X size={24} />
       </button>
-      
+
+      {/* Controles de Áudio (canto superior esquerdo) */}
+      <div className="absolute top-6 left-6 flex gap-2 z-10">
+        {/* Toggle Play/Pause */}
+        <button
+          onClick={togglePlayPause}
+          className="w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all border border-white/20"
+          title={isPlaying ? 'Pausar' : 'Continuar'}
+        >
+          {isPlaying ? <Pause size={18} className="text-white/70" /> : <Play size={18} className="text-white/70" />}
+        </button>
+
+        {/* Toggle Áudio */}
+        <button
+          onClick={toggleAudio}
+          className="w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full transition-all border border-white/20"
+          title={audioEnabled ? 'Desativar áudio' : 'Ativar áudio'}
+        >
+          {audioEnabled ? <Volume size={18} className="text-white/70" /> : <VolumeOff size={18} className="text-white/70" />}
+        </button>
+      </div>
+
       <div className="flex flex-col items-center justify-center h-full px-8">
         <div
           className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 shadow-2xl"
@@ -365,7 +589,7 @@ const ExerciseModal = ({ exercise, onClose }) => {
             animation: 'breatheSphere 5s ease-in-out infinite'
           }}
         />
-        
+
         <h2
           key={currentStep}
           className="mt-16 text-2xl text-center text-white/90 font-light max-w-lg leading-loose"
@@ -373,7 +597,7 @@ const ExerciseModal = ({ exercise, onClose }) => {
         >
           {exercise.script[currentStep]}
         </h2>
-        
+
         <div className="absolute bottom-12 left-8 right-8">
           <div className="h-1 bg-white/15 rounded-full overflow-hidden">
             <div
@@ -386,7 +610,7 @@ const ExerciseModal = ({ exercise, onClose }) => {
           </p>
         </div>
       </div>
-      
+
       <style>{`
         @keyframes breatheSphere {
           0%, 100% { transform: scale(1); }
@@ -425,63 +649,104 @@ export default function OceanoEmocional() {
   }, []);
   
   useEffect(() => {
-    const hour = new Date().getHours();
-    let greeting = '';
-    
-    if (hour >= 5 && hour < 12) greeting = 'Bom dia. Como você está se sentindo hoje?';
-    else if (hour >= 12 && hour < 18) greeting = 'Boa tarde. Vejo que você voltou. Como foi o seu dia até agora?';
-    else if (hour >= 18 && hour < 22) greeting = 'Boa noite. Está tudo bem?';
-    else greeting = 'Oi. Parece que o sono não vem fácil hoje, né?';
-    
-    setAssistantMessage(greeting);
+    // Usa o NLP para gerar saudação contextual
+    if (window.EmotionalNLP) {
+      setAssistantMessage(window.EmotionalNLP.getGreeting());
+    } else {
+      // Fallback caso o NLP não esteja carregado ainda
+      const hour = new Date().getHours();
+      let greeting = '';
+
+      if (hour >= 5 && hour < 12) greeting = 'Bom dia. Como você está se sentindo hoje?';
+      else if (hour >= 12 && hour < 18) greeting = 'Boa tarde. Vejo que você voltou. Como foi o seu dia até agora?';
+      else if (hour >= 18 && hour < 22) greeting = 'Boa noite. Está tudo bem?';
+      else greeting = 'Oi. Parece que o sono não vem fácil hoje, né?';
+
+      setAssistantMessage(greeting);
+    }
   }, []);
   
   const handleReturnHome = () => {
-    setCurrentExercise(null);
-    setShowMenu(false);
-    setEmotion('neutral');
-    setAssistantMessage('Olá. Estou aqui. Como você está agora?');
+    // Redireciona para a página principal do app
+    window.location.href = '/';
   };
   
+  // Estado para armazenar sugestão de exercício do NLP
+  const [suggestedExercise, setSuggestedExercise] = useState(null);
+
   const interpretMessage = useCallback((text) => {
-    const lower = text.toLowerCase();
-    
-    const keywords = {
-      anxiety: ['ansioso', 'nervoso', 'agitado', 'inquieto', 'ansiedade'],
-      sleep: ['dormir', 'insônia', 'cansado', 'sono', 'não durmo'],
-      calm: ['calma', 'paz', 'relaxar', 'tranquilo'],
-      panic: ['pânico', 'desespero', 'medo intenso', 'crise'],
-      sad: ['triste', 'sozinho', 'vazio', 'deprimido'],
-      happy: ['feliz', 'bem', 'melhor', 'alegre']
-    };
-    
-    if (keywords.anxiety.some(k => lower.includes(k))) {
-      setEmotion('anxious');
-      setAssistantMessage('Sinto que você está ansioso. Vamos respirar juntos? Só 2 minutos do 4-7-8.');
-    } else if (keywords.sleep.some(k => lower.includes(k))) {
-      setEmotion('sleep');
-      setAssistantMessage('Percebi que você está com dificuldade para dormir. Vamos tentar uma meditação para sono profundo?');
-    } else if (keywords.panic.some(k => lower.includes(k))) {
-      setEmotion('anxious');
-      setAssistantMessage('Você está seguro. Vamos fazer a técnica 5-4-3-2-1 para te trazer de volta ao presente.');
-    } else if (keywords.calm.some(k => lower.includes(k))) {
-      setEmotion('calm');
-      setAssistantMessage('Que tal uma meditação rápida de 3 minutos para acalmar a mente?');
-    } else if (keywords.sad.some(k => lower.includes(k))) {
-      setEmotion('sad');
-      setAssistantMessage('Está difícil hoje, né? Tudo bem ter dias assim. Quer escrever um pouco no diário?');
-    } else if (keywords.happy.some(k => lower.includes(k))) {
-      setEmotion('happy');
-      setAssistantMessage('Que bom saber que você está bem! Isso é maravilhoso 💙');
+    // Usa o engine de NLP emocional
+    if (window.EmotionalNLP) {
+      const result = window.EmotionalNLP.process(text);
+
+      // Atualiza estado emocional visual
+      setEmotion(result.emotion);
+
+      // Atualiza mensagem do assistente
+      setAssistantMessage(result.message);
+
+      // Guarda sugestão de exercício
+      setSuggestedExercise(result.suggestedExercise);
+
+      // Se for urgente, pode iniciar exercício automaticamente
+      if (result.urgent && result.suggestedExercise) {
+        // Aguarda 3 segundos para o usuário ler a mensagem antes de sugerir
+        setTimeout(() => {
+          // O exercício será mostrado como ação primária
+        }, 3000);
+      }
     } else {
+      // Fallback caso o NLP não esteja carregado
       setAssistantMessage('Estou aqui para você. Como posso te ajudar agora?');
     }
   }, []);
   
+  // Mapeamento de exercícios para ícones e labels
+  const exerciseConfig = {
+    'breathing-478': { icon: Wind, label: 'Respirar 4-7-8' },
+    'breathing-box': { icon: Wind, label: 'Respirar Box' },
+    'meditation': { icon: Sparkles, label: 'Meditar' },
+    'deep-sleep': { icon: Moon, label: 'Sono Profundo' },
+    'grounding': { icon: Heart, label: 'Grounding 5-4-3-2-1' },
+    'journal': { icon: BookOpen, label: 'Diário' }
+  };
+
   let primaryAction = null;
   let secondaryActions = [];
-  
-  if (emotion === 'anxious') {
+
+  // Se o NLP sugeriu um exercício específico, usa ele como ação primária
+  if (suggestedExercise && exerciseConfig[suggestedExercise]) {
+    const config = exerciseConfig[suggestedExercise];
+    primaryAction = {
+      icon: config.icon,
+      label: config.label,
+      onClick: () => setCurrentExercise(suggestedExercise)
+    };
+
+    // Adiciona outras opções como secundárias baseadas no estado emocional
+    if (emotion === 'anxious') {
+      secondaryActions = [
+        { icon: Heart, label: 'Grounding', onClick: () => setCurrentExercise('grounding') },
+        { icon: Wind, label: 'Respirar', onClick: () => setCurrentExercise('breathing-478') }
+      ].filter(a => a.label !== config.label);
+    } else if (emotion === 'sleep') {
+      secondaryActions = [
+        { icon: Moon, label: 'Sono Profundo', onClick: () => setCurrentExercise('deep-sleep') },
+        { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') }
+      ].filter(a => a.label !== config.label);
+    } else if (emotion === 'sad') {
+      secondaryActions = [
+        { icon: BookOpen, label: 'Diário', onClick: () => setCurrentExercise('journal') },
+        { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') }
+      ].filter(a => a.label !== config.label);
+    } else {
+      secondaryActions = [
+        { icon: Wind, label: 'Respirar', onClick: () => setCurrentExercise('breathing-478') },
+        { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') }
+      ].filter(a => a.label !== config.label);
+    }
+  } else if (emotion === 'anxious') {
+    // Lógica original por estado emocional
     primaryAction = { icon: Wind, label: 'Respirar agora', onClick: () => setCurrentExercise('breathing-478') };
     secondaryActions = [
       { icon: Heart, label: 'Grounding', onClick: () => setCurrentExercise('grounding') }
@@ -491,7 +756,19 @@ export default function OceanoEmocional() {
     secondaryActions = [
       { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') }
     ];
+  } else if (emotion === 'sad') {
+    primaryAction = { icon: BookOpen, label: 'Escrever no diário', onClick: () => setCurrentExercise('journal') };
+    secondaryActions = [
+      { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') }
+    ];
+  } else if (emotion === 'happy' || emotion === 'calm') {
+    // Estados positivos - oferece opções sem pressão
+    secondaryActions = [
+      { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') },
+      { icon: BookOpen, label: 'Diário', onClick: () => setCurrentExercise('journal') }
+    ];
   } else {
+    // Estado neutro ou indefinido
     secondaryActions = [
       { icon: Wind, label: 'Respirar', onClick: () => setCurrentExercise('breathing-478') },
       { icon: Sparkles, label: 'Meditar', onClick: () => setCurrentExercise('meditation') },

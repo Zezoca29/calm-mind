@@ -40,7 +40,9 @@
 
 
     <!-- Ocean Mind Integration -->
-   <!-- Carregar Ocean Mind Component -->
+    <!-- Carregar Emotional NLP Engine (deve vir antes do oceanmind) -->
+    <script src="js/emotional-nlp.js"></script>
+    <!-- Carregar Ocean Mind Component -->
     <script type="text/babel" src="js/oceanmind.jsx"></script>
 
 <!-- Script de Integração -->
@@ -5170,8 +5172,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Melhorias de UI para Sincronização -->
     <script src="/js/sync-ui-enhancements.js"></script>
     
-    <!-- Carregar o Componente React -->
+    <!-- Carregar Emotional NLP e Componente React -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="/js/emotional-nlp.js"></script>
     <script type="text/babel" src="/js/oceanmind.jsx"></script>
 </body>
 </html>
