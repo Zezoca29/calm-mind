@@ -7,21 +7,10 @@
   status = 200
 
 [[redirects]]
-  from = "/app"
+  from = "/"
   to = "/index.html"
   status = 200
 
-[[redirects]]
-  from = "/index.html"
-  to = "/"
-  status = 301
-
-[[redirects]]
-  from = "/landingpage.html"
-  to = "/login"
-  status = 301
-
-# Pretty URLs (remove .html extension)
 [[headers]]
   for = "/*"
   [headers.values]
