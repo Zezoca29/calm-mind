@@ -406,6 +406,23 @@
             box-shadow: var(--shadow-lg);
         }
     </style>
+    <script>
+        // Funções de modal definidas globalmente para evitar erro de referência
+        function showLogin() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            if (typeof clearAlerts === 'function') clearAlerts();
+        }
+
+        function showSignup() {
+            document.getElementById('signupModal').classList.remove('hidden');
+            if (typeof clearAlerts === 'function') clearAlerts();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            if (typeof clearAlerts === 'function') clearAlerts();
+        }
+    </script>
 </head>
 <body>
     <!-- Navigation -->
@@ -1171,15 +1188,15 @@
         const SUPABASE_URL = 'https://mhrbrjrvflhyyznjuusy.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ocmJyanJ2ZmxoeXl6bmp1dXN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMyMDQ3NzMsImV4cCI6MjA3ODc4MDc3M30.H7KzgVWQYg1mI0AR_PO4XqYGLtLD9ejId3G27l1vp60';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Check if user is already logged in
         checkAuth();
 
         async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await supabaseClient.auth.getUser();
             if (user) {
-                window.location.href = 'index.html';
+                window.location.href = '/';
             }
         }
 
@@ -1198,22 +1215,6 @@
                     btn.style.transform = 'scale(1)';
                 }
             });
-        }
-
-        // Show/Hide modals
-        function showLogin() {
-            document.getElementById('loginModal').classList.remove('hidden');
-            clearAlerts();
-        }
-        
-        function showSignup() {
-            document.getElementById('signupModal').classList.remove('hidden');
-            clearAlerts();
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            clearAlerts();
         }
 
         function clearAlerts() {
@@ -1256,14 +1257,14 @@
             clearAlerts();
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
                 if (error) throw error;
 
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 
             } catch (error) {
                 showLoading('loginButton', false);
@@ -1295,7 +1296,7 @@
             clearAlerts();
 
             try {
-                const { data, error } = await supabase.auth.signUp({
+                const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {
@@ -1315,7 +1316,7 @@
                 }
 
                 if (data.session) {
-                    window.location.href = 'index.html';
+                    window.location.href = '/';
                 } else {
                     showAlert('signupAlert', 'Conta criada! Verifique seu email para confirmar.', 'success');
                     showLoading('signupButton', false);
@@ -1353,9 +1354,9 @@
         // Check for SOS shortcut
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('sos') === 'true') {
-            supabase.auth.getUser().then(({ data: { user } }) => {
+            supabaseClient.auth.getUser().then(({ data: { user } }) => {
                 if (user) {
-                    window.location.href = 'index.html?sos=true';
+                    window.location.href = '/?sos=true';
                 } else {
                     showSignup();
                 }

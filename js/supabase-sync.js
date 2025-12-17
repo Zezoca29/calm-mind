@@ -37,7 +37,7 @@ async function checkAuth() {
         
         if (error || !session) {
             // Redirecionar para landing page se não estiver autenticado
-            window.location.href = '/landingpage.html';
+            window.location.href = '/login';
             return false;
         }
         
@@ -58,7 +58,7 @@ async function logout() {
         
         localStorage.removeItem('calm_mind_session');
         localStorage.removeItem('calm_mind_user');
-        window.location.href = '/landingpage.html';
+        window.location.href = '/login';
     } catch (error) {
         console.error('Erro ao fazer logout:', error);
     }

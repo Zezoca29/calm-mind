@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/login", "destination": "/landingpage.html" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/app", "destination": "/index.html" }
+  ],
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/landingpage.html", "destination": "/login", "permanent": true }
+  ],
+  "cleanUrls": true
+}
