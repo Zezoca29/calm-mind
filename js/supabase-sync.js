@@ -769,6 +769,18 @@ function checkConnectionStatus() {
     }
 }
 
+// Função para obter o cliente Supabase (para uso em outros módulos)
+function getSupabaseClient() {
+    if (!supabaseClient) {
+        initSupabase();
+    }
+    return supabaseClient;
+}
+
+// Exportar funções globalmente
+window.getSupabaseClient = getSupabaseClient;
+window.getCurrentUserId = getCurrentUserId;
+
 // Monitorar mudanças na conexão
 window.addEventListener('online', checkConnectionStatus);
 window.addEventListener('offline', checkConnectionStatus);

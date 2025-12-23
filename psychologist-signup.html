@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Psicólogos - Calm Mind</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-200: #bae6fd;
+            --primary-300: #7dd3fc;
+            --primary-400: #38bdf8;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --primary-800: #075985;
+            --primary-900: #0c4a6e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-50) 0%, white 50%, #f3f4f6 100%);
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            ring: 2px;
+            ring-color: var(--primary-200);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+        }
+
+        .form-error {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-600);
+            padding: 0.875rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: 2px solid var(--primary-600);
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-50);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 0.25rem;
+            border: 2px solid #d1d5db;
+            cursor: pointer;
+        }
+
+        .specialty-tag {
+            display: inline-block;
+            background: var(--primary-100);
+            color: var(--primary-700);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .specialty-tag:hover {
+            background: var(--primary-200);
+        }
+
+        .specialty-tag.selected {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-700);
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 1.5rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+
+        .step:first-child::before {
+            left: 50%;
+        }
+
+        .step:last-child::before {
+            right: 50%;
+        }
+
+        .step-circle {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #9ca3af;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            margin: 0 auto;
+        }
+
+        .step.active .step-circle {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: var(--primary-600);
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--primary-600);
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <a href="/landingpage.html" class="inline-block mb-4">
+                    <svg class="w-12 h-12 mx-auto text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </a>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Cadastro de Psicólogos</h1>
+                <p class="text-gray-600">Junte-se ao Calm Mind e conecte-se com pacientes que precisam de você</p>
+            </div>
+
+            <!-- Progress Steps -->
+            <div class="progress-steps mb-8">
+                <div class="step active" id="step-1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Conta</div>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Perfil</div>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Contato</div>
+                </div>
+                <div class="step" id="step-4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Confirmar</div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alert-container"></div>
+
+            <!-- Form Container -->
+            <div class="form-container p-8">
+                <!-- Step 1: Authentication -->
+                <form id="auth-form" class="form-step">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Crie sua conta</h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="auth-email">E-mail profissional *</label>
+                        <input type="email" id="auth-email" class="form-input" required placeholder="seu.email@exemplo.com">
+                        <div class="form-error" id="auth-email-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="auth-password">Senha *</label>
+                        <input type="password" id="auth-password" class="form-input" required placeholder="Mínimo 6 caracteres">
+                        <div class="form-error" id="auth-password-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="auth-password-confirm">Confirmar senha *</label>
+                        <input type="password" id="auth-password-confirm" class="form-input" required placeholder="Digite a senha novamente">
+                        <div class="form-error" id="auth-password-confirm-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="auth-terms" required>
+                            <label for="auth-terms" class="text-sm text-gray-600">
+                                Aceito os <a href="#" class="text-primary-600 hover:underline">termos de uso</a> e
+                                <a href="#" class="text-primary-600 hover:underline">política de privacidade</a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Continuar</button>
+
+                    <p class="text-center text-sm text-gray-600 mt-4">
+                        Já tem uma conta? <a href="/index.html" class="text-primary-600 hover:underline font-semibold">Fazer login</a>
+                    </p>
+                </form>
+
+                <!-- Step 2: Professional Profile -->
+                <form id="profile-form" class="form-step hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Perfil Profissional</h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="profile-name">Nome completo *</label>
+                        <input type="text" id="profile-name" class="form-input" required placeholder="Dr(a). Seu Nome">
+                        <div class="form-error" id="profile-name-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="profile-crp">CRP (Registro Profissional) *</label>
+                        <input type="text" id="profile-crp" class="form-input" required placeholder="00/00000" maxlength="8">
+                        <div class="text-xs text-gray-500 mt-1">Formato: 00/00000 (Ex: 06/12345)</div>
+                        <div class="form-error" id="profile-crp-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Especialidades *</label>
+                        <div id="specialties-container" class="border border-gray-300 rounded-lg p-4">
+                            <!-- Specialty tags will be generated here -->
+                        </div>
+                        <div class="form-error" id="specialties-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="profile-bio">Biografia / Apresentação</label>
+                        <textarea id="profile-bio" class="form-input" rows="5" placeholder="Conte um pouco sobre você, sua experiência, abordagem terapêutica..."></textarea>
+                        <div class="text-xs text-gray-500 mt-1">Máximo 500 caracteres</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="profile-photo">URL da Foto de Perfil</label>
+                        <input type="url" id="profile-photo" class="form-input" placeholder="https://exemplo.com/sua-foto.jpg">
+                        <div class="text-xs text-gray-500 mt-1">Link para uma foto profissional (opcional)</div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="button" class="btn-secondary" onclick="previousStep()">Voltar</button>
+                        <button type="submit" class="btn-primary">Continuar</button>
+                    </div>
+                </form>
+
+                <!-- Step 3: Contact & Address -->
+                <form id="contact-form" class="form-step hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Contato e Localização</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label" for="contact-phone">Telefone / WhatsApp *</label>
+                            <input type="tel" id="contact-phone" class="form-input" required placeholder="(00) 00000-0000">
+                            <div class="form-error" id="contact-phone-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="contact-email">E-mail para contato</label>
+                            <input type="email" id="contact-email" class="form-input" placeholder="contato@exemplo.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contact-website">Website / Página profissional</label>
+                        <input type="url" id="contact-website" class="form-input" placeholder="https://seu-site.com">
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6 mt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Endereço do consultório</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="form-group md:col-span-1">
+                                <label class="form-label" for="address-zipcode">CEP</label>
+                                <input type="text" id="address-zipcode" class="form-input" placeholder="00000-000" maxlength="9">
+                                <button type="button" class="text-xs text-primary-600 hover:underline mt-1" onclick="searchCEP()">Buscar CEP</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="form-group md:col-span-2">
+                                <label class="form-label" for="address-street">Rua</label>
+                                <input type="text" id="address-street" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="address-number">Número</label>
+                                <input type="text" id="address-number" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label" for="address-complement">Complemento</label>
+                                <input type="text" id="address-complement" class="form-input" placeholder="Sala, andar...">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="address-neighborhood">Bairro</label>
+                                <input type="text" id="address-neighborhood" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label" for="address-city">Cidade</label>
+                                <input type="text" id="address-city" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="address-state">Estado</label>
+                                <select id="address-state" class="form-input">
+                                    <option value="">Selecione</option>
+                                    <option value="AC">Acre</option>
+                                    <option value="AL">Alagoas</option>
+                                    <option value="AP">Amapá</option>
+                                    <option value="AM">Amazonas</option>
+                                    <option value="BA">Bahia</option>
+                                    <option value="CE">Ceará</option>
+                                    <option value="DF">Distrito Federal</option>
+                                    <option value="ES">Espírito Santo</option>
+                                    <option value="GO">Goiás</option>
+                                    <option value="MA">Maranhão</option>
+                                    <option value="MT">Mato Grosso</option>
+                                    <option value="MS">Mato Grosso do Sul</option>
+                                    <option value="MG">Minas Gerais</option>
+                                    <option value="PA">Pará</option>
+                                    <option value="PB">Paraíba</option>
+                                    <option value="PR">Paraná</option>
+                                    <option value="PE">Pernambuco</option>
+                                    <option value="PI">Piauí</option>
+                                    <option value="RJ">Rio de Janeiro</option>
+                                    <option value="RN">Rio Grande do Norte</option>
+                                    <option value="RS">Rio Grande do Sul</option>
+                                    <option value="RO">Rondônia</option>
+                                    <option value="RR">Roraima</option>
+                                    <option value="SC">Santa Catarina</option>
+                                    <option value="SP">São Paulo</option>
+                                    <option value="SE">Sergipe</option>
+                                    <option value="TO">Tocantins</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6 mt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Modalidades de atendimento</h3>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="accepts-online" checked>
+                            <label for="accepts-online" class="text-sm text-gray-700">Atendimento online (videochamada)</label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="accepts-in-person" checked>
+                            <label for="accepts-in-person" class="text-sm text-gray-700">Atendimento presencial</label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6 mt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Convênios e valores</h3>
+
+                        <div class="form-group">
+                            <label class="form-label" for="insurance-plans">Planos de saúde aceitos (separados por vírgula)</label>
+                            <input type="text" id="insurance-plans" class="form-input" placeholder="Unimed, Amil, SulAmérica...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="price-range">Faixa de preço da consulta</label>
+                            <select id="price-range" class="form-input">
+                                <option value="">Prefiro não informar</option>
+                                <option value="R$ 50 - R$ 100">R$ 50 - R$ 100</option>
+                                <option value="R$ 100 - R$ 150">R$ 100 - R$ 150</option>
+                                <option value="R$ 150 - R$ 200">R$ 150 - R$ 200</option>
+                                <option value="R$ 200 - R$ 300">R$ 200 - R$ 300</option>
+                                <option value="R$ 300+">R$ 300+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 mt-6">
+                        <button type="button" class="btn-secondary" onclick="previousStep()">Voltar</button>
+                        <button type="submit" class="btn-primary">Continuar</button>
+                    </div>
+                </form>
+
+                <!-- Step 4: Review & Submit -->
+                <div id="review-form" class="form-step hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Revise suas informações</h2>
+
+                    <div id="review-content" class="space-y-6">
+                        <!-- Review content will be generated here -->
+                    </div>
+
+                    <div class="flex gap-4 mt-8">
+                        <button type="button" class="btn-secondary" onclick="previousStep()">Voltar</button>
+                        <button type="button" class="btn-primary" onclick="submitRegistration()" id="submit-btn">
+                            Finalizar cadastro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success Message -->
+                <div id="success-message" class="hidden text-center py-12">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Cadastro realizado com sucesso!</h2>
+                    <p class="text-gray-600 mb-8">Seu perfil está sendo analisado e em breve estará disponível para os pacientes.</p>
+                    <a href="/index.html" class="btn-primary inline-block">Ir para o App</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/supabase-sync.js"></script>
+    <script src="js/psychologists-manager.js"></script>
+    <script>
+        // ============= STATE MANAGEMENT =============
+
+        let currentStep = 1;
+        let formData = {
+            auth: {},
+            profile: {},
+            contact: {},
+            selectedSpecialties: []
+        };
+        let userId = null;
+
+        // ============= INITIALIZATION =============
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize specialty tags
+            renderSpecialtyTags();
+
+            // Setup form event listeners
+            setupFormListeners();
+        });
+
+        // ============= SPECIALTY TAGS =============
+
+        function renderSpecialtyTags() {
+            const container = document.getElementById('specialties-container');
+            const specialties = PsychologistsConfig.especialidades;
+
+            container.innerHTML = specialties.map(specialty => `
+                <span class="specialty-tag" onclick="toggleSpecialty('${specialty}')">
+                    ${specialty}
+                </span>
+            `).join('');
+        }
+
+        function toggleSpecialty(specialty) {
+            const index = formData.selectedSpecialties.indexOf(specialty);
+
+            if (index > -1) {
+                formData.selectedSpecialties.splice(index, 1);
+            } else {
+                formData.selectedSpecialties.push(specialty);
+            }
+
+            updateSpecialtyUI();
+        }
+
+        function updateSpecialtyUI() {
+            const tags = document.querySelectorAll('.specialty-tag');
+            tags.forEach(tag => {
+                const specialty = tag.textContent.trim();
+                if (formData.selectedSpecialties.includes(specialty)) {
+                    tag.classList.add('selected');
+                } else {
+                    tag.classList.remove('selected');
+                }
+            });
+        }
+
+        // ============= FORM VALIDATION =============
+
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        function validateCRP(crp) {
+            const regex = /^\d{2}\/\d{5}$/;
+            return regex.test(crp);
+        }
+
+        function validatePhone(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            return cleaned.length === 10 || cleaned.length === 11;
+        }
+
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(fieldId + '-error');
+            const inputElement = document.getElementById(fieldId);
+
+            if (errorElement) errorElement.textContent = message;
+            if (inputElement) inputElement.classList.add('error');
+        }
+
+        function clearError(fieldId) {
+            const errorElement = document.getElementById(fieldId + '-error');
+            const inputElement = document.getElementById(fieldId);
+
+            if (errorElement) errorElement.textContent = '';
+            if (inputElement) inputElement.classList.remove('error');
+        }
+
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+
+            container.innerHTML = '';
+            container.appendChild(alert);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // ============= CEP SEARCH =============
+
+        async function searchCEP() {
+            const cepInput = document.getElementById('address-zipcode');
+            const cep = cepInput.value.replace(/\D/g, '');
+
+            if (cep.length !== 8) {
+                showAlert('CEP deve ter 8 dígitos', 'error');
+                return;
+            }
+
+            try {
+                const manager = window.psychologistsManager;
+                const address = await manager.searchCEP(cep);
+
+                document.getElementById('address-street').value = address.street;
+                document.getElementById('address-neighborhood').value = address.neighborhood;
+                document.getElementById('address-city').value = address.city;
+                document.getElementById('address-state').value = address.state;
+
+                showAlert('Endereço encontrado!', 'success');
+            } catch (error) {
+                showAlert('CEP não encontrado', 'error');
+            }
+        }
+
+        // ============= FORM LISTENERS =============
+
+        function setupFormListeners() {
+            // Auth form
+            document.getElementById('auth-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await handleAuthSubmit();
+            });
+
+            // Profile form
+            document.getElementById('profile-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleProfileSubmit();
+            });
+
+            // Contact form
+            document.getElementById('contact-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleContactSubmit();
+            });
+
+            // Format inputs
+            document.getElementById('profile-crp').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 7);
+                }
+                e.target.value = value;
+            });
+
+            document.getElementById('contact-phone').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 10) {
+                    value = '(' + value.substring(0, 2) + ') ' + value.substring(2, 7) + '-' + value.substring(7, 11);
+                } else if (value.length > 6) {
+                    value = '(' + value.substring(0, 2) + ') ' + value.substring(2, 6) + '-' + value.substring(6);
+                } else if (value.length > 2) {
+                    value = '(' + value.substring(0, 2) + ') ' + value.substring(2);
+                }
+                e.target.value = value;
+            });
+
+            document.getElementById('address-zipcode').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 5) {
+                    value = value.substring(0, 5) + '-' + value.substring(5, 8);
+                }
+                e.target.value = value;
+            });
+        }
+
+        // ============= STEP HANDLERS =============
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const passwordConfirm = document.getElementById('auth-password-confirm').value;
+            const termsAccepted = document.getElementById('auth-terms').checked;
+
+            // Clear previous errors
+            clearError('auth-email');
+            clearError('auth-password');
+            clearError('auth-password-confirm');
+
+            // Validate
+            let hasError = false;
+
+            if (!validateEmail(email)) {
+                showError('auth-email', 'E-mail inválido');
+                hasError = true;
+            }
+
+            if (!validatePassword(password)) {
+                showError('auth-password', 'Senha deve ter pelo menos 6 caracteres');
+                hasError = true;
+            }
+
+            if (password !== passwordConfirm) {
+                showError('auth-password-confirm', 'Senhas não coincidem');
+                hasError = true;
+            }
+
+            if (!termsAccepted) {
+                showAlert('Você deve aceitar os termos de uso', 'error');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            // Create account with Supabase
+            try {
+                const supabase = window.getSupabaseClient();
+
+                // First, try to sign up
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/psychologist-signup.html'
+                    }
+                });
+
+                if (signUpError) throw signUpError;
+
+                // Store credentials for later sign in
+                formData.auth = {
+                    email,
+                    password,
+                    userId: signUpData.user.id
+                };
+                userId = signUpData.user.id;
+
+                // Check if email confirmation is required
+                if (signUpData.session) {
+                    // User is already signed in (email confirmation disabled)
+                    showAlert('Conta criada com sucesso!', 'success');
+                    nextStep();
+                } else {
+                    // Email confirmation required - sign in automatically
+                    // (or the account was created and we need to sign in)
+                    try {
+                        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                            email: email,
+                            password: password
+                        });
+
+                        if (signInError) {
+                            // If sign in fails, it might be because email confirmation is required
+                            showAlert('Conta criada! Por favor, verifique seu e-mail para confirmar o cadastro antes de continuar.', 'info');
+                            return;
+                        }
+
+                        userId = signInData.user.id;
+                        showAlert('Conta criada com sucesso!', 'success');
+                        nextStep();
+                    } catch (signInError) {
+                        console.error('Erro ao fazer login:', signInError);
+                        showAlert('Conta criada! Faça login para continuar.', 'info');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao criar conta:', error);
+
+                // Check if account already exists
+                if (error.message && error.message.includes('already registered')) {
+                    showAlert('Este e-mail já está cadastrado. Tente fazer login.', 'error');
+                } else {
+                    showAlert(error.message || 'Erro ao criar conta. Tente novamente.', 'error');
+                }
+            }
+        }
+
+        function handleProfileSubmit() {
+            const name = document.getElementById('profile-name').value;
+            const crp = document.getElementById('profile-crp').value;
+            const bio = document.getElementById('profile-bio').value;
+            const photo = document.getElementById('profile-photo').value;
+
+            // Clear previous errors
+            clearError('profile-name');
+            clearError('profile-crp');
+            clearError('specialties');
+
+            // Validate
+            let hasError = false;
+
+            if (name.trim().length < 3) {
+                showError('profile-name', 'Nome deve ter pelo menos 3 caracteres');
+                hasError = true;
+            }
+
+            if (!validateCRP(crp)) {
+                showError('profile-crp', 'CRP inválido (formato: 00/00000)');
+                hasError = true;
+            }
+
+            if (formData.selectedSpecialties.length === 0) {
+                showError('specialties', 'Selecione pelo menos uma especialidade');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            formData.profile = {
+                name,
+                crp,
+                specialty: formData.selectedSpecialties,
+                bio: bio.substring(0, 500),
+                photo_url: photo || null
+            };
+
+            nextStep();
+        }
+
+        function handleContactSubmit() {
+            const phone = document.getElementById('contact-phone').value;
+            const email = document.getElementById('contact-email').value;
+            const website = document.getElementById('contact-website').value;
+            const zipcode = document.getElementById('address-zipcode').value;
+            const street = document.getElementById('address-street').value;
+            const number = document.getElementById('address-number').value;
+            const complement = document.getElementById('address-complement').value;
+            const neighborhood = document.getElementById('address-neighborhood').value;
+            const city = document.getElementById('address-city').value;
+            const state = document.getElementById('address-state').value;
+            const acceptsOnline = document.getElementById('accepts-online').checked;
+            const acceptsInPerson = document.getElementById('accepts-in-person').checked;
+            const insurancePlans = document.getElementById('insurance-plans').value;
+            const priceRange = document.getElementById('price-range').value;
+
+            // Clear previous errors
+            clearError('contact-phone');
+
+            // Validate
+            let hasError = false;
+
+            if (!validatePhone(phone)) {
+                showError('contact-phone', 'Telefone inválido');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            formData.contact = {
+                phone,
+                email: email || null,
+                website: website || null,
+                address_zipcode: zipcode || null,
+                address_street: street || null,
+                address_number: number || null,
+                address_complement: complement || null,
+                address_neighborhood: neighborhood || null,
+                address_city: city || null,
+                address_state: state || null,
+                accepts_online: acceptsOnline,
+                accepts_in_person: acceptsInPerson,
+                insurance_plans: insurancePlans ? insurancePlans.split(',').map(p => p.trim()) : [],
+                price_range: priceRange || null
+            };
+
+            renderReview();
+            nextStep();
+        }
+
+        // ============= REVIEW =============
+
+        function renderReview() {
+            const container = document.getElementById('review-content');
+
+            const html = `
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Informações Profissionais</h3>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Nome:</span> ${formData.profile.name}</p>
+                        <p><span class="font-semibold">CRP:</span> ${formData.profile.crp}</p>
+                        <p><span class="font-semibold">Especialidades:</span> ${formData.profile.specialty.join(', ')}</p>
+                        ${formData.profile.bio ? `<p><span class="font-semibold">Bio:</span> ${formData.profile.bio}</p>` : ''}
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Contato</h3>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Telefone:</span> ${formData.contact.phone}</p>
+                        ${formData.contact.email ? `<p><span class="font-semibold">E-mail:</span> ${formData.contact.email}</p>` : ''}
+                        ${formData.contact.website ? `<p><span class="font-semibold">Website:</span> ${formData.contact.website}</p>` : ''}
+                    </div>
+                </div>
+
+                ${formData.contact.address_city ? `
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Endereço</h3>
+                    <div class="space-y-2">
+                        <p>${formData.contact.address_street || ''} ${formData.contact.address_number || ''}</p>
+                        ${formData.contact.address_complement ? `<p>${formData.contact.address_complement}</p>` : ''}
+                        <p>${formData.contact.address_neighborhood || ''} - ${formData.contact.address_city || ''} / ${formData.contact.address_state || ''}</p>
+                        ${formData.contact.address_zipcode ? `<p>CEP: ${formData.contact.address_zipcode}</p>` : ''}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Atendimento</h3>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Online:</span> ${formData.contact.accepts_online ? 'Sim' : 'Não'}</p>
+                        <p><span class="font-semibold">Presencial:</span> ${formData.contact.accepts_in_person ? 'Sim' : 'Não'}</p>
+                        ${formData.contact.insurance_plans.length > 0 ? `<p><span class="font-semibold">Convênios:</span> ${formData.contact.insurance_plans.join(', ')}</p>` : ''}
+                        ${formData.contact.price_range ? `<p><span class="font-semibold">Valor:</span> ${formData.contact.price_range}</p>` : ''}
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ============= SUBMIT =============
+
+        async function submitRegistration() {
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+
+            try {
+                const supabase = window.getSupabaseClient();
+
+                // Verify user is authenticated
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+                if (sessionError || !session) {
+                    // User not authenticated, try to sign in again
+                    if (formData.auth && formData.auth.password) {
+                        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                            email: formData.auth.email,
+                            password: formData.auth.password
+                        });
+
+                        if (signInError) {
+                            throw new Error('Você precisa estar autenticado. Por favor, faça login novamente.');
+                        }
+                    } else {
+                        throw new Error('Sessão expirada. Por favor, faça login novamente.');
+                    }
+                }
+
+                // Combine all form data
+                const psychologistData = {
+                    ...formData.profile,
+                    ...formData.contact
+                };
+
+                // Create psychologist record
+                const manager = window.psychologistsManager;
+                await manager.init();
+
+                console.log('Criando psicólogo com dados:', psychologistData);
+
+                const result = await manager.createPsychologist(psychologistData);
+
+                console.log('Psicólogo criado com sucesso:', result);
+
+                // Show success
+                document.getElementById('review-form').classList.add('hidden');
+                document.getElementById('success-message').classList.remove('hidden');
+
+                showAlert('Cadastro realizado com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao criar psicólogo:', error);
+
+                let errorMessage = 'Erro ao finalizar cadastro. Tente novamente.';
+
+                if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                if (error.code === '42501') {
+                    errorMessage = 'Erro de permissão. Verifique se você está autenticado.';
+                }
+
+                if (error.message && error.message.includes('duplicate key')) {
+                    errorMessage = 'Este CRP já está cadastrado no sistema.';
+                }
+
+                showAlert(errorMessage, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Finalizar cadastro';
+            }
+        }
+
+        // ============= NAVIGATION =============
+
+        function nextStep() {
+            if (currentStep < 4) {
+                // Hide current step
+                document.querySelectorAll('.form-step').forEach(form => {
+                    form.classList.add('hidden');
+                });
+
+                // Update step
+                currentStep++;
+
+                // Update progress
+                updateProgress();
+
+                // Show next step
+                showCurrentStep();
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                // Hide current step
+                document.querySelectorAll('.form-step').forEach(form => {
+                    form.classList.add('hidden');
+                });
+
+                // Update step
+                currentStep--;
+
+                // Update progress
+                updateProgress();
+
+                // Show previous step
+                showCurrentStep();
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function showCurrentStep() {
+            const forms = ['auth-form', 'profile-form', 'contact-form', 'review-form'];
+            const currentForm = document.getElementById(forms[currentStep - 1]);
+            if (currentForm) {
+                currentForm.classList.remove('hidden');
+            }
+        }
+
+        function updateProgress() {
+            // Update step circles
+            for (let i = 1; i <= 4; i++) {
+                const step = document.getElementById(`step-${i}`);
+                step.classList.remove('active', 'completed');
+
+                if (i < currentStep) {
+                    step.classList.add('completed');
+                } else if (i === currentStep) {
+                    step.classList.add('active');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

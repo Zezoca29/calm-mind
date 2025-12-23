@@ -211,6 +211,93 @@ CREATE TRIGGER update_sleep_entries_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- ==========================================
+-- TABELA: psychologists (Psicólogos Cadastrados)
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS public.psychologists (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    crp TEXT NOT NULL UNIQUE, -- Registro no Conselho Regional de Psicologia
+    specialty TEXT[], -- Especialidades (ex: ["Ansiedade", "Depressão", "TCC"])
+    bio TEXT, -- Biografia/Apresentação
+    phone TEXT,
+    email TEXT,
+    website TEXT,
+
+    -- Endereço
+    address_street TEXT,
+    address_number TEXT,
+    address_complement TEXT,
+    address_neighborhood TEXT,
+    address_city TEXT,
+    address_state TEXT,
+    address_zipcode TEXT,
+
+    -- Atendimento
+    accepts_online BOOLEAN DEFAULT FALSE,
+    accepts_in_person BOOLEAN DEFAULT TRUE,
+    insurance_plans TEXT[], -- Planos aceitos
+    price_range TEXT, -- Ex: "R$ 100-150"
+
+    -- Mídia
+    photo_url TEXT,
+
+    -- Avaliação
+    rating NUMERIC(3,2) CHECK (rating >= 0 AND rating <= 5),
+    total_reviews INTEGER DEFAULT 0,
+
+    -- Status
+    is_active BOOLEAN DEFAULT TRUE,
+    verified BOOLEAN DEFAULT FALSE, -- Se foi verificado pela administração
+
+    -- Metadados
+    added_by UUID REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX idx_psychologists_name ON public.psychologists(name);
+CREATE INDEX idx_psychologists_crp ON public.psychologists(crp);
+CREATE INDEX idx_psychologists_city ON public.psychologists(address_city);
+CREATE INDEX idx_psychologists_state ON public.psychologists(address_state);
+CREATE INDEX idx_psychologists_specialty ON public.psychologists USING GIN(specialty);
+CREATE INDEX idx_psychologists_is_active ON public.psychologists(is_active);
+
+-- RLS Policies
+ALTER TABLE public.psychologists ENABLE ROW LEVEL SECURITY;
+
+-- Todos podem visualizar psicólogos ativos (público)
+CREATE POLICY "Todos podem ver psicólogos ativos"
+    ON public.psychologists FOR SELECT
+    USING (is_active = TRUE);
+
+-- Usuários autenticados podem cadastrar psicólogos
+CREATE POLICY "Usuários autenticados podem cadastrar psicólogos"
+    ON public.psychologists FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
+-- Apenas quem cadastrou pode editar (ou admins, quando implementado)
+CREATE POLICY "Usuários podem editar psicólogos que cadastraram"
+    ON public.psychologists FOR UPDATE
+    TO authenticated
+    USING (auth.uid() = added_by)
+    WITH CHECK (auth.uid() = added_by);
+
+-- Apenas quem cadastrou pode deletar (ou admins)
+CREATE POLICY "Usuários podem deletar psicólogos que cadastraram"
+    ON public.psychologists FOR DELETE
+    TO authenticated
+    USING (auth.uid() = added_by);
+
+-- Trigger
+CREATE TRIGGER update_psychologists_updated_at
+    BEFORE UPDATE ON public.psychologists
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- ==========================================
 -- VIEWS ÚTEIS PARA ANÁLISE
 -- ==========================================
 
@@ -277,6 +364,7 @@ COMMENT ON TABLE public.mood_entries IS 'Armazena registros de humor dos usuári
 COMMENT ON TABLE public.diary_entries IS 'Armazena entradas do diário emocional';
 COMMENT ON TABLE public.breathing_sessions IS 'Armazena sessões de exercícios de respiração';
 COMMENT ON TABLE public.sleep_entries IS 'Armazena registros de sono dos usuários';
+COMMENT ON TABLE public.psychologists IS 'Armazena informações de psicólogos cadastrados';
 
 -- ==========================================
 -- FIM DO SCHEMA
